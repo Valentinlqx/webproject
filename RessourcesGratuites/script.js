@@ -2,7 +2,7 @@ let categories = [];
 let resources = [];
 
 // ── State ──
-let currentCat = 'all';
+let selectedCats = new Set();
 let searchQuery = '';
 let lang = localStorage.getItem('lang') || 'fr';
 
@@ -49,7 +49,12 @@ function applyLang() {
 // ── URL hash state ──
 function pushURLState() {
   const params = new URLSearchParams();
-  if (currentCat !== 'opensource') params.set('cat', currentCat);
+  const isDefault = selectedCats.size === 1 && selectedCats.has('opensource');
+  if (selectedCats.size === 0) {
+    params.set('cats', 'all');
+  } else if (!isDefault) {
+    params.set('cats', [...selectedCats].join(','));
+  }
   if (searchQuery) params.set('q', searchQuery);
   const str = params.toString();
   history.replaceState(null, '', str ? '#' + str : location.pathname + location.search);
@@ -57,7 +62,14 @@ function pushURLState() {
 
 function readURLState() {
   const params = new URLSearchParams(location.hash.slice(1));
-  currentCat = params.get('cat') || 'opensource';
+  const catsParam = params.get('cats');
+  if (!catsParam) {
+    selectedCats = new Set(['opensource']);
+  } else if (catsParam === 'all') {
+    selectedCats = new Set();
+  } else {
+    selectedCats = new Set(catsParam.split(',').filter(Boolean));
+  }
   searchQuery = params.get('q') || '';
 }
 
@@ -65,16 +77,18 @@ function readURLState() {
 function getFiltered() {
   const q = searchQuery.toLowerCase();
   return resources.filter(r => {
-    const matchCat = currentCat === 'all' || r.cats.includes(currentCat);
+    const matchCat = selectedCats.size === 0 || [...selectedCats].every(c => r.cats.includes(c));
     const matchSearch = !q || r.name.toLowerCase().includes(q) || r.desc.toLowerCase().includes(q);
     return matchCat && matchSearch;
   });
 }
 
+// Count results if this cat is added to current selection (or total if 'all')
 function getCatCount(catId) {
   const q = searchQuery.toLowerCase();
+  const testCats = catId === 'all' ? new Set() : new Set([...selectedCats, catId]);
   return resources.filter(r => {
-    const matchCat = catId === 'all' || r.cats.includes(catId);
+    const matchCat = testCats.size === 0 || [...testCats].every(c => r.cats.includes(c));
     const matchSearch = !q || r.name.toLowerCase().includes(q) || r.desc.toLowerCase().includes(q);
     return matchCat && matchSearch;
   }).length;
@@ -86,18 +100,22 @@ function renderCategories() {
   container.innerHTML = '';
 
   const allBtn = document.createElement('button');
-  allBtn.className = 'cat-btn' + (currentCat === 'all' ? ' active' : '');
+  allBtn.className = 'cat-btn' + (selectedCats.size === 0 ? ' active' : '');
   allBtn.dataset.cat = 'all';
   allBtn.innerHTML = `${i18n[lang].all} <span class="cat-count"></span>`;
-  allBtn.addEventListener('click', () => selectCategory('all', allBtn));
+  allBtn.addEventListener('click', () => {
+    selectedCats.clear();
+    renderCategories();
+    render();
+  });
   container.appendChild(allBtn);
 
   categories.forEach(cat => {
     const btn = document.createElement('button');
-    btn.className = 'cat-btn' + (currentCat === cat.id ? ' active' : '');
+    btn.className = 'cat-btn' + (selectedCats.has(cat.id) ? ' active' : '');
     btn.dataset.cat = cat.id;
     btn.innerHTML = `${cat.label} <span class="cat-count"></span>`;
-    btn.addEventListener('click', () => selectCategory(cat.id, btn));
+    btn.addEventListener('click', () => toggleCategory(cat.id));
     container.appendChild(btn);
   });
 }
@@ -111,10 +129,13 @@ function updateCatCounts() {
   });
 }
 
-function selectCategory(id, btn) {
-  currentCat = id;
-  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+function toggleCategory(id) {
+  if (selectedCats.has(id)) {
+    selectedCats.delete(id);
+  } else {
+    selectedCats.add(id);
+  }
+  renderCategories();
   render();
 }
 
