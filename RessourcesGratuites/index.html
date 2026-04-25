@@ -12,12 +12,13 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+<script>if(localStorage.getItem('theme')!=='light')document.body.classList.add('dark');</script>
 
   <header>
     <div class="header-controls">
       <a href="../" class="back-btn" title="Retour">←</a>
       <button class="lang-toggle" id="lang-toggle" title="Switch language">EN</button>
-      <button class="theme-toggle" id="theme-toggle" title="Changer le thème">🌙</button>
+      <button class="theme-toggle" id="theme-toggle" title="Changer le thème">☀️</button>
     </div>
     <div class="hero">
       <h1 data-i18n="h1">✦ Ressources Gratuites</h1>

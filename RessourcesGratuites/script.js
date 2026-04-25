@@ -175,7 +175,6 @@ document.getElementById('search').addEventListener('input', e => {
   render();
 });
 
-
 document.addEventListener('keydown', e => {
   const searchEl = document.getElementById('search');
   if (e.key === '/' && document.activeElement !== searchEl) {
@@ -204,10 +203,7 @@ document.getElementById('lang-toggle').addEventListener('click', () => {
 // ── Dark mode ──
 const themeToggle = document.getElementById('theme-toggle');
 
-if (localStorage.getItem('theme') !== 'light') {
-  document.body.classList.add('dark');
-  themeToggle.textContent = '☀️';
-}
+themeToggle.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
 
 themeToggle.addEventListener('click', () => {
   document.body.classList.toggle('dark');
