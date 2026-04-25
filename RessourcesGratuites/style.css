@@ -1,3 +1,11 @@
+@font-face {
+  font-family: 'Reglo';
+  src: url('https://cdn.jsdelivr.net/gh/sebsan/Reglo@main/Reglo-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ── Palette & variables ───────────────────────────────
    Light : fond gris clair, header noir, cartes blanches
    Dark  : fond noir, cartes gris très sombre
@@ -119,6 +127,7 @@ header {
 }
 
 .hero h1 {
+  font-family: 'Reglo', 'Segoe UI', system-ui, sans-serif;
   font-size: 2rem;
   font-weight: 700;
   letter-spacing: -0.5px;
