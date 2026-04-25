@@ -83,6 +83,7 @@ header {
   gap: 8px;
 }
 
+.back-btn,
 .theme-toggle,
 .lang-toggle {
   background: rgba(254, 250, 224, 0.12);
@@ -106,6 +107,12 @@ header {
   font-size: 1rem;
 }
 
+.back-btn {
+  text-decoration: none;
+  font-size: 1.1rem;
+}
+
+.back-btn:hover,
 .theme-toggle:hover,
 .lang-toggle:hover {
   background: rgba(254, 250, 224, 0.22);
