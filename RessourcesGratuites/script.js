@@ -64,7 +64,7 @@ function readURLState() {
   const params = new URLSearchParams(location.hash.slice(1));
   const catsParam = params.get('cats');
   if (!catsParam) {
-    selectedCats = new Set(['opensource']);
+    selectedCats = new Set();
   } else if (catsParam === 'all') {
     selectedCats = new Set();
   } else {
@@ -83,12 +83,12 @@ function getFiltered() {
   });
 }
 
-// Count results if this cat is added to current selection (or total if 'all')
+// Count results if this cat is added to current selection
 function getCatCount(catId) {
   const q = searchQuery.toLowerCase();
-  const testCats = catId === 'all' ? new Set() : new Set([...selectedCats, catId]);
+  const testCats = new Set([...selectedCats, catId]);
   return resources.filter(r => {
-    const matchCat = testCats.size === 0 || [...testCats].every(c => r.cats.includes(c));
+    const matchCat = [...testCats].every(c => r.cats.includes(c));
     const matchSearch = !q || r.name.toLowerCase().includes(q) || r.desc.toLowerCase().includes(q);
     return matchCat && matchSearch;
   }).length;
