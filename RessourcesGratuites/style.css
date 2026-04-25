@@ -1,52 +1,52 @@
 /* ── Palette & variables ───────────────────────────────
-   Light : fond crème, header vert foncé, cartes blanches
-   Dark  : fond vert très sombre, cartes vert sombre
+   Light : fond gris clair, header noir, cartes blanches
+   Dark  : fond noir, cartes gris très sombre
 ──────────────────────────────────────────────────── */
 
 :root {
-  --bg:            #FEFAE0;
+  --bg:            #f5f5f5;
   --bg-card:       #ffffff;
-  --bg-header:     #283618;
-  --bg-input:      rgba(254, 250, 224, 0.12);
+  --bg-header:     #111111;
+  --bg-input:      rgba(0, 0, 0, 0.05);
   --bg-cat:        transparent;
-  --bg-cat-hover:  rgba(40, 54, 24, 0.06);
-  --border:        #606C38;
-  --border-hover:  #283618;
-  --border-focus:  #DDA15E;
-  --border-sep:    rgba(96, 108, 56, 0.25);
-  --text:          #283618;
-  --text-2:        #606C38;
-  --text-header:   #FEFAE0;
-  --text-sub:      #DDA15E;
-  --text-muted:    rgba(96, 108, 56, 0.6);
-  --placeholder:   rgba(221, 161, 94, 0.5);
-  --accent:        #BC6C25;
-  --accent-2:      #DDA15E;
-  --shadow:        rgba(40, 54, 24, 0.08);
-  --shadow-hover:  rgba(40, 54, 24, 0.18);
+  --bg-cat-hover:  rgba(0, 0, 0, 0.04);
+  --border:        #cccccc;
+  --border-hover:  #111111;
+  --border-focus:  #111111;
+  --border-sep:    rgba(0, 0, 0, 0.08);
+  --text:          #111111;
+  --text-2:        #666666;
+  --text-header:   #f5f5f5;
+  --text-sub:      rgba(245, 245, 245, 0.55);
+  --text-muted:    rgba(0, 0, 0, 0.3);
+  --placeholder:   rgba(245, 245, 245, 0.4);
+  --accent:        #111111;
+  --accent-2:      #555555;
+  --shadow:        rgba(0, 0, 0, 0.07);
+  --shadow-hover:  rgba(0, 0, 0, 0.15);
 }
 
 body.dark {
-  --bg:            #1a2410;
-  --bg-card:       #222d15;
-  --bg-header:     #111a09;
-  --bg-input:      rgba(254, 250, 224, 0.07);
-  --bg-cat:        #1f2b12;
-  --bg-cat-hover:  rgba(254, 250, 224, 0.05);
-  --border:        #3a4d20;
-  --border-hover:  #606C38;
-  --border-focus:  #DDA15E;
-  --border-sep:    rgba(96, 108, 56, 0.2);
-  --text:          #FEFAE0;
-  --text-2:        #8a9a6a;
-  --text-header:   #FEFAE0;
-  --text-sub:      #DDA15E;
-  --text-muted:    rgba(138, 154, 106, 0.6);
-  --placeholder:   rgba(221, 161, 94, 0.4);
-  --accent:        #BC6C25;
-  --accent-2:      #DDA15E;
-  --shadow:        rgba(0, 0, 0, 0.2);
-  --shadow-hover:  rgba(0, 0, 0, 0.45);
+  --bg:            #0f0f0f;
+  --bg-card:       #1a1a1a;
+  --bg-header:     #080808;
+  --bg-input:      rgba(255, 255, 255, 0.06);
+  --bg-cat:        #141414;
+  --bg-cat-hover:  rgba(255, 255, 255, 0.04);
+  --border:        #2a2a2a;
+  --border-hover:  #666666;
+  --border-focus:  #ffffff;
+  --border-sep:    rgba(255, 255, 255, 0.07);
+  --text:          #efefef;
+  --text-2:        #888888;
+  --text-header:   #efefef;
+  --text-sub:      rgba(239, 239, 239, 0.45);
+  --text-muted:    rgba(136, 136, 136, 0.55);
+  --placeholder:   rgba(255, 255, 255, 0.2);
+  --accent:        #efefef;
+  --accent-2:      #aaaaaa;
+  --shadow:        rgba(0, 0, 0, 0.3);
+  --shadow-hover:  rgba(0, 0, 0, 0.55);
 }
 
 /* ── Base ── */
@@ -86,10 +86,10 @@ header {
 .back-btn,
 .theme-toggle,
 .lang-toggle {
-  background: rgba(254, 250, 224, 0.12);
-  border: 1px solid rgba(254, 250, 224, 0.25);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
-  color: #FEFAE0;
+  color: var(--text-header);
   font-size: 0.8rem;
   font-family: inherit;
   font-weight: 600;
@@ -115,7 +115,7 @@ header {
 .back-btn:hover,
 .theme-toggle:hover,
 .lang-toggle:hover {
-  background: rgba(254, 250, 224, 0.22);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .hero h1 {
@@ -148,7 +148,7 @@ header {
   width: 100%;
   padding: 13px 20px;
   background: var(--bg-input);
-  border: 1px solid rgba(96, 108, 56, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 12px;
   color: var(--text-header);
   font-size: 0.95rem;
@@ -207,7 +207,7 @@ main {
 
 .cat-btn.active {
   background: var(--accent);
-  color: #FEFAE0;
+  color: var(--bg);
   border-color: var(--accent);
   font-weight: 600;
 }
