@@ -78,8 +78,9 @@ h1 {
 .links {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 16px;
   margin-bottom: 28px;
+  align-items: center;
 }
 
 .link-btn {
@@ -99,8 +100,10 @@ h1 {
 
 .socials {
   display: flex;
+  flex-direction: column;
   justify-content: center;
-  gap: 10px;
+  align-items: center;
+  gap: 16px;
 }
 
 .social-btn {
