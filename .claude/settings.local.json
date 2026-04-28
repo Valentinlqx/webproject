@@ -3,7 +3,33 @@
     "allow": [
       "Bash(node -e \"require\\('./RessourcesGratuites/script.js'\\)\")",
       "Bash(node --input-type=module)",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(git -C /c/Users/valen/Desktop/web rev-parse --git-dir)",
+      "Bash(git -C /c/Users/valen/Desktop/web remote -v)",
+      "Bash(gh repo *)",
+      "PowerShell(gh repo rename portfolio --repo Valentinlqx/web --yes)",
+      "Bash(git -C /c/Users/valen/Desktop/web remote set-url origin https://github.com/Valentinlqx/portfolio.git)",
+      "Bash(git -C /c/Users/valen/Desktop/web status)",
+      "Bash(git -C /c/Users/valen/Desktop/web diff --stat)",
+      "Bash(git -C /c/Users/valen/Desktop/web status --short)",
+      "Bash(git -C /c/Users/valen/Desktop/web ls-files --others --exclude-standard)",
+      "Bash(git -C /c/Users/valen/Desktop/web log --oneline -5)",
+      "Bash(git -C /c/Users/valen/Desktop/web add RessourcesGratuites/index.html RessourcesGratuites/style.css)",
+      "Bash(git -C /c/Users/valen/Desktop/web commit -m ' *)",
+      "Bash(git -C /c/Users/valen/Desktop/web push)",
+      "Bash(git -C /c/Users/valen/Desktop/web ls-files)",
+      "Bash(git -C /c/Users/valen/Desktop/web add RessourcesGratuites/index.html RessourcesGratuites/script.js)",
+      "Bash(git -C /c/Users/valen/Desktop/web add index.html style.css RessourcesGratuites/style.css)",
+      "Bash(git -C /c/Users/valen/Desktop/web add index.html style.css)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:velvetyne.fr)",
+      "WebSearch",
+      "WebFetch(domain:api.github.com)",
+      "Bash(git -C /c/Users/valen/Desktop/web add style.css RessourcesGratuites/style.css)",
+      "Bash(git -C /c/Users/valen/Desktop/web add RessourcesGratuites/script.js)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)"
     ]
   }
 }

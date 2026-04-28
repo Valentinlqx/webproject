@@ -36,7 +36,10 @@ body {
   min-height: 100vh;
   background-color: var(--bg);
   background-image:
-    radial-gradient(ellipse 80% 60% at 50% 20%, var(--glow), transparent 70%);
+    radial-gradient(ellipse 80% 60% at 50% 20%, var(--glow), transparent 70%),
+    url('res/1.jpg');
+  background-size: cover;
+  background-position: center;
   font-family: 'Segoe UI', system-ui, sans-serif;
   color: var(--text);
   display: flex;
