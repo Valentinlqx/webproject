@@ -63,28 +63,6 @@ body::before {
   z-index: -1;
 }
 
-body::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: calc(100% - 40px);
-  max-width: 420px;
-  height: 260px;
-  background: rgba(0, 0, 0, 0.4);
-  border-radius: 16px;
-  z-index: 0;
-  pointer-events: none;
-  margin-top: -60px;
-}
-
-.profile,
-.links,
-.socials {
-  position: relative;
-  z-index: 1;
-}
 
 
 @keyframes fadeUp {
