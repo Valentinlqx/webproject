@@ -119,7 +119,7 @@ body::before {
   background-color: rgba(0, 0, 0, 0.1);
   padding: 24px 32px;
   border-radius: 12px;
-  backdrop-filter: blur(10px);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
 }
 
 h1 {
@@ -141,7 +141,7 @@ h1 {
   background-color: rgba(0, 0, 0, 0.1);
   padding: 24px 32px;
   border-radius: 12px;
-  backdrop-filter: blur(10px);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
 }
 
 .link-btn {
@@ -168,7 +168,7 @@ h1 {
   background-color: rgba(0, 0, 0, 0.1);
   padding: 24px 32px;
   border-radius: 12px;
-  backdrop-filter: blur(10px);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
 }
 
 .social-btn {
