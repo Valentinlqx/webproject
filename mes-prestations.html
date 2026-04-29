@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mes Prestations — Valentin L.</title>
+  <meta name="description" content="Mes prestations - Valentin L." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>" />
+  <link rel="preload" as="image" href="res/1.jpg">
+  <link rel="preload" as="image" href="res/3.jpg">
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body::before {
+      background-image:
+        radial-gradient(ellipse 80% 60% at 50% 20%, var(--glow), transparent 70%),
+        url('res/3.jpg') !important;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="profile">
+    <h1>Mes prestations</h1>
+  </div>
+
+  <div class="links">
+    <a href="index.html" class="link-btn" data-transition="res/1.jpg">Retour</a>
+  </div>
+
+  <script src="transition.js"></script>
+</body>
+</html>
