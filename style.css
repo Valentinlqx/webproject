@@ -240,13 +240,24 @@ h1 {
 
 @media (max-width: 480px) {
   .services-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    max-width: 100%;
+    margin: 20px 0;
   }
 
   .service-card {
-    padding: 24px 20px;
-    min-height: 180px;
+    padding: 16px 12px;
+    min-height: 140px;
+    gap: 8px;
+  }
+
+  .service-icon {
+    font-size: 2rem;
+  }
+
+  .service-card h2 {
+    font-size: 0.95rem;
   }
 
   .card {
