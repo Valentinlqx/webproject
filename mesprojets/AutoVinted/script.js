@@ -2,16 +2,122 @@
    Client-side webapp: upload photos → GPT-4o vision → annonce Vinted optimisée
 */
 
+// ─── Providers ───────────────────────────────────────
+const PROVIDERS = {
+  pollinations: {
+    label: 'Gratuit — Pollinations (aucune clé)',
+    needsKey: false,
+    vision: true,
+    hint: "Fonctionne sans inscription, idéal pour tester. Plus lent et moins fiable que les options payantes.",
+    models: [{ id: 'openai-large', label: 'GPT-4o (gratuit, via Pollinations)' }],
+    call: callPollinations,
+  },
+  openai: {
+    label: 'OpenAI — ChatGPT',
+    needsKey: true,
+    vision: true,
+    keyUrl: 'https://platform.openai.com/api-keys',
+    keyLabel: 'Clé API OpenAI',
+    keyPrefix: 'sk-',
+    hint: "Meilleure qualité de vision. Compte ~0.01€ par annonce avec GPT-4o.",
+    models: [
+      { id: 'gpt-4o', label: 'GPT-4o (recommandé)' },
+      { id: 'gpt-4o-mini', label: 'GPT-4o mini (économique)' },
+    ],
+    call: (s) => callOpenAICompatible(s, 'https://api.openai.com/v1/chat/completions', true),
+  },
+  anthropic: {
+    label: 'Anthropic — Claude',
+    needsKey: true,
+    vision: true,
+    keyUrl: 'https://console.anthropic.com/settings/keys',
+    keyLabel: 'Clé API Anthropic',
+    keyPrefix: 'sk-ant-',
+    hint: "Excellent pour les descriptions naturelles. Vision native Claude.",
+    models: [
+      { id: 'claude-sonnet-4-5-20250929', label: 'Claude Sonnet 4.5' },
+      { id: 'claude-3-5-sonnet-20241022', label: 'Claude Sonnet 3.5' },
+      { id: 'claude-3-5-haiku-20241022', label: 'Claude Haiku 3.5 (rapide)' },
+    ],
+    call: callAnthropic,
+  },
+  gemini: {
+    label: 'Google — Gemini',
+    needsKey: true,
+    vision: true,
+    keyUrl: 'https://aistudio.google.com/app/apikey',
+    keyLabel: 'Clé API Google AI Studio',
+    keyPrefix: 'AIza',
+    hint: "Quota gratuit généreux sur Google AI Studio.",
+    models: [
+      { id: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash (rapide)' },
+      { id: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro' },
+    ],
+    call: callGemini,
+  },
+  groq: {
+    label: 'Groq — Llama Vision (rapide)',
+    needsKey: true,
+    vision: true,
+    keyUrl: 'https://console.groq.com/keys',
+    keyLabel: 'Clé API Groq',
+    keyPrefix: 'gsk_',
+    hint: "Très rapide. Quota gratuit sur Groq Cloud.",
+    models: [
+      { id: 'llama-3.2-90b-vision-preview', label: 'Llama 3.2 90B Vision' },
+      { id: 'llama-3.2-11b-vision-preview', label: 'Llama 3.2 11B Vision' },
+    ],
+    call: (s) => callOpenAICompatible(s, 'https://api.groq.com/openai/v1/chat/completions', false),
+  },
+  mistral: {
+    label: 'Mistral — Pixtral',
+    needsKey: true,
+    vision: true,
+    keyUrl: 'https://console.mistral.ai/api-keys/',
+    keyLabel: 'Clé API Mistral',
+    keyPrefix: '',
+    hint: "Modèle Pixtral spécialisé vision, made in France.",
+    models: [
+      { id: 'pixtral-large-latest', label: 'Pixtral Large' },
+      { id: 'pixtral-12b-2409', label: 'Pixtral 12B' },
+    ],
+    call: (s) => callOpenAICompatible(s, 'https://api.mistral.ai/v1/chat/completions', false),
+  },
+  deepseek: {
+    label: 'DeepSeek (texte uniquement)',
+    needsKey: true,
+    vision: false,
+    keyUrl: 'https://platform.deepseek.com/api_keys',
+    keyLabel: 'Clé API DeepSeek',
+    keyPrefix: 'sk-',
+    hint: "⚠️ DeepSeek ne lit pas les images : il te demandera de tout décrire en texte.",
+    models: [
+      { id: 'deepseek-chat', label: 'DeepSeek V3' },
+      { id: 'deepseek-reasoner', label: 'DeepSeek R1 (raisonnement)' },
+    ],
+    call: (s) => callOpenAICompatible(s, 'https://api.deepseek.com/chat/completions', true),
+  },
+};
+
 // ─── State ───────────────────────────────────────────
 const state = {
   photos: [],          // [{ id, file, dataUrl }]
   conversation: [],    // [{ role, content }] — messages
   provider: localStorage.getItem('av-provider') || 'pollinations',
-  apiKey: localStorage.getItem('av-api-key') || '',
-  model: localStorage.getItem('av-model') || 'gpt-4o',
+  model: localStorage.getItem('av-model-' + (localStorage.getItem('av-provider') || 'pollinations')) || '',
   history: JSON.parse(localStorage.getItem('av-history') || '[]'),
   lastListing: null,
 };
+
+function getApiKey(providerId) {
+  return localStorage.getItem('av-key-' + providerId) || '';
+}
+function setApiKey(providerId, key) {
+  localStorage.setItem('av-key-' + providerId, key);
+}
+function getStoredModel(providerId) {
+  return localStorage.getItem('av-model-' + providerId) || PROVIDERS[providerId].models[0].id;
+}
 
 const MAX_PHOTOS = 8;
 const MAX_PHOTO_SIZE = 1280; // px (downscale before sending)
@@ -224,37 +330,16 @@ function addBubble(type, text = '') {
 
 // ─── AI call (dispatch on provider) ──────────────────
 async function callAI() {
-  if (state.provider === 'openai') return callOpenAI();
-  return callPollinations();
-}
-
-async function callOpenAI() {
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${state.apiKey}`,
-    },
-    body: JSON.stringify({
-      model: state.model,
-      messages: state.conversation,
-      response_format: { type: 'json_object' },
-      temperature: 0.7,
-      max_tokens: 1500,
-    }),
-  });
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error?.message || `HTTP ${res.status}`);
+  const provider = PROVIDERS[state.provider];
+  if (!provider) throw new Error('Fournisseur inconnu');
+  // Make sure model belongs to current provider
+  if (!provider.models.find(m => m.id === state.model)) {
+    state.model = getStoredModel(state.provider);
   }
-  const data = await res.json();
-  const content = data.choices[0].message.content;
-  state.conversation.push({ role: 'assistant', content });
-  return parseJSON(content);
+  return provider.call(state);
 }
 
-// Pollinations.ai — gratuit, sans clé, vision via openai-large
+// Pollinations.ai — gratuit, sans clé
 async function callPollinations() {
   const res = await fetch('https://text.pollinations.ai/openai', {
     method: 'POST',
@@ -267,13 +352,143 @@ async function callPollinations() {
       referrer: 'autovinted',
     }),
   });
-
   if (!res.ok) {
-    throw new Error(`Service IA gratuit indisponible (${res.status}). Réessaie ou passe à OpenAI dans les paramètres.`);
+    throw new Error(`Service gratuit indisponible (${res.status}). Réessaie ou passe à un autre fournisseur.`);
   }
   const data = await res.json();
   const content = data.choices?.[0]?.message?.content || '';
   state.conversation.push({ role: 'assistant', content });
+  return parseJSON(content);
+}
+
+// OpenAI-compatible (OpenAI, Groq, Mistral, DeepSeek)
+async function callOpenAICompatible(s, endpoint, supportsJsonMode) {
+  const key = getApiKey(s.provider);
+  const provider = PROVIDERS[s.provider];
+
+  // Strip image parts for text-only providers (e.g. DeepSeek)
+  const messages = provider.vision ? s.conversation : s.conversation.map(m => {
+    if (typeof m.content === 'string') return m;
+    const text = m.content.filter(p => p.type === 'text').map(p => p.text).join('\n');
+    return { role: m.role, content: text || "(L'utilisateur a joint des photos. Demande-lui de les décrire en texte.)" };
+  });
+
+  const body = {
+    model: s.model,
+    messages,
+    temperature: 0.7,
+    max_tokens: 1500,
+  };
+  if (supportsJsonMode) body.response_format = { type: 'json_object' };
+
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${key}`,
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || err.message || `HTTP ${res.status}`);
+  }
+  const data = await res.json();
+  const content = data.choices[0].message.content;
+  s.conversation.push({ role: 'assistant', content });
+  return parseJSON(content);
+}
+
+// Anthropic Claude — different API shape
+async function callAnthropic(s) {
+  const key = getApiKey(s.provider);
+  // Convert OpenAI-style messages → Anthropic format
+  const system = s.conversation.find(m => m.role === 'system')?.content || '';
+  const messages = s.conversation
+    .filter(m => m.role !== 'system')
+    .map(m => {
+      if (typeof m.content === 'string') return { role: m.role, content: m.content };
+      // OpenAI vision format → Anthropic format
+      const content = m.content.map(part => {
+        if (part.type === 'text') return { type: 'text', text: part.text };
+        if (part.type === 'image_url') {
+          const url = part.image_url.url;
+          const match = url.match(/^data:(image\/[a-z]+);base64,(.+)$/);
+          if (!match) return { type: 'text', text: '[image]' };
+          return {
+            type: 'image',
+            source: { type: 'base64', media_type: match[1], data: match[2] }
+          };
+        }
+        return part;
+      });
+      return { role: m.role, content };
+    });
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({
+      model: s.model,
+      max_tokens: 1500,
+      system,
+      messages,
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `HTTP ${res.status}`);
+  }
+  const data = await res.json();
+  const content = data.content?.[0]?.text || '';
+  s.conversation.push({ role: 'assistant', content });
+  return parseJSON(content);
+}
+
+// Google Gemini — different API shape
+async function callGemini(s) {
+  const key = getApiKey(s.provider);
+  const system = s.conversation.find(m => m.role === 'system')?.content || '';
+  const contents = s.conversation
+    .filter(m => m.role !== 'system')
+    .map(m => {
+      const role = m.role === 'assistant' ? 'model' : 'user';
+      if (typeof m.content === 'string') return { role, parts: [{ text: m.content }] };
+      const parts = m.content.map(part => {
+        if (part.type === 'text') return { text: part.text };
+        if (part.type === 'image_url') {
+          const url = part.image_url.url;
+          const match = url.match(/^data:(image\/[a-z]+);base64,(.+)$/);
+          if (!match) return { text: '[image]' };
+          return { inline_data: { mime_type: match[1], data: match[2] } };
+        }
+        return { text: '' };
+      });
+      return { role, parts };
+    });
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${s.model}:generateContent?key=${encodeURIComponent(key)}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      systemInstruction: { parts: [{ text: system }] },
+      contents,
+      generationConfig: { temperature: 0.7, maxOutputTokens: 1500, responseMimeType: 'application/json' },
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `HTTP ${res.status}`);
+  }
+  const data = await res.json();
+  const content = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  s.conversation.push({ role: 'assistant', content });
   return parseJSON(content);
 }
 
@@ -393,20 +608,63 @@ $('restart-btn').addEventListener('click', () => {
 // ─── Settings ────────────────────────────────────────
 const settingsModal = $('settings-modal');
 const providerSelect = $('provider-select');
+const modelSelect = $('model-select');
 const apikeyField = $('apikey-field');
 const modelField = $('model-field');
+const apiKeyInput = $('api-key');
+const apikeyLabel = $('apikey-label');
+const apikeyLink = $('apikey-link');
+const providerHint = $('provider-hint');
+
+// Populate provider dropdown once
+Object.entries(PROVIDERS).forEach(([id, p]) => {
+  const opt = document.createElement('option');
+  opt.value = id;
+  opt.textContent = p.label;
+  providerSelect.appendChild(opt);
+});
 
 function syncProviderUI() {
-  const isOpenAI = providerSelect.value === 'openai';
-  apikeyField.hidden = !isOpenAI;
-  modelField.hidden = !isOpenAI;
+  const id = providerSelect.value;
+  const p = PROVIDERS[id];
+  if (!p) return;
+
+  providerHint.textContent = p.hint || '';
+
+  // Models
+  modelSelect.innerHTML = '';
+  p.models.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.id;
+    opt.textContent = m.label;
+    modelSelect.appendChild(opt);
+  });
+  modelSelect.value = getStoredModel(id);
+  modelField.hidden = p.models.length <= 1;
+
+  // API key
+  apikeyField.hidden = !p.needsKey;
+  if (p.needsKey) {
+    apikeyLabel.textContent = p.keyLabel;
+    apiKeyInput.placeholder = (p.keyPrefix || '') + '...';
+    apiKeyInput.value = getApiKey(id);
+    if (p.keyUrl) {
+      apikeyLink.href = p.keyUrl;
+      apikeyLink.style.display = '';
+    } else {
+      apikeyLink.style.display = 'none';
+    }
+  }
 }
 providerSelect.addEventListener('change', syncProviderUI);
 
+// Save key/model on change so user doesn't lose them between providers
+modelSelect.addEventListener('change', () => {
+  localStorage.setItem('av-model-' + providerSelect.value, modelSelect.value);
+});
+
 $('settings-toggle').addEventListener('click', () => {
   providerSelect.value = state.provider;
-  $('api-key').value = state.apiKey;
-  $('model-select').value = state.model;
   syncProviderUI();
   settingsModal.hidden = false;
 });
@@ -414,12 +672,14 @@ $('settings-close').addEventListener('click', () => { settingsModal.hidden = tru
 settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) settingsModal.hidden = true; });
 
 $('settings-save').addEventListener('click', () => {
-  state.provider = providerSelect.value;
-  state.apiKey = $('api-key').value.trim();
-  state.model = $('model-select').value;
-  localStorage.setItem('av-provider', state.provider);
-  localStorage.setItem('av-api-key', state.apiKey);
-  localStorage.setItem('av-model', state.model);
+  const providerId = providerSelect.value;
+  state.provider = providerId;
+  state.model = modelSelect.value;
+  localStorage.setItem('av-provider', providerId);
+  if (state.model) localStorage.setItem('av-model-' + providerId, state.model);
+  if (PROVIDERS[providerId].needsKey) {
+    setApiKey(providerId, apiKeyInput.value.trim());
+  }
   settingsModal.hidden = true;
   showToast('Paramètres enregistrés');
 });
@@ -433,8 +693,13 @@ document.addEventListener('keydown', (e) => {
 });
 
 function checkProvider() {
-  if (state.provider === 'openai' && !state.apiKey) {
-    showToast('Ajoute ta clé API OpenAI ou repasse en mode gratuit');
+  const p = PROVIDERS[state.provider];
+  if (!p) {
+    state.provider = 'pollinations';
+    return true;
+  }
+  if (p.needsKey && !getApiKey(state.provider)) {
+    showToast(`Ajoute ta clé ${p.keyLabel} ou choisis le mode gratuit`);
     providerSelect.value = state.provider;
     syncProviderUI();
     settingsModal.hidden = false;
@@ -442,6 +707,9 @@ function checkProvider() {
   }
   return true;
 }
+
+// Initialize state.model with the current provider's default
+if (!state.model) state.model = getStoredModel(state.provider);
 
 // ─── History ─────────────────────────────────────────
 const historyModal = $('history-modal');
