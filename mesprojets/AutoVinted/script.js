@@ -239,8 +239,10 @@ LIVRES : si c'est un livre, remplis le champ "isbn" dans les détails (repère l
 
 Prix idéal/rapide/min selon marque, état, demande marché 2nde main. En euros.
 
+RÈGLE ABSOLUE : "title" et "description" doivent être prêts à coller directement sur Vinted, SANS aucun conseil, recommandation, astuce ou mention de mesures à faire. Les conseils vont UNIQUEMENT dans "tips". La description se termine par une ligne vide puis 6-10 #hashtags minuscules sans accents.
+
 RÉPONDS UNIQUEMENT EN JSON VALIDE, sans texte/markdown autour:
-{"action":"ask"|"generate","message":"...","listing":null|{"title":"max 60 chars","description":"courte, vendeuse, retours ligne, FINIR par ligne vide + 6-10 #hashtags minuscules sans accents","details":{"marque":"","taille":"","etat":"Neuf avec étiquette|Neuf sans étiquette|Très bon état|Bon état|Satisfaisant","couleur":"","categorie":"","matiere":"","isbn":"(livres uniquement, sinon vide)"},"prices":{"ideal":"15€","rapide":"10€","minimum":"8€"},"tips":["..."]}}`;
+{"action":"ask"|"generate","message":"...","listing":null|{"title":"max 60 chars","description":"courte, vendeuse, retours ligne, FINIR par ligne vide + 6-10 #hashtags","details":{"marque":"","taille":"","etat":"Neuf avec étiquette|Neuf sans étiquette|Très bon état|Bon état|Satisfaisant","couleur":"","categorie":"","matiere":"","isbn":"(livres uniquement, sinon vide)"},"prices":{"ideal":"15€","rapide":"10€","minimum":"8€"},"tips":["conseils pratiques pour le vendeur, jamais dans la description"]}}`;
 
 // MODE LOT — auto-détection d'articles parmi N photos
 const BULK_SYSTEM_PROMPT = `Tu es un vendeur Vinted humain. Style: naturel, vendeur, court.
@@ -254,7 +256,8 @@ Tâche:
 
 LIVRES : si c'est un livre, remplis le champ "isbn" dans les détails (repère le code sur la 4ème couv ou page de garde). Mentionne auteur/éditeur/format dans la description.
 
-Description: courte, vendeuse, FINIR par ligne vide + 6-10 #hashtags minuscules sans accents.
+RÈGLE ABSOLUE : "title" et "description" doivent être prêts à coller directement sur Vinted, SANS aucun conseil, recommandation, astuce ou mention de mesures à faire. Les conseils vont UNIQUEMENT dans "tips". La description se termine par une ligne vide puis 6-10 #hashtags minuscules sans accents.
+
 Prix idéal/rapide/min en euros selon marché 2nde main.
 
 JSON UNIQUEMENT, sans texte/markdown autour:
@@ -1301,7 +1304,7 @@ function renderHistory() {
 }
 
 // ─── Demo listing ────────────────────────────────────
-const DEMO_ID = 'demo-clarks-craftmaster-v1';
+const DEMO_ID = 'demo-clarks-craftmaster-v2';
 function seedDemoListing() {
   if (localStorage.getItem('av-demo-seeded') === DEMO_ID) return;
   const demo = {
@@ -1311,7 +1314,7 @@ function seedDemoListing() {
     thumbnail: null,
     listing: {
       title: 'Mocassins Clarks × Walk in Paris Craftmaster — Cuir Bordeaux',
-      description: 'Superbes penny loafers en collaboration exclusive Walk in Paris × Clarks Craftmaster. Cuir pleine fleur bordeaux profond, doublure intérieure verte, semelle noire. Coupe classique intemporelle, parfaits habillés ou casual chic.\n\n📏 Conseil : mesure ta semelle intérieure pour trouver ta pointure exacte Clarks.\n\n#Clarks #WalkInParis #Craftmaster #PennyLoafer #Mocassins #Loafer #CuirVeritable #Bordeaux #Chaussures #MadeInEngland #ClassiqueChic #Workwear #SmartCasual #Vintage #CapsuleWardrobe',
+      description: 'Superbes penny loafers en collaboration exclusive Walk in Paris × Clarks Craftmaster. Cuir pleine fleur bordeaux profond, doublure intérieure verte, semelle noire. Coupe classique intemporelle, parfaits habillés ou casual chic.\n\n#Clarks #WalkInParis #Craftmaster #PennyLoafer #Mocassins #Loafer #CuirVeritable #Bordeaux #Chaussures #MadeInEngland #ClassiqueChic #Workwear #SmartCasual #Vintage #CapsuleWardrobe',
       details: { marque: 'Clarks × Walk in Paris', categorie: 'Chaussures', couleur: 'Bordeaux', etat: 'Neuf avec étiquettes', matiere: 'Cuir pleine fleur' },
       prices: { ideal: '115 €', rapide: '95 €', minimum: '80 €' },
       tips: [
