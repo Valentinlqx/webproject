@@ -668,7 +668,7 @@ async function callPollinations() {
       model: 'openai-large',
       messages: state.conversation,
       temperature: 0.7,
-      max_tokens: 1500,
+      max_tokens: state.mode === 'bulk' ? 6000 : 2000,
       referrer: 'autovinted',
     }),
   });
@@ -697,7 +697,7 @@ async function callOpenAICompatible(s, endpoint, supportsJsonMode) {
     model: s.model,
     messages,
     temperature: 0.7,
-    max_tokens: 1500,
+    max_tokens: state.mode === 'bulk' ? 6000 : 2000,
   };
   if (supportsJsonMode) body.response_format = { type: 'json_object' };
 
@@ -755,7 +755,7 @@ async function callAnthropic(s) {
     },
     body: JSON.stringify({
       model: s.model,
-      max_tokens: 1500,
+      max_tokens: state.mode === 'bulk' ? 6000 : 2000,
       system,
       messages,
     }),
@@ -799,7 +799,7 @@ async function callGemini(s) {
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: system }] },
       contents,
-      generationConfig: { temperature: 0.7, maxOutputTokens: 1500, responseMimeType: 'application/json' },
+      generationConfig: { temperature: 0.7, maxOutputTokens: state.mode === 'bulk' ? 6000 : 2000, responseMimeType: 'application/json' },
     }),
   });
   if (!res.ok) {
@@ -812,20 +812,32 @@ async function callGemini(s) {
   return parseJSON(content);
 }
 
-// Parse JSON tolerantly — Pollinations may wrap in markdown code blocks
+// Parse JSON tolerantly — providers may wrap in markdown code blocks
 function parseJSON(text) {
-  try { return JSON.parse(text); } catch {}
+  const raw = text || '';
+  try { return JSON.parse(raw); } catch {}
+
   // strip ```json ... ``` fences
-  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
   if (fenced) {
     try { return JSON.parse(fenced[1].trim()); } catch {}
   }
-  // grab first {...} block
-  const braced = text.match(/\{[\s\S]*\}/);
+
+  // grab first balanced {...} block
+  const braced = raw.match(/\{[\s\S]*\}/);
   if (braced) {
     try { return JSON.parse(braced[0]); } catch {}
   }
-  throw new Error('Réponse IA invalide. Réessaie.');
+
+  // Diagnostic info for the user + console
+  console.error('[AutoVinted] Raw AI response that failed to parse:\n', raw);
+  const trimmed = raw.trim();
+  if (!trimmed) {
+    throw new Error("L'IA a renvoyé une réponse vide. Vérifie ta clé API et réessaie.");
+  }
+  // Show beginning of the response so user/dev can see what's wrong
+  const snippet = trimmed.length > 220 ? trimmed.slice(0, 220) + '…' : trimmed;
+  throw new Error(`Réponse IA non-JSON (extrait) : « ${snippet} » — Détails complets dans la console (F12).`);
 }
 
 // ─── Handle AI response ──────────────────────────────
