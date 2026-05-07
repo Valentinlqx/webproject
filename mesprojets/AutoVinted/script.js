@@ -1267,102 +1267,172 @@ function syncProviderUI() {
 
 // ─── Ollama modal open/close ────────────────────────
 const ollamaModal = $('ollama-modal');
-$('ollama-open-guide').addEventListener('click', () => {
-  ollamaModal.hidden = false;
-});
-$('ollama-modal-close').addEventListener('click', () => { ollamaModal.hidden = true; });
-ollamaModal.addEventListener('click', (e) => {
-  if (e.target === ollamaModal) ollamaModal.hidden = true;
-});
+function openOllamaModal()  { ollamaModal.hidden = false; startOllamaStatusPolling(); }
+function closeOllamaModal() { ollamaModal.hidden = true;  stopOllamaStatusPolling(); }
+$('ollama-open-guide').addEventListener('click', openOllamaModal);
+$('ollama-modal-close').addEventListener('click', closeOllamaModal);
+ollamaModal.addEventListener('click', (e) => { if (e.target === ollamaModal) closeOllamaModal(); });
 
-// ─── Ollama guide : checklist progressive ────────────
-const OLLAMA_TOTAL_STEPS = 6;
-let ollamaCurrentStep = parseInt(localStorage.getItem('av-ollama-step') || '0', 10);
-if (isNaN(ollamaCurrentStep) || ollamaCurrentStep < 0) ollamaCurrentStep = 0;
-
-function renderOllamaSteps() {
-  const steps = document.querySelectorAll('.ollama-step[data-step]');
-  const doneScreen = $('ollama-step-done');
-  const allDone = ollamaCurrentStep >= OLLAMA_TOTAL_STEPS;
-
-  steps.forEach(el => {
-    const idx = parseInt(el.dataset.step, 10);
-    el.classList.remove('pending', 'active', 'done');
-    if (idx < ollamaCurrentStep) el.classList.add('done');
-    else if (idx === ollamaCurrentStep) el.classList.add('active');
-    else el.classList.add('pending');
-  });
-
-  if (doneScreen) doneScreen.hidden = !allDone;
-
-  const fill = $('ollama-progress-fill');
-  if (fill) fill.style.width = `${Math.min(100, (ollamaCurrentStep / OLLAMA_TOTAL_STEPS) * 100)}%`;
-  const txt = $('ollama-progress-text');
-  if (txt) txt.textContent = allDone
-    ? `✓ ${OLLAMA_TOTAL_STEPS} étapes validées`
-    : `Étape ${ollamaCurrentStep + 1} sur ${OLLAMA_TOTAL_STEPS}`;
-}
-
-function setOllamaStep(n) {
-  ollamaCurrentStep = Math.max(0, Math.min(OLLAMA_TOTAL_STEPS, n));
-  localStorage.setItem('av-ollama-step', String(ollamaCurrentStep));
-  renderOllamaSteps();
-  // Scroll the active step into view inside the modal
-  const active = document.querySelector('.ollama-step.active') || $('ollama-step-done');
-  if (active) active.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-
-document.querySelectorAll('.ollama-step-next').forEach(b => {
-  b.addEventListener('click', (e) => { e.preventDefault(); setOllamaStep(ollamaCurrentStep + 1); });
-});
-document.querySelectorAll('.ollama-step-prev').forEach(b => {
-  b.addEventListener('click', (e) => { e.preventDefault(); setOllamaStep(ollamaCurrentStep - 1); });
-});
-document.querySelectorAll('.ollama-step-skip').forEach(b => {
-  b.addEventListener('click', (e) => { e.preventDefault(); setOllamaStep(ollamaCurrentStep + 1); });
-});
-$('ollama-restart-guide')?.addEventListener('click', (e) => { e.preventDefault(); setOllamaStep(0); });
-
-// Click on a done step's head re-opens it
-document.querySelectorAll('.ollama-step[data-step]').forEach(el => {
-  el.querySelector('.ollama-step-head').addEventListener('click', (e) => {
-    if (el.classList.contains('done')) {
-      e.preventDefault();
-      const idx = parseInt(el.dataset.step, 10);
-      setOllamaStep(idx);
-    }
-  });
-});
-
-renderOllamaSteps();
-
-// ─── Ollama guide : OS tabs + copy buttons ───────────
-const OLLAMA_CORS_CMD = {
-  'mac':     'OLLAMA_ORIGINS=* ollama serve',
-  'win-ps':  '$env:OLLAMA_ORIGINS="*"; ollama serve',
-  'win-cmd': 'set OLLAMA_ORIGINS=* && ollama serve',
-};
-
+// ─── Ollama : OS picker + launcher generator + live status ──
 function detectDefaultOS() {
   const ua = (navigator.userAgent || '').toLowerCase();
-  if (ua.includes('windows')) return 'win-ps';
-  return 'mac';
+  if (ua.includes('windows')) return 'windows';
+  if (ua.includes('mac')) return 'mac';
+  return 'linux';
 }
+let ollamaOS = detectDefaultOS();
 
-function setOllamaOSTab(os) {
-  document.querySelectorAll('#ollama-os-tabs .ollama-os-tab').forEach(b => {
+function setOllamaOSPick(os) {
+  ollamaOS = os;
+  document.querySelectorAll('#ollama-os-pick .ollama-os-tab').forEach(b => {
     b.classList.toggle('active', b.dataset.os === os);
   });
-  $('ollama-cmd-cors').textContent = OLLAMA_CORS_CMD[os] || OLLAMA_CORS_CMD.mac;
+  const hint = $('ollama-launcher-hint');
+  if (hint) {
+    hint.innerHTML = os === 'windows'
+      ? 'Une fois téléchargé, <b>double-clique</b> sur <code>autovinted-launcher.bat</code>. Windows peut afficher un avertissement de sécurité — clique sur "Plus d\'infos" puis "Exécuter quand même".'
+      : 'Une fois téléchargé, ouvre un terminal dans le dossier de téléchargement et lance : <code>bash autovinted-launcher.sh</code> (ou <code>chmod +x autovinted-launcher.sh && ./autovinted-launcher.sh</code>).';
+  }
 }
-setOllamaOSTab(detectDefaultOS());
-
-document.querySelectorAll('#ollama-os-tabs .ollama-os-tab').forEach(b => {
-  b.addEventListener('click', (e) => {
-    e.preventDefault();
-    setOllamaOSTab(b.dataset.os);
-  });
+setOllamaOSPick(ollamaOS);
+document.querySelectorAll('#ollama-os-pick .ollama-os-tab').forEach(b => {
+  b.addEventListener('click', (e) => { e.preventDefault(); setOllamaOSPick(b.dataset.os); });
 });
+
+const OLLAMA_DEFAULT_MODEL = 'llama3.2-vision';
+
+function buildLauncherWindows(model) {
+  return `@echo off
+title AutoVinted - Ollama Launcher
+echo ===============================
+echo  AutoVinted x Ollama Launcher
+echo ===============================
+echo.
+
+where ollama >nul 2>nul
+if errorlevel 1 (
+  echo [X] Ollama n'est pas installe.
+  echo     Telecharge-le sur https://ollama.com/download
+  echo.
+  pause
+  exit /b 1
+)
+
+echo [1/3] Arret des instances Ollama existantes...
+taskkill /F /IM ollama.exe >nul 2>nul
+taskkill /F /IM "ollama app.exe" >nul 2>nul
+timeout /t 1 /nobreak >nul
+
+echo [2/3] Verification du modele ${model}...
+ollama list 2>nul | findstr "${model}" >nul
+if errorlevel 1 (
+  echo     Telechargement (premiere fois uniquement, peut prendre du temps)...
+  ollama pull ${model}
+)
+
+echo [3/3] Demarrage du serveur avec CORS active...
+echo.
+echo ============================================================
+echo  Pret ! Tu peux maintenant utiliser AutoVinted.
+echo  GARDE CETTE FENETRE OUVERTE pendant que tu utilises l'app.
+echo  (Ferme-la pour arreter Ollama)
+echo ============================================================
+echo.
+set OLLAMA_ORIGINS=*
+ollama serve
+`;
+}
+
+function buildLauncherUnix(model) {
+  return `#!/usr/bin/env bash
+set -e
+echo "==============================="
+echo " AutoVinted x Ollama Launcher"
+echo "==============================="
+echo
+
+if ! command -v ollama &> /dev/null; then
+  echo "[X] Ollama n'est pas installé."
+  echo "    Télécharge-le sur https://ollama.com/download"
+  echo
+  read -p "Appuie sur Entrée pour quitter..."
+  exit 1
+fi
+
+echo "[1/3] Arrêt des instances Ollama existantes..."
+pkill -f "ollama serve" 2>/dev/null || true
+sleep 1
+
+echo "[2/3] Vérification du modèle ${model}..."
+if ! ollama list 2>/dev/null | grep -q "${model}"; then
+  echo "    Téléchargement (première fois uniquement, peut prendre du temps)..."
+  ollama pull ${model}
+fi
+
+echo "[3/3] Démarrage du serveur avec CORS activé..."
+echo
+echo "============================================================"
+echo " Prêt ! Tu peux maintenant utiliser AutoVinted."
+echo " GARDE CE TERMINAL OUVERT pendant que tu utilises l'app."
+echo " (Ctrl+C pour arrêter Ollama)"
+echo "============================================================"
+echo
+OLLAMA_ORIGINS=* ollama serve
+`;
+}
+
+function downloadLauncher() {
+  const model = state.model || OLLAMA_DEFAULT_MODEL;
+  const isWin = ollamaOS === 'windows';
+  const content = isWin ? buildLauncherWindows(model) : buildLauncherUnix(model);
+  const filename = isWin ? 'autovinted-launcher.bat' : 'autovinted-launcher.sh';
+  const blob = new Blob([content], { type: isWin ? 'application/octet-stream' : 'text/x-shellscript' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast(`✓ ${filename} téléchargé`);
+}
+
+$('ollama-download-launcher').addEventListener('click', downloadLauncher);
+
+// Live status check while modal is open
+let ollamaStatusTimer = null;
+async function checkOllamaStatus() {
+  const statusEl = $('ollama-status');
+  if (!statusEl) return;
+  const dot = statusEl.querySelector('.ollama-status-dot');
+  const txt = statusEl.querySelector('.ollama-status-text');
+  const host = getOllamaHost();
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 1500);
+    const res = await fetch(`${host}/api/tags`, { signal: ctrl.signal });
+    clearTimeout(t);
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    const count = (data.models || []).length;
+    statusEl.className = 'ollama-status ok';
+    txt.innerHTML = count > 0
+      ? `✓ Ollama tourne et ${count} modèle${count > 1 ? 's' : ''} installé${count > 1 ? 's' : ''} — tout est prêt !`
+      : `⚠ Ollama tourne mais aucun modèle installé — le launcher va le télécharger`;
+  } catch {
+    statusEl.className = 'ollama-status off';
+    txt.textContent = `⊘ Ollama ne répond pas sur ${host} — utilise le launcher ci-dessous`;
+  }
+}
+
+function startOllamaStatusPolling() {
+  checkOllamaStatus();
+  ollamaStatusTimer = setInterval(checkOllamaStatus, 2500);
+}
+function stopOllamaStatusPolling() {
+  if (ollamaStatusTimer) { clearInterval(ollamaStatusTimer); ollamaStatusTimer = null; }
+}
 
 document.querySelectorAll('.ollama-copy').forEach(btn => {
   btn.addEventListener('click', (e) => {
@@ -1468,7 +1538,7 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     settingsModal.hidden = true;
     historyModal.hidden = true;
-    ollamaModal.hidden = true;
+    closeOllamaModal();
     closeTutorial();
   }
 });
