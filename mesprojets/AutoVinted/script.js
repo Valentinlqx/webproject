@@ -1315,12 +1315,22 @@ echo.
 where ollama >nul 2>nul
 if errorlevel 1 goto :no_ollama
 
-echo [1/4] Arret des instances Ollama existantes...
+echo [1/4] Arret de toutes les instances Ollama...
 echo       Necessaire pour activer CORS pour cette page.
-taskkill /F /IM ollama.exe >nul 2>nul
-taskkill /F /IM "ollama app.exe" >nul 2>nul
-taskkill /F /IM "ollama_llama_server.exe" >nul 2>nul
-timeout /t 3 /nobreak >nul
+
+REM Methode 1 : taskkill sur les noms connus (avec /T pour les processus enfants)
+taskkill /F /T /IM "ollama.exe" >nul 2>nul
+taskkill /F /T /IM "ollama app.exe" >nul 2>nul
+taskkill /F /T /IM "ollama_llama_server.exe" >nul 2>nul
+taskkill /F /T /IM "OllamaApp.exe" >nul 2>nul
+
+REM Methode 2 : filet de securite via PowerShell - tue tout processus "ollama*"
+powershell -NoProfile -Command "Get-Process -Name 'ollama*' -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue" >nul 2>nul
+
+REM Methode 3 : libere le port 11434 si encore occupe par autre chose
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":11434" ^| findstr "LISTENING" 2^>nul') do taskkill /F /PID %%a >nul 2>nul
+
+timeout /t 2 /nobreak >nul
 
 echo.
 echo [2/4] Verification / telechargement du modele "${model}" (~${size})
@@ -1369,10 +1379,17 @@ echo.
 echo ============================================================
 echo  /!\\ Ollama s'est arrete.
 echo.
-echo  Causes possibles :
-echo    - Le port 11434 est deja utilise par Ollama Desktop.
-echo      -^> Clic droit sur l'icone llama dans la zone de notification,
-echo         puis Quit Ollama. Relance ce launcher ensuite.
+echo  Si tu vois "Only one usage of each socket address" ci-dessus :
+echo    Le port 11434 est deja utilise par Ollama Desktop.
+echo.
+echo    SOLUTION :
+echo    1. Regarde la zone de notification Windows (a cote de l'horloge,
+echo       dans la fleche ^ qui cache les icones cachees).
+echo    2. Trouve l'icone llama d'Ollama.
+echo    3. Clic droit -^> Quit Ollama.
+echo    4. Relance ce launcher.
+echo.
+echo  Autres causes :
 echo    - Antivirus / parefeu bloque ollama.exe.
 echo    - Erreur affichee plus haut dans cette fenetre.
 echo ============================================================
@@ -1398,11 +1415,15 @@ if ! command -v ollama &> /dev/null; then
   exit 1
 fi
 
-echo "[1/4] Arrêt des instances Ollama existantes..."
-echo "      (Nécessaire pour réactiver CORS pour cette page)"
-pkill -f "ollama serve" 2>/dev/null || true
-pkill -f "ollama runner" 2>/dev/null || true
-sleep 3
+echo "[1/4] Arrêt de toutes les instances Ollama..."
+echo "      Nécessaire pour activer CORS pour cette page."
+# Tue tout processus contenant "ollama" dans son nom ou ses arguments
+pkill -9 -f "ollama" 2>/dev/null || true
+# Libère le port 11434 si encore occupé
+if command -v lsof &> /dev/null; then
+  lsof -ti :11434 2>/dev/null | xargs -r kill -9 2>/dev/null || true
+fi
+sleep 2
 
 echo
 echo "[2/4] Vérification / téléchargement du modèle \\"${model}\\" (~${size})"
