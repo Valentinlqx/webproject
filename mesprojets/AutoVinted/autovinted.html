@@ -183,6 +183,11 @@
           <span class="result-label">Conseils</span>
           <ul class="result-tips" id="r-tips"></ul>
         </div>
+
+        <div class="result-block" id="r-source-block" hidden>
+          <span class="result-label">Source / Copyright</span>
+          <a id="r-source-link" href="#" target="_blank" rel="noopener" class="source-link">Voir le produit original →</a>
+        </div>
       </div>
 
       <div class="result-actions">
@@ -229,65 +234,20 @@
     </div>
   </div>
 
-  <!-- Tutorial -->
-  <div class="modal" id="tutorial-modal" hidden>
-    <div class="modal-card tutorial-card">
-      <button class="icon-btn tutorial-close" id="tutorial-close" title="Fermer">✕</button>
-
-      <div class="tutorial-steps" id="tutorial-steps">
-        <section class="tutorial-step active" data-step="0">
-          <div class="tutorial-emoji">✦</div>
-          <h2>Bienvenue sur AutoVinted</h2>
-          <p>Upload tes photos, l'IA rédige automatiquement une annonce Vinted optimisée pour vente rapide. Voici comment ça marche en 30 secondes.</p>
-        </section>
-
-        <section class="tutorial-step" data-step="1">
-          <div class="tutorial-emoji">📸</div>
-          <h2>1. Upload tes photos</h2>
-          <p>Glisse-dépose ou clique pour choisir tes photos. <strong>4 à 6 angles</strong> c'est l'idéal : face, dos, étiquette, composition, défauts éventuels.</p>
-          <div class="tutorial-tip">L'estimateur en temps réel t'indique combien de tokens et combien d'euros chaque génération va coûter selon ton IA choisie.</div>
-        </section>
-
-        <section class="tutorial-step" data-step="2">
-          <div class="tutorial-emoji">🔀</div>
-          <h2>2. Deux modes au choix</h2>
-          <p><strong>Une annonce</strong> — toutes les photos d'un seul article. L'IA pose quelques questions si une info manque.</p>
-          <p><strong>En lot</strong> — jusqu'à 30 photos, plusieurs articles à la fois. L'IA détecte automatiquement quelles photos vont ensemble et génère une annonce par article. Parfait pour vider ton placard.</p>
-        </section>
-
-        <section class="tutorial-step" data-step="3">
-          <div class="tutorial-emoji">⚙</div>
-          <h2>3. Choisis ton IA</h2>
-          <p><strong>Gratuit (Pollinations)</strong> — par défaut, aucune inscription, fonctionne tout de suite. Idéal pour tester.</p>
-          <p><strong>OpenAI / Claude / Gemini / Groq / Mistral / DeepSeek</strong> — qualité supérieure avec ta propre clé API. Coût indicatif : <strong>0,001 à 0,02 €</strong> par annonce selon le modèle.</p>
-          <div class="tutorial-tip">Tu peux changer de fournisseur à tout moment depuis le ⚙ en haut. Chaque clé est stockée localement dans ton navigateur.</div>
-        </section>
-
-        <section class="tutorial-step" data-step="4">
-          <div class="tutorial-emoji">💡</div>
-          <h2>4. Maximise tes ventes</h2>
-          <p>On a réuni les meilleurs conseils Vinted dans la section dépliable au-dessus du bouton :</p>
-          <ul class="tutorial-list">
-            <li>Photos qui convertissent (fond, lumière, angles)</li>
-            <li>Mesures précises avec aide-mémoire par catégorie</li>
-            <li>Guide des tailles internationales</li>
-            <li>Pricing, hashtags, timing optimal</li>
-          </ul>
-        </section>
-
-        <section class="tutorial-step" data-step="5">
-          <div class="tutorial-emoji">🚀</div>
-          <h2>Prêt ?</h2>
-          <p>Tu peux retrouver toutes tes annonces générées dans <strong>l'historique ⌛</strong>, et rouvrir ce tuto avec le bouton <strong>?</strong> en haut.</p>
-          <p>Bonnes ventes ! ✨</p>
-        </section>
-      </div>
-
-      <div class="tutorial-dots" id="tutorial-dots"></div>
-
-      <div class="tutorial-nav">
-        <button class="btn-ghost" id="tutorial-prev">Précédent</button>
-        <button class="btn-primary" id="tutorial-next">Suivant</button>
+  <!-- Spotlight Tutorial -->
+  <div id="tutorial-overlay" hidden aria-hidden="true">
+    <div id="tutorial-spotlight"></div>
+    <div id="tutorial-tooltip">
+      <button class="tutorial-tip-close" id="tutorial-tip-close" title="Fermer">✕</button>
+      <div class="tutorial-tip-emoji" id="tutorial-tip-emoji"></div>
+      <h3 id="tutorial-tip-title"></h3>
+      <p id="tutorial-tip-text"></p>
+      <div class="tutorial-tip-footer">
+        <div class="tutorial-tip-dots" id="tutorial-tip-dots"></div>
+        <div class="tutorial-tip-btns">
+          <button class="btn-ghost btn-sm" id="tutorial-tip-prev">←</button>
+          <button class="btn-primary btn-sm" id="tutorial-tip-next">Suivant →</button>
+        </div>
       </div>
     </div>
   </div>

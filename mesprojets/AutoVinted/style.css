@@ -817,16 +817,54 @@ section { margin-bottom: 24px; }
   background: var(--bg-soft);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 12px 14px;
+  padding: 10px 12px;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
 }
 .history-item:hover { background: var(--bg-soft-2); border-color: var(--border-hover); }
-.history-item-title { font-weight: 600; font-size: 0.92rem; line-height: 1.3; }
+.history-thumb {
+  width: 52px;
+  height: 52px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+  background: var(--card-border);
+}
+.history-thumb-placeholder {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  background: var(--card-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+.history-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.history-item-title { font-weight: 600; font-size: 0.92rem; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .history-item-date { font-size: 0.74rem; color: var(--text-3); }
+.history-item-badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: rgba(230, 233, 238, 0.1);
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-top: 2px;
+  width: fit-content;
+}
 .history-empty {
   text-align: center;
   color: var(--text-2);
@@ -834,126 +872,127 @@ section { margin-bottom: 24px; }
   font-size: 0.9rem;
 }
 
-/* ── Tutorial ── */
-.tutorial-card {
-  position: relative;
-  padding: 32px 24px 22px;
-  max-width: 460px;
-  text-align: center;
+/* ── Spotlight Tutorial ── */
+#tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  pointer-events: all;
 }
+#tutorial-overlay[hidden] { display: none; }
 
-.tutorial-close {
+#tutorial-spotlight {
   position: absolute;
-  top: 14px;
-  right: 14px;
-  background: var(--bg-soft);
-  color: var(--text);
-  z-index: 1;
-}
-
-.tutorial-steps {
-  position: relative;
-  min-height: 280px;
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
-}
-
-.tutorial-step {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  animation: fadeIn 0.3s ease;
-}
-.tutorial-step.active { display: flex; }
-
-.tutorial-emoji {
-  font-size: 3rem;
-  line-height: 1;
-  margin-top: 8px;
-}
-
-.tutorial-step h2 {
-  font-size: 1.4rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-
-.tutorial-step p {
-  font-size: 0.96rem;
-  color: var(--text-2);
-  line-height: 1.55;
-  max-width: 380px;
-}
-.tutorial-step p strong { color: var(--text); }
-
-.tutorial-list {
-  list-style: none;
-  text-align: left;
-  margin-top: 4px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.tutorial-list li {
-  font-size: 0.92rem;
-  color: var(--text-2);
-  padding-left: 18px;
-  position: relative;
-}
-.tutorial-list li::before {
-  content: '✦';
-  position: absolute;
-  left: 0;
-  color: var(--text);
-}
-
-.tutorial-tip {
-  background: var(--bg-soft);
   border-radius: 10px;
-  padding: 10px 14px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+  z-index: 9001;
+  transition: left 0.35s cubic-bezier(0.4,0,0.2,1),
+              top 0.35s cubic-bezier(0.4,0,0.2,1),
+              width 0.35s cubic-bezier(0.4,0,0.2,1),
+              height 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+
+#tutorial-tooltip {
+  position: absolute;
+  z-index: 9002;
+  background: var(--card-bg, #0a0e15);
+  border: 1px solid var(--card-border, #1c2330);
+  border-radius: 14px;
+  padding: 16px 18px 14px;
+  width: 270px;
+  pointer-events: all;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  transition: left 0.35s cubic-bezier(0.4,0,0.2,1),
+              top 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+
+.tutorial-tip-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: var(--text-2);
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 4px 6px;
+  border-radius: 6px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+.tutorial-tip-close:hover { color: var(--text); }
+
+.tutorial-tip-emoji {
+  font-size: 1.6rem;
+  margin-bottom: 6px;
+  line-height: 1;
+}
+
+#tutorial-tooltip h3 {
+  font-size: 0.97rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  padding-right: 20px;
+}
+
+#tutorial-tooltip p {
   font-size: 0.85rem;
   color: var(--text-2);
-  margin-top: 6px;
-  text-align: left;
-  max-width: 380px;
   line-height: 1.5;
+  margin-bottom: 12px;
+}
+#tutorial-tooltip p strong { color: var(--text); }
+
+.tutorial-tip-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
-.tutorial-dots {
+.tutorial-tip-dots {
   display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 14px;
-  margin-bottom: 6px;
+  gap: 5px;
+  align-items: center;
 }
-.tutorial-dot {
-  width: 7px;
-  height: 7px;
+.tutorial-tip-dot {
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: var(--bg-soft-2);
-  transition: background 0.2s, transform 0.2s;
+  background: var(--card-border);
   border: none;
   padding: 0;
   cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
 }
-.tutorial-dot.active {
+.tutorial-tip-dot.active {
   background: var(--accent);
   transform: scale(1.3);
 }
 
-.tutorial-nav {
+.tutorial-tip-btns {
   display: flex;
-  gap: 10px;
-  margin-top: 12px;
+  gap: 6px;
+  align-items: center;
 }
-.tutorial-nav button {
-  flex: 1;
-  margin-top: 0 !important;
+
+.btn-sm {
+  padding: 6px 11px;
+  font-size: 0.8rem;
+  min-width: 0;
+  margin: 0 !important;
 }
-.tutorial-nav button[hidden] { display: none; }
+.btn-sm[hidden] { display: none; }
+
+/* ── Source link ── */
+.source-link {
+  font-size: 0.85rem;
+  color: var(--text-2);
+  text-decoration: underline;
+  word-break: break-all;
+}
+.source-link:hover { color: var(--text); }
 
 /* ── Toast ── */
 .toast {

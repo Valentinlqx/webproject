@@ -498,16 +498,15 @@ async function runBulk() {
     }
 
     // Render each detected article
-    listings.forEach((listing, i) => {
+    for (let i = 0; i < listings.length; i++) {
+      const listing = listings[i];
       const indices = Array.isArray(listing.photo_indices) ? listing.photo_indices : [i];
-      const photos = indices
-        .map(idx => state.photos[idx])
-        .filter(Boolean);
+      const photos = indices.map(idx => state.photos[idx]).filter(Boolean);
       const card = createBulkCard(photos, i);
       bulkResults.appendChild(card.el);
       card.fillListing(listing);
-      saveToHistory(listing);
-    });
+      await saveToHistory(listing, photos);
+    }
 
     bulkProgress.hidden = true;
     bulkActions.hidden = false;
@@ -916,7 +915,7 @@ function handleAIResponse(resp) {
     renderListing(resp.listing);
     chatSection.hidden = true;
     resultSection.hidden = false;
-    saveToHistory(resp.listing);
+    saveToHistory(resp.listing).catch(() => {});
   } else {
     addBubble('ai', resp.message || 'Réponse inattendue.');
   }
@@ -952,6 +951,15 @@ function renderListing(listing) {
     $('r-tips-block').hidden = false;
   } else {
     $('r-tips-block').hidden = true;
+  }
+
+  const srcBlock = $('r-source-block');
+  const srcLink  = $('r-source-link');
+  if (listing.sourceLink) {
+    srcLink.href = listing.sourceLink;
+    srcBlock.hidden = false;
+  } else {
+    srcBlock.hidden = true;
   }
 
   resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1085,65 +1093,104 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     settingsModal.hidden = true;
     historyModal.hidden = true;
-    tutorialModal.hidden = true;
+    closeTutorial();
   }
 });
 
-// ─── Tutorial ────────────────────────────────────────
-const tutorialModal = $('tutorial-modal');
-const tutorialSteps = document.querySelectorAll('.tutorial-step');
-const tutorialDots = $('tutorial-dots');
-const tutorialPrev = $('tutorial-prev');
-const tutorialNext = $('tutorial-next');
-const TUTORIAL_TOTAL = tutorialSteps.length;
+// ─── Spotlight Tutorial ───────────────────────────────
+const TUTORIAL_STEPS = [
+  { target: '.hero',           emoji: '✦',  title: 'Bienvenue sur AutoVinted', text: 'Upload tes photos, l\'IA rédige ton annonce Vinted optimisée. Voici le tour en 30 secondes.', placement: 'bottom' },
+  { target: '.mode-toggle',    emoji: '🔀', title: 'Une annonce ou en lot',     text: '<strong>Une annonce</strong> — photos d\'un seul article.<br><strong>En lot</strong> — jusqu\'à 30 photos, l\'IA détecte les articles automatiquement.', placement: 'bottom' },
+  { target: '#dropzone',       emoji: '📸', title: 'Upload tes photos',         text: 'Glisse-dépose ici ou clique pour parcourir. 4 à 6 angles idéalement : face, dos, étiquette, défauts.', placement: 'bottom' },
+  { target: '#context-input',  emoji: '💬', title: 'Ajoute du contexte',        text: 'Infos que l\'IA ne peut pas deviner : taille réelle, prix d\'achat, état... Optionnel mais recommandé.', placement: 'top' },
+  { target: '#settings-toggle',emoji: '⚙', title: 'Configure ton IA',          text: '<strong>Gratuit (Pollinations)</strong> — sans clé, fonctionne tout de suite.<br><strong>OpenAI / Claude / Gemini…</strong> — qualité supérieure avec ta clé API.', placement: 'bottom' },
+  { target: '#history-toggle', emoji: '⌛', title: 'Historique',                text: 'Retrouve toutes tes annonces ici. <strong>Un exemple Clarks est déjà disponible</strong> pour voir à quoi ressemble un résultat !', placement: 'bottom' },
+];
+
+const tutorialOverlay  = $('tutorial-overlay');
+const tutorialSpotlight= $('tutorial-spotlight');
+const tutorialTooltip  = $('tutorial-tooltip');
+const tutorialTipDots  = $('tutorial-tip-dots');
+const tutorialTipPrev  = $('tutorial-tip-prev');
+const tutorialTipNext  = $('tutorial-tip-next');
 let tutorialStep = 0;
 
-// Build dots
-for (let i = 0; i < TUTORIAL_TOTAL; i++) {
+for (let i = 0; i < TUTORIAL_STEPS.length; i++) {
   const d = document.createElement('button');
-  d.className = 'tutorial-dot' + (i === 0 ? ' active' : '');
-  d.setAttribute('aria-label', `Étape ${i + 1}`);
+  d.className = 'tutorial-tip-dot';
   d.addEventListener('click', () => goToStep(i));
-  tutorialDots.appendChild(d);
+  tutorialTipDots.appendChild(d);
+}
+
+function positionTutorial(target, placement) {
+  const rect = target.getBoundingClientRect();
+  const pad = 8, gap = 14, tW = 270, tH = 200;
+
+  tutorialSpotlight.style.left   = `${rect.left - pad}px`;
+  tutorialSpotlight.style.top    = `${rect.top  - pad}px`;
+  tutorialSpotlight.style.width  = `${rect.width  + pad * 2}px`;
+  tutorialSpotlight.style.height = `${rect.height + pad * 2}px`;
+
+  let tx, ty;
+  if (placement === 'bottom') {
+    tx = rect.left + rect.width / 2 - tW / 2;
+    ty = rect.bottom + pad + gap;
+  } else if (placement === 'top') {
+    tx = rect.left + rect.width / 2 - tW / 2;
+    ty = rect.top - pad - gap - tH;
+  } else if (placement === 'right') {
+    tx = rect.right + pad + gap;
+    ty = rect.top + rect.height / 2 - tH / 2;
+  } else {
+    tx = rect.left - pad - gap - tW;
+    ty = rect.top  + rect.height / 2 - tH / 2;
+  }
+  tx = Math.max(8, Math.min(window.innerWidth  - tW - 8, tx));
+  ty = Math.max(8, Math.min(window.innerHeight - tH - 8, ty));
+  tutorialTooltip.style.left = `${tx}px`;
+  tutorialTooltip.style.top  = `${ty}px`;
 }
 
 function goToStep(i) {
-  tutorialStep = Math.max(0, Math.min(TUTORIAL_TOTAL - 1, i));
-  tutorialSteps.forEach((s, idx) => s.classList.toggle('active', idx === tutorialStep));
-  tutorialDots.querySelectorAll('.tutorial-dot').forEach((d, idx) =>
+  tutorialStep = Math.max(0, Math.min(TUTORIAL_STEPS.length - 1, i));
+  const step = TUTORIAL_STEPS[tutorialStep];
+
+  tutorialTipDots.querySelectorAll('.tutorial-tip-dot').forEach((d, idx) =>
     d.classList.toggle('active', idx === tutorialStep)
   );
-  tutorialPrev.hidden = tutorialStep === 0;
-  tutorialNext.textContent = tutorialStep === TUTORIAL_TOTAL - 1 ? 'Commencer' : 'Suivant';
-}
+  $('tutorial-tip-emoji').textContent    = step.emoji;
+  $('tutorial-tip-title').textContent    = step.title;
+  $('tutorial-tip-text').innerHTML       = step.text;
+  tutorialTipPrev.hidden = tutorialStep === 0;
+  tutorialTipNext.textContent = tutorialStep === TUTORIAL_STEPS.length - 1 ? 'Commencer ✦' : 'Suivant →';
 
-tutorialPrev.addEventListener('click', () => goToStep(tutorialStep - 1));
-tutorialNext.addEventListener('click', () => {
-  if (tutorialStep === TUTORIAL_TOTAL - 1) {
-    closeTutorial();
-  } else {
-    goToStep(tutorialStep + 1);
+  const target = document.querySelector(step.target);
+  if (target) {
+    target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    requestAnimationFrame(() => positionTutorial(target, step.placement));
   }
-});
+}
 
 function openTutorial() {
+  tutorialOverlay.hidden = false;
+  tutorialOverlay.removeAttribute('aria-hidden');
   goToStep(0);
-  tutorialModal.hidden = false;
 }
 function closeTutorial() {
-  tutorialModal.hidden = true;
+  tutorialOverlay.hidden = true;
+  tutorialOverlay.setAttribute('aria-hidden', 'true');
   localStorage.setItem('av-tutorial-seen', '1');
 }
 
-$('tutorial-toggle').addEventListener('click', openTutorial);
-$('tutorial-close').addEventListener('click', closeTutorial);
-tutorialModal.addEventListener('click', (e) => {
-  if (e.target === tutorialModal) closeTutorial();
+tutorialTipPrev.addEventListener('click', () => goToStep(tutorialStep - 1));
+tutorialTipNext.addEventListener('click', () => {
+  if (tutorialStep === TUTORIAL_STEPS.length - 1) closeTutorial();
+  else goToStep(tutorialStep + 1);
 });
+$('tutorial-toggle').addEventListener('click', openTutorial);
+$('tutorial-tip-close').addEventListener('click', closeTutorial);
 
-// Auto-show on first visit
 if (!localStorage.getItem('av-tutorial-seen')) {
-  // Small delay so the page renders first
   setTimeout(openTutorial, 350);
 }
 
@@ -1179,12 +1226,28 @@ $('history-clear').addEventListener('click', () => {
   showToast('Historique effacé');
 });
 
-function saveToHistory(listing) {
-  state.history.unshift({
-    listing,
-    date: new Date().toISOString(),
-    id: crypto.randomUUID(),
+async function compressThumbnail(dataUrl, maxSize = 120, quality = 0.5) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
+      const w = Math.round(img.width * scale);
+      const h = Math.round(img.height * scale);
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => resolve(null);
+    img.src = dataUrl;
   });
+}
+
+async function saveToHistory(listing, photos = null) {
+  let thumbnail = null;
+  const src = photos || state.photos;
+  if (src && src.length > 0) thumbnail = await compressThumbnail(src[0].dataUrl);
+  state.history.unshift({ listing, date: new Date().toISOString(), id: crypto.randomUUID(), thumbnail });
   state.history = state.history.slice(0, 30);
   localStorage.setItem('av-history', JSON.stringify(state.history));
 }
@@ -1200,9 +1263,17 @@ function renderHistory() {
   list.innerHTML = state.history.map(h => {
     const d = new Date(h.date);
     const dateStr = d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+    const thumbHtml = h.thumbnail
+      ? `<img class="history-thumb" src="${h.thumbnail}" alt="" />`
+      : `<div class="history-thumb-placeholder">👟</div>`;
+    const badge = h.isDemo ? '<span class="history-item-badge">Exemple</span>' : '';
     return `<div class="history-item" data-id="${h.id}">
-      <span class="history-item-title">${escapeHtml(h.listing.title || '(sans titre)')}</span>
-      <span class="history-item-date">${dateStr}</span>
+      ${thumbHtml}
+      <div class="history-item-info">
+        <span class="history-item-title">${escapeHtml(h.listing.title || '(sans titre)')}</span>
+        <span class="history-item-date">${dateStr}</span>
+        ${badge}
+      </div>
     </div>`;
   }).join('');
 
@@ -1218,6 +1289,34 @@ function renderHistory() {
     });
   });
 }
+
+// ─── Demo listing ────────────────────────────────────
+const DEMO_ID = 'demo-clarks-craftmaster-v1';
+function seedDemoListing() {
+  if (localStorage.getItem('av-demo-seeded') === DEMO_ID) return;
+  const demo = {
+    id: DEMO_ID,
+    date: '2026-05-01T09:00:00.000Z',
+    isDemo: true,
+    thumbnail: null,
+    listing: {
+      title: 'Mocassins Clarks × Walk in Paris Craftmaster — Cuir Bordeaux',
+      description: 'Superbes penny loafers en collaboration exclusive Walk in Paris × Clarks Craftmaster. Cuir pleine fleur bordeaux profond, doublure intérieure verte, semelle noire. Coupe classique intemporelle, parfaits habillés ou casual chic.\n\n📏 Conseil : mesure ta semelle intérieure pour trouver ta pointure exacte Clarks.\n\n#Clarks #WalkInParis #Craftmaster #PennyLoafer #Mocassins #Loafer #CuirVeritable #Bordeaux #Chaussures #MadeInEngland #ClassiqueChic #Workwear #SmartCasual #Vintage #CapsuleWardrobe',
+      details: { marque: 'Clarks × Walk in Paris', categorie: 'Chaussures', couleur: 'Bordeaux', etat: 'Neuf avec étiquettes', matiere: 'Cuir pleine fleur' },
+      prices: { ideal: '115 €', rapide: '95 €', minimum: '80 €' },
+      tips: [
+        'Mesure la semelle intérieure (en cm) — les pointures Clarks varient et ça rassure les acheteurs.',
+        'Ajoute une photo portée si possible, les chaussures se vendent bien mieux avec la coupe visible.',
+        'Précise si la boîte d\'origine est disponible — ça peut justifier un prix légèrement plus élevé.',
+      ],
+      sourceLink: 'https://walkinparis.com/en/products/walk-in-paris-x-clarks-craft-james-lo-bordeaux',
+    },
+  };
+  state.history = [...state.history, demo];
+  localStorage.setItem('av-history', JSON.stringify(state.history));
+  localStorage.setItem('av-demo-seeded', DEMO_ID);
+}
+seedDemoListing();
 
 // ─── Helpers ─────────────────────────────────────────
 function setBtnLoading(btn, loading, label) {
