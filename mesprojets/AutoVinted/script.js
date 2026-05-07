@@ -101,6 +101,102 @@ const PROVIDERS = {
   },
 };
 
+// ─── Pricing & token estimation ─────────────────────
+// Prix indicatifs en USD (≈ EUR) par 1M tokens [input, output]
+// Source : pages tarifaires officielles, novembre 2025
+const PRICING = {
+  // OpenAI
+  'gpt-4o':                      { in: 2.50, out: 10.00 },
+  'gpt-4o-mini':                 { in: 0.15, out: 0.60 },
+  // Anthropic
+  'claude-opus-4-7':             { in: 15.00, out: 75.00 },
+  'claude-sonnet-4-6':           { in: 3.00, out: 15.00 },
+  'claude-sonnet-4-5-20250929':  { in: 3.00, out: 15.00 },
+  'claude-3-5-sonnet-20241022':  { in: 3.00, out: 15.00 },
+  'claude-haiku-4-5-20251001':   { in: 1.00, out: 5.00 },
+  // Google
+  'gemini-2.0-flash':            { in: 0.10, out: 0.40 },
+  'gemini-1.5-pro':              { in: 1.25, out: 5.00 },
+  // Groq
+  'llama-3.2-90b-vision-preview':{ in: 0.90, out: 0.90 },
+  'llama-3.2-11b-vision-preview':{ in: 0.18, out: 0.18 },
+  // Mistral
+  'pixtral-large-latest':        { in: 2.00, out: 6.00 },
+  'pixtral-12b-2409':            { in: 0.15, out: 0.15 },
+  // DeepSeek
+  'deepseek-chat':               { in: 0.27, out: 1.10 },
+  'deepseek-reasoner':           { in: 0.55, out: 2.19 },
+  // Pollinations free
+  'openai-large':                { in: 0, out: 0 },
+};
+
+// Tokens approximatifs par image selon le provider
+const IMAGE_TOKENS_PER_PROVIDER = {
+  pollinations: 425,   // OpenAI tile-based, image ≤1024 = 425 tokens (85 + 4 tiles)
+  openai:       425,
+  anthropic:    1300,  // Claude ~1568 max, ~1300 moyenne pour 1024
+  gemini:       258,   // forfait par image
+  groq:         1200,
+  mistral:      1000,
+  deepseek:     0,     // pas de vision
+};
+
+const USD_TO_EUR = 0.93;
+
+function estimateUsage() {
+  const isBulk = state.mode === 'bulk';
+  const sys = isBulk ? BULK_SYSTEM_PROMPT : SYSTEM_PROMPT;
+  const ctx = state.context || $('context-input')?.value || '';
+  // ~4 chars / token (français)
+  const userTextChars = ctx.length + 200; // intro + numérotation photos
+  const textTokens = Math.ceil((sys.length + userTextChars) / 4);
+
+  const imgPer = IMAGE_TOKENS_PER_PROVIDER[state.provider] ?? 425;
+  const imgTokens = state.photos.length * imgPer;
+
+  const numListings = isBulk ? Math.max(1, Math.ceil(state.photos.length / 2.5)) : 1;
+  const outputTokens = numListings * 350; // ~350 tokens / annonce JSON
+
+  const inTokens = textTokens + imgTokens;
+
+  const price = PRICING[state.model];
+  let cost = null; // EUR
+  if (price) {
+    const usd = (inTokens * price.in + outputTokens * price.out) / 1_000_000;
+    cost = usd * USD_TO_EUR;
+  }
+
+  return { inTokens, outputTokens, cost };
+}
+
+function updateEstimate() {
+  const el = $('estimate');
+  if (!el) return;
+  if (state.photos.length === 0) {
+    el.textContent = '';
+    el.hidden = true;
+    return;
+  }
+  el.hidden = false;
+  const { inTokens, outputTokens, cost } = estimateUsage();
+  const total = inTokens + outputTokens;
+  const tokenStr = `≈ ${total.toLocaleString('fr-FR')} tokens`;
+
+  let costStr;
+  if (state.provider === 'pollinations') {
+    costStr = ' · gratuit';
+  } else if (cost === null) {
+    costStr = '';
+  } else if (cost < 0.005) {
+    costStr = ' · < 0,01 €';
+  } else if (cost < 1) {
+    costStr = ` · ≈ ${cost.toFixed(3).replace('.', ',')} €`;
+  } else {
+    costStr = ` · ≈ ${cost.toFixed(2).replace('.', ',')} €`;
+  }
+  el.textContent = tokenStr + costStr;
+}
+
 // ─── State ───────────────────────────────────────────
 const state = {
   photos: [],          // [{ id, file, dataUrl }]
@@ -127,97 +223,40 @@ function getStoredModel(providerId) {
 
 const MAX_PHOTOS_SINGLE = 8;
 const MAX_PHOTOS_BULK = 30;
-const MAX_PHOTO_SIZE = 1280; // px (downscale before sending)
+const MAX_PHOTO_SIZE = 1024; // px (downscale before sending — saves tokens & bandwidth)
+const JPEG_QUALITY = 0.80;
 const maxPhotos = () => state.mode === 'bulk' ? MAX_PHOTOS_BULK : MAX_PHOTOS_SINGLE;
 
-// ─── System prompt (le cœur de l'IA) ─────────────────
-const SYSTEM_PROMPT = `Tu es un vendeur Vinted expérimenté qui rédige des annonces qui se vendent vite. Tu écris comme un humain, pas comme une IA marketing : ton simple, naturel, concis, crédible. Phrases courtes et vendeuses.
+// ─── System prompts (compacts pour économiser les tokens) ─────
+const SYSTEM_PROMPT = `Tu es un vendeur Vinted humain. Style: naturel, vendeur, phrases courtes, jamais "IA marketing".
 
-Tu analyses les photos d'un vêtement ou accessoire et tu rédiges une annonce Vinted optimisée pour la visibilité, la confiance et la rapidité de vente.
+Analyse les photos et rédige une annonce Vinted optimisée pour vente rapide.
 
-INFORMATIONS NÉCESSAIRES avant de générer l'annonce :
-- marque, taille, état, couleur, type de vêtement, matière
-- défauts éventuels, prix d'achat approximatif
-- si c'est tendance / vintage / rare, sexe/catégorie
+Si une info clé manque (marque, taille, état, défauts, matière), pose 1-3 questions courtes. Sinon, génère.
+N'invente jamais ce qui n'est pas visible.
 
-Si certaines de ces infos ne sont pas visibles ou déductibles avec certitude depuis les photos, POSE des questions courtes et conversationnelles (1 à 3 questions max par message). N'invente jamais ce qui n'est pas visible.
+Prix idéal/rapide/min selon marque, état, demande marché 2nde main. En euros.
 
-Quand tu as toutes les infos importantes, génère l'annonce.
+RÉPONDS UNIQUEMENT EN JSON VALIDE, sans texte/markdown autour:
+{"action":"ask"|"generate","message":"...","listing":null|{"title":"max 60 chars","description":"courte, vendeuse, retours ligne, FINIR par ligne vide + 6-10 #hashtags minuscules sans accents","details":{"marque":"","taille":"","etat":"Neuf avec étiquette|Neuf sans étiquette|Très bon état|Bon état|Satisfaisant","couleur":"","categorie":"","matiere":""},"prices":{"ideal":"15€","rapide":"10€","minimum":"8€"},"tips":["..."]}}`;
 
-PRICING : estime un prix cohérent selon marque, état, demande actuelle, rareté, prix marché seconde main. Donne 3 prix en euros : idéal, vente rapide, minimum acceptable.
+// MODE LOT — auto-détection d'articles parmi N photos
+const BULK_SYSTEM_PROMPT = `Tu es un vendeur Vinted humain. Style: naturel, vendeur, court.
 
-FORMAT DE RÉPONSE — tu réponds TOUJOURS en JSON valide avec ce schéma :
+Photos NUMÉROTÉES (Photo 0, 1, 2…). Plusieurs photos peuvent montrer le MÊME article (face/dos/étiquette/défaut).
 
-{
-  "action": "ask" | "generate",
-  "message": "ton message si action=ask, sinon court résumé",
-  "listing": null | {
-    "title": "titre Vinted optimisé (max 60 caractères, sans emojis abusifs)",
-    "description": "description prête à copier-coller, naturelle, courte, vendeuse, avec retours ligne. TERMINE TOUJOURS par une ligne vide puis 6 à 10 hashtags pertinents séparés par des espaces (ex: #marque #typeProduit #couleur #style #occasion #saison) — tout en minuscules, sans accents, sans espaces dans les tags",
-    "details": {
-      "marque": "...",
-      "taille": "...",
-      "etat": "Neuf avec étiquette | Neuf sans étiquette | Très bon état | Bon état | Satisfaisant",
-      "couleur": "...",
-      "categorie": "...",
-      "matiere": "..."
-    },
-    "prices": {
-      "ideal": "15€",
-      "rapide": "10€",
-      "minimum": "8€"
-    },
-    "tips": ["conseil 1", "conseil 2"]
-  }
-}
+Tâche:
+1. Identifie chaque article distinct
+2. Regroupe les photos du même article
+3. Génère 1 annonce par article — PAS de questions, déduis ou utilise des valeurs génériques cohérentes
 
-Aucun texte hors JSON. Pas de markdown autour du JSON.`;
+Description: courte, vendeuse, FINIR par ligne vide + 6-10 #hashtags minuscules sans accents.
+Prix idéal/rapide/min en euros selon marché 2nde main.
 
-// System prompt utilisé en MODE LOT — détecte plusieurs articles depuis un set de photos
-const BULK_SYSTEM_PROMPT = `Tu es un vendeur Vinted expérimenté qui rédige des annonces qui se vendent vite. Ton style : humain, naturel, concis, crédible. Phrases courtes et vendeuses, jamais de ton "IA marketing".
+JSON UNIQUEMENT, sans texte/markdown autour:
+{"listings":[{"photo_indices":[0,1],"title":"max 60 chars","description":"...","details":{"marque":"","taille":"","etat":"Neuf|Neuf sans étiquette|Très bon état|Bon état|Satisfaisant","couleur":"","categorie":"","matiere":""},"prices":{"ideal":"15€","rapide":"10€","minimum":"8€"},"tips":[]}]}
 
-ON TE DONNE PLUSIEURS PHOTOS NUMÉROTÉES (Photo 0, Photo 1, Photo 2…). Plusieurs photos peuvent montrer le MÊME article (face/dos/étiquette/défaut/porté). Ton job :
-
-1. ANALYSE chaque photo
-2. REGROUPE les photos qui appartiennent au même article (même produit, même couleur, même contexte visuel)
-3. Pour CHAQUE article distinct détecté, génère une annonce Vinted optimisée
-4. Ne pose PAS de questions — déduis ce que tu peux des photos et du contexte fourni. Si une info ne peut pas être devinée, mets une valeur générique cohérente ("Bon état", "Taille M" si visiblement standard, etc.)
-
-Pour chaque annonce :
-- Titre Vinted optimisé (max 60 caractères)
-- Description naturelle, courte, vendeuse, AVEC ligne vide puis 6-10 hashtags pertinents en minuscules sans accents (ex: #marque #typeproduit #couleur #style #occasion)
-- Détails (marque, taille, état, couleur, catégorie, matière)
-- 3 prix : idéal, vente rapide, minimum acceptable (en euros)
-- Quelques conseils si pertinents
-
-FORMAT DE RÉPONSE — uniquement du JSON valide :
-
-{
-  "listings": [
-    {
-      "photo_indices": [0, 1, 2],
-      "title": "...",
-      "description": "...\\n\\n#tag1 #tag2 #tag3",
-      "details": {
-        "marque": "...",
-        "taille": "...",
-        "etat": "Neuf avec étiquette | Neuf sans étiquette | Très bon état | Bon état | Satisfaisant",
-        "couleur": "...",
-        "categorie": "...",
-        "matiere": "..."
-      },
-      "prices": { "ideal": "15€", "rapide": "10€", "minimum": "8€" },
-      "tips": ["conseil 1", "conseil 2"]
-    },
-    {
-      "photo_indices": [3],
-      "title": "...",
-      ...
-    }
-  ]
-}
-
-photo_indices = liste des numéros de photos (0-indexés) qui montrent ce même article. Chaque photo doit appartenir à une seule annonce. Aucun texte hors JSON, pas de markdown autour.`;
+photo_indices = numéros des photos (0-indexés). Chaque photo dans UNE seule annonce.`;
 
 // ─── DOM ─────────────────────────────────────────────
 const $ = (id) => document.getElementById(id);
@@ -290,7 +329,7 @@ function downscaleImage(file, maxSide) {
       canvas.width = w; canvas.height = h;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, w, h);
-      resolve(canvas.toDataURL('image/jpeg', 0.85));
+      resolve(canvas.toDataURL('image/jpeg', JPEG_QUALITY));
     };
     img.src = URL.createObjectURL(file);
   });
@@ -383,12 +422,22 @@ function updateAnalyzeBtnLabel() {
   }
 }
 
-// Hook into renderPreviews to refresh button label
+// Hook into renderPreviews to refresh button label + estimate
 const _origRenderPreviews = renderPreviews;
 renderPreviews = function () {
   _origRenderPreviews();
   updateAnalyzeBtnLabel();
+  updateEstimate();
 };
+
+// Refresh estimate when context changes
+$('context-input').addEventListener('input', updateEstimate);
+
+// Refresh estimate when mode changes
+modeBtns.forEach(b => b.addEventListener('click', () => {
+  // state.mode is updated by the earlier handler — defer one tick
+  setTimeout(updateEstimate, 0);
+}));
 
 // ─── Bulk run ────────────────────────────────────────
 const bulkSection = $('bulk-section');
@@ -1016,6 +1065,7 @@ $('settings-save').addEventListener('click', () => {
   }
   settingsModal.hidden = true;
   showToast('Paramètres enregistrés');
+  updateEstimate();
 });
 
 // Close modals with Escape
