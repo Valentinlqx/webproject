@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>AutoVinted — Génère ton annonce en 1 clic</title>
+  <meta name="description" content="Upload tes photos, l'IA rédige une annonce Vinted optimisée prête à copier-coller." />
+  <meta name="theme-color" content="#02050a" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<script>if(localStorage.getItem('av-theme')!=='light')document.body.classList.add('dark');</script>
+
+  <header>
+    <div class="header-controls">
+      <a href="../../mes-projets.html" class="icon-btn" title="Retour">←</a>
+      <div class="header-actions">
+        <button class="icon-btn" id="history-toggle" title="Historique">⌛</button>
+        <button class="icon-btn" id="settings-toggle" title="Paramètres">⚙</button>
+        <button class="icon-btn" id="theme-toggle" title="Thème">☀️</button>
+      </div>
+    </div>
+    <div class="hero">
+      <h1>✦ AutoVinted</h1>
+      <p class="hero-sub">Upload tes photos, l'IA rédige ton annonce Vinted optimisée.</p>
+    </div>
+  </header>
+
+  <main>
+    <!-- Upload zone -->
+    <section class="upload-section" id="upload-section">
+      <label for="file-input" class="dropzone" id="dropzone">
+        <div class="dropzone-icon">📸</div>
+        <p class="dropzone-title">Glisse tes photos ici</p>
+        <p class="dropzone-sub">ou clique pour parcourir — jusqu'à 8 photos</p>
+        <input type="file" id="file-input" accept="image/*" multiple hidden />
+      </label>
+
+      <div class="previews" id="previews"></div>
+
+      <button class="btn-primary" id="analyze-btn" disabled>
+        <span class="btn-label">Analyser mes photos</span>
+        <span class="btn-spinner" hidden></span>
+      </button>
+    </section>
+
+    <!-- Conversation (questions IA) -->
+    <section class="chat-section" id="chat-section" hidden>
+      <div class="chat-header">
+        <div class="chat-avatar">✦</div>
+        <div>
+          <p class="chat-name">Assistant Vinted</p>
+          <p class="chat-status">Quelques précisions pour finaliser ton annonce</p>
+        </div>
+      </div>
+      <div class="chat-messages" id="chat-messages"></div>
+      <form class="chat-input" id="chat-form">
+        <input type="text" id="chat-text" placeholder="Ta réponse..." autocomplete="off" />
+        <button type="submit" class="chat-send" title="Envoyer">→</button>
+      </form>
+      <button class="btn-ghost" id="generate-btn" hidden>Générer l'annonce maintenant</button>
+    </section>
+
+    <!-- Résultat -->
+    <section class="result-section" id="result-section" hidden>
+      <div class="result-card">
+        <div class="result-block">
+          <div class="result-block-head">
+            <span class="result-label">Titre</span>
+            <button class="copy-btn" data-copy="title">Copier</button>
+          </div>
+          <p class="result-title" id="r-title"></p>
+        </div>
+
+        <div class="result-block">
+          <div class="result-block-head">
+            <span class="result-label">Description</span>
+            <button class="copy-btn" data-copy="description">Copier</button>
+          </div>
+          <p class="result-description" id="r-description"></p>
+        </div>
+
+        <div class="result-block">
+          <span class="result-label">Détails</span>
+          <ul class="result-details" id="r-details"></ul>
+        </div>
+
+        <div class="result-block">
+          <span class="result-label">Prix conseillés</span>
+          <div class="price-grid" id="r-prices"></div>
+        </div>
+
+        <div class="result-block" id="r-tips-block">
+          <span class="result-label">Conseils</span>
+          <ul class="result-tips" id="r-tips"></ul>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn-primary" id="copy-all-btn">Copier toute l'annonce</button>
+        <button class="btn-ghost" id="restart-btn">Nouvelle annonce</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Settings modal -->
+  <div class="modal" id="settings-modal" hidden>
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2>Paramètres</h2>
+        <button class="icon-btn" id="settings-close">✕</button>
+      </div>
+      <label class="field">
+        <span class="field-label">Clé API OpenAI</span>
+        <input type="password" id="api-key" placeholder="sk-..." />
+        <span class="field-hint">Stockée uniquement dans ton navigateur. <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">Obtenir une clé →</a></span>
+      </label>
+      <label class="field">
+        <span class="field-label">Modèle</span>
+        <select id="model-select">
+          <option value="gpt-4o">GPT-4o (recommandé)</option>
+          <option value="gpt-4o-mini">GPT-4o mini (économique)</option>
+        </select>
+      </label>
+      <button class="btn-primary" id="settings-save">Enregistrer</button>
+    </div>
+  </div>
+
+  <!-- History modal -->
+  <div class="modal" id="history-modal" hidden>
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2>Historique</h2>
+        <button class="icon-btn" id="history-close">✕</button>
+      </div>
+      <div class="history-list" id="history-list"></div>
+      <button class="btn-ghost" id="history-clear" hidden>Tout effacer</button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" hidden></div>
+
+  <footer>© 2026 Valentin L. — AutoVinted</footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
