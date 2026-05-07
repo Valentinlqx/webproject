@@ -235,12 +235,12 @@ Analyse les photos et rédige une annonce Vinted optimisée pour vente rapide.
 Si une info clé manque (marque, taille, état, défauts, matière), pose 1-3 questions courtes. Sinon, génère.
 N'invente jamais ce qui n'est pas visible.
 
-LIVRES : si l'article est un livre, repère l'ISBN sur la 4ème de couverture ou la page de garde et indique-le dans la description (ligne dédiée "ISBN : 978-..."). Mentionne aussi auteur, éditeur, année, format (poche/broché) si visibles.
+LIVRES : si c'est un livre, remplis le champ "isbn" dans les détails (repère le code sur la 4ème couv ou page de garde). Mentionne auteur/éditeur/format dans la description.
 
 Prix idéal/rapide/min selon marque, état, demande marché 2nde main. En euros.
 
 RÉPONDS UNIQUEMENT EN JSON VALIDE, sans texte/markdown autour:
-{"action":"ask"|"generate","message":"...","listing":null|{"title":"max 60 chars","description":"courte, vendeuse, retours ligne, FINIR par ligne vide + 6-10 #hashtags minuscules sans accents","details":{"marque":"","taille":"","etat":"Neuf avec étiquette|Neuf sans étiquette|Très bon état|Bon état|Satisfaisant","couleur":"","categorie":"","matiere":""},"prices":{"ideal":"15€","rapide":"10€","minimum":"8€"},"tips":["..."]}}`;
+{"action":"ask"|"generate","message":"...","listing":null|{"title":"max 60 chars","description":"courte, vendeuse, retours ligne, FINIR par ligne vide + 6-10 #hashtags minuscules sans accents","details":{"marque":"","taille":"","etat":"Neuf avec étiquette|Neuf sans étiquette|Très bon état|Bon état|Satisfaisant","couleur":"","categorie":"","matiere":"","isbn":"(livres uniquement, sinon vide)"},"prices":{"ideal":"15€","rapide":"10€","minimum":"8€"},"tips":["..."]}}`;
 
 // MODE LOT — auto-détection d'articles parmi N photos
 const BULK_SYSTEM_PROMPT = `Tu es un vendeur Vinted humain. Style: naturel, vendeur, court.
@@ -252,13 +252,13 @@ Tâche:
 2. Regroupe les photos du même article
 3. Génère 1 annonce par article — PAS de questions, déduis ou utilise des valeurs génériques cohérentes
 
-LIVRES : si c'est un livre, repère l'ISBN (4ème couv ou page de garde) et indique-le dans la description ("ISBN : 978-..."). Mentionne aussi auteur, éditeur, format (poche/broché) si visibles.
+LIVRES : si c'est un livre, remplis le champ "isbn" dans les détails (repère le code sur la 4ème couv ou page de garde). Mentionne auteur/éditeur/format dans la description.
 
 Description: courte, vendeuse, FINIR par ligne vide + 6-10 #hashtags minuscules sans accents.
 Prix idéal/rapide/min en euros selon marché 2nde main.
 
 JSON UNIQUEMENT, sans texte/markdown autour:
-{"listings":[{"photo_indices":[0,1],"title":"max 60 chars","description":"...","details":{"marque":"","taille":"","etat":"Neuf|Neuf sans étiquette|Très bon état|Bon état|Satisfaisant","couleur":"","categorie":"","matiere":""},"prices":{"ideal":"15€","rapide":"10€","minimum":"8€"},"tips":[]}]}
+{"listings":[{"photo_indices":[0,1],"title":"max 60 chars","description":"...","details":{"marque":"","taille":"","etat":"Neuf|Neuf sans étiquette|Très bon état|Bon état|Satisfaisant","couleur":"","categorie":"","matiere":"","isbn":"(livres uniquement, sinon vide)"},"prices":{"ideal":"15€","rapide":"10€","minimum":"8€"},"tips":[]}]}
 
 photo_indices = numéros des photos (0-indexés). Chaque photo dans UNE seule annonce.`;
 
@@ -571,7 +571,7 @@ function renderBulkBody(l, index, photoArr) {
   const d = l.details || {};
   const p = l.prices || {};
   const tips = (l.tips || []).map(t => `<li>${escapeHtml(t)}</li>`).join('');
-  const detailLabels = { marque: 'Marque', taille: 'Taille', etat: 'État', couleur: 'Couleur', categorie: 'Catégorie', matiere: 'Matière' };
+  const detailLabels = { marque: 'Marque', taille: 'Taille', etat: 'État', couleur: 'Couleur', categorie: 'Catégorie', matiere: 'Matière', isbn: 'ISBN' };
   const details = Object.entries(detailLabels)
     .filter(([k]) => d[k])
     .map(([k, label]) => `<li><strong>${label}</strong>${escapeHtml(d[k])}</li>`).join('');
@@ -631,7 +631,7 @@ function bindBulkBodyActions(bodyEl, listing) {
 function formatFullListing(l) {
   const d = l.details || {};
   const p = l.prices || {};
-  return `${l.title}\n\n${l.description}\n\n— Marque : ${d.marque || ''}\n— Taille : ${d.taille || ''}\n— État : ${d.etat || ''}\n— Couleur : ${d.couleur || ''}\n— Catégorie : ${d.categorie || ''}\n${d.matiere ? '— Matière : ' + d.matiere + '\n' : ''}\nPrix : ${p.ideal || ''}`;
+  return `${l.title}\n\n${l.description}\n\n— Marque : ${d.marque || ''}\n— Taille : ${d.taille || ''}\n— État : ${d.etat || ''}\n— Couleur : ${d.couleur || ''}\n— Catégorie : ${d.categorie || ''}\n${d.matiere ? '— Matière : ' + d.matiere + '\n' : ''}${d.isbn ? '— ISBN : ' + d.isbn + '\n' : ''}\nPrix : ${p.ideal || ''}`;
 }
 
 $('bulk-copy-all-btn').addEventListener('click', () => {
@@ -924,7 +924,8 @@ function renderListing(listing) {
   const details = listing.details || {};
   const detailLabels = {
     marque: 'Marque', taille: 'Taille', etat: 'État',
-    couleur: 'Couleur', categorie: 'Catégorie', matiere: 'Matière'
+    couleur: 'Couleur', categorie: 'Catégorie', matiere: 'Matière',
+    isbn: 'ISBN'
   };
   $('r-details').innerHTML = Object.entries(detailLabels)
     .filter(([k]) => details[k])
@@ -973,7 +974,7 @@ $('copy-all-btn').addEventListener('click', () => {
   if (!l) return;
   const d = l.details || {};
   const p = l.prices || {};
-  const text = `${l.title}\n\n${l.description}\n\n— Marque : ${d.marque || ''}\n— Taille : ${d.taille || ''}\n— État : ${d.etat || ''}\n— Couleur : ${d.couleur || ''}\n— Catégorie : ${d.categorie || ''}\n${d.matiere ? '— Matière : ' + d.matiere + '\n' : ''}\nPrix : ${p.ideal || ''}`;
+  const text = `${l.title}\n\n${l.description}\n\n— Marque : ${d.marque || ''}\n— Taille : ${d.taille || ''}\n— État : ${d.etat || ''}\n— Couleur : ${d.couleur || ''}\n— Catégorie : ${d.categorie || ''}\n${d.matiere ? '— Matière : ' + d.matiere + '\n' : ''}${d.isbn ? '— ISBN : ' + d.isbn + '\n' : ''}\nPrix : ${p.ideal || ''}`;
   navigator.clipboard.writeText(text).then(() => showToast('Annonce copiée ✓'));
 });
 
