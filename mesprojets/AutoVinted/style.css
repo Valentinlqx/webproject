@@ -985,6 +985,68 @@ section { margin-bottom: 24px; }
 }
 .btn-sm[hidden] { display: none; }
 
+/* ── Feature toggles ── */
+.features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+.feature-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 4px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+.feature-toggle:hover { background: var(--bg-soft); }
+.feature-toggle input { display: none; }
+.feature-toggle-track {
+  flex-shrink: 0;
+  width: 36px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--card-border);
+  position: relative;
+  transition: background 0.2s;
+}
+.feature-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--text-2);
+  transition: transform 0.2s, background 0.2s;
+}
+.feature-toggle input:checked ~ .feature-toggle-track {
+  background: var(--accent);
+}
+.feature-toggle input:checked ~ .feature-toggle-track .feature-toggle-thumb {
+  transform: translateX(16px);
+  background: var(--bg);
+}
+.feature-toggle-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.feature-toggle-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.2;
+}
+.feature-toggle-hint {
+  font-size: 0.76rem;
+  color: var(--text-2);
+  line-height: 1.3;
+}
+
 /* ── Warnings (Vinted policy) ── */
 .result-warnings {
   background: rgba(245, 158, 11, 0.08);

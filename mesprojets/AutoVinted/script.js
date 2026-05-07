@@ -145,7 +145,7 @@ const USD_TO_EUR = 0.93;
 
 function estimateUsage() {
   const isBulk = state.mode === 'bulk';
-  const sys = isBulk ? BULK_SYSTEM_PROMPT : SYSTEM_PROMPT;
+  const sys = isBulk ? buildBulkSystemPrompt() : buildSystemPrompt();
   const ctx = state.context || $('context-input')?.value || '';
   // ~4 chars / token (français)
   const userTextChars = ctx.length + 200; // intro + numérotation photos
@@ -207,6 +207,7 @@ const state = {
   model: localStorage.getItem('av-model-' + (localStorage.getItem('av-provider') || 'pollinations')) || '',
   history: JSON.parse(localStorage.getItem('av-history') || '[]'),
   lastListing: null,
+  features: null, // initialized below once DEFAULT_FEATURES + loadFeatures exist
 };
 
 function getApiKey(providerId) {
@@ -244,48 +245,86 @@ const VINTED_POLICY = `RÈGLES VINTED (détecte si visible et signale dans "warn
 - Textiles avec gros défauts non visibles sur photo
 Signale aussi si la photo n'est clairement pas de toi (image stock, fond pro évident).`;
 
-const SYSTEM_PROMPT = `Tu es un vendeur Vinted humain. Style: naturel, vendeur, phrases courtes, jamais "IA marketing".
+// Personnalisation : chaque feature désactivée allège le prompt et la réponse
+const DEFAULT_FEATURES = {
+  warnings: true,   // détection règles Vinted
+  hashtags: true,   // hashtags en fin de description
+  details:  true,   // marque/taille/état/couleur/catégorie/matière/isbn
+  prices:   true,   // 3 niveaux de prix conseillés
+  tips:     true,   // conseils vendeur
+};
+const FEATURE_LABELS = {
+  warnings: { label: 'Vérifier règles Vinted',     hint: 'Détecte les risques de retrait (contrefaçon, interdits…)' },
+  hashtags: { label: 'Hashtags dans description',  hint: '6-10 #hashtags ajoutés à la fin' },
+  details:  { label: 'Détails (marque, taille…)',  hint: 'Marque, taille, état, couleur, catégorie, matière' },
+  prices:   { label: 'Prix conseillés',            hint: '3 niveaux : idéal / vente rapide / minimum' },
+  tips:     { label: 'Conseils vendeur',           hint: 'Astuces pour vendre plus vite' },
+};
 
-Analyse les photos et rédige une annonce Vinted optimisée pour vente rapide.
+function loadFeatures() {
+  try { return { ...DEFAULT_FEATURES, ...JSON.parse(localStorage.getItem('av-features') || '{}') }; }
+  catch { return { ...DEFAULT_FEATURES }; }
+}
+function saveFeatures(f) { localStorage.setItem('av-features', JSON.stringify(f)); }
+state.features = loadFeatures();
 
-Si une info clé manque (marque, taille, état, défauts, matière), pose 1-3 questions courtes. Sinon, génère.
-N'invente jamais ce qui n'est pas visible.
+function buildSystemPrompt() {
+  const f = state.features;
+  const parts = [];
+  parts.push('Tu es un vendeur Vinted humain. Style: naturel, vendeur, phrases courtes, jamais "IA marketing".');
+  parts.push('Analyse les photos et rédige une annonce Vinted optimisée pour vente rapide.');
+  parts.push('Si une info clé manque, pose 1-3 questions courtes. Sinon, génère. N\'invente jamais ce qui n\'est pas visible.');
+  parts.push('LIVRES : si c\'est un livre, remplis "isbn" et mentionne auteur/éditeur/format dans la description.');
 
-LIVRES : si c'est un livre, remplis le champ "isbn" dans les détails (repère le code sur la 4ème couv ou page de garde). Mentionne auteur/éditeur/format dans la description.
+  const hashtagsRule = f.hashtags
+    ? 'La description finit par une ligne vide puis 6-10 #hashtags minuscules sans accents.'
+    : 'PAS de hashtags dans la description.';
+  parts.push(`RÈGLE ABSOLUE : "title" et "description" prêts à coller sur Vinted, SANS aucun conseil/recommandation/astuce. ${hashtagsRule}`);
 
-Prix idéal/rapide/min selon marque, état, demande marché 2nde main. En euros.
+  if (f.warnings) {
+    parts.push(VINTED_POLICY);
+    parts.push('"warnings" = strings courtes signalant uniquement des risques RÉELS détectés. [] si rien.');
+  }
 
-RÈGLE ABSOLUE : "title" et "description" doivent être prêts à coller directement sur Vinted, SANS aucun conseil, recommandation, astuce ou mention de mesures à faire. Les conseils vont UNIQUEMENT dans "tips". La description se termine par une ligne vide puis 6-10 #hashtags minuscules sans accents.
+  // Schema dynamique
+  const fields = ['"title":"max 60 chars"', '"description":"courte, vendeuse"'];
+  if (f.details) fields.push('"details":{"marque":"","taille":"","etat":"Neuf avec étiquette|Neuf sans étiquette|Très bon état|Bon état|Satisfaisant","couleur":"","categorie":"","matiere":"","isbn":"(livres uniquement, sinon vide)"}');
+  if (f.prices)  fields.push('"prices":{"ideal":"15€","rapide":"10€","minimum":"8€"}');
+  if (f.tips)    fields.push('"tips":["conseils pour le vendeur"]');
+  if (f.warnings) fields.push('"warnings":["risques ou []"]');
 
-${VINTED_POLICY}
-"warnings" = tableau de strings courtes (1 phrase) signalant uniquement des risques RÉELS détectés. Tableau vide si rien.
+  parts.push(`RÉPONDS UNIQUEMENT EN JSON VALIDE, sans texte/markdown autour:\n{"action":"ask"|"generate","message":"...","listing":null|{${fields.join(',')}}}`);
+  return parts.join('\n\n');
+}
 
-RÉPONDS UNIQUEMENT EN JSON VALIDE, sans texte/markdown autour:
-{"action":"ask"|"generate","message":"...","listing":null|{"title":"max 60 chars","description":"courte, vendeuse, retours ligne, FINIR par ligne vide + 6-10 #hashtags","details":{"marque":"","taille":"","etat":"Neuf avec étiquette|Neuf sans étiquette|Très bon état|Bon état|Satisfaisant","couleur":"","categorie":"","matiere":"","isbn":"(livres uniquement, sinon vide)"},"prices":{"ideal":"15€","rapide":"10€","minimum":"8€"},"tips":["conseils pratiques pour le vendeur, jamais dans la description"],"warnings":["risques Vinted ou []"]}}`;
+function buildBulkSystemPrompt() {
+  const f = state.features;
+  const parts = [];
+  parts.push('Tu es un vendeur Vinted humain. Style: naturel, vendeur, court.');
+  parts.push('Photos NUMÉROTÉES (Photo 0, 1, 2…). Plusieurs photos peuvent montrer le MÊME article.');
+  parts.push('Tâche : identifie chaque article distinct, regroupe les photos, génère 1 annonce par article. PAS de questions, déduis.');
+  parts.push('LIVRES : si c\'est un livre, remplis "isbn" et mentionne auteur/éditeur/format dans la description.');
 
-// MODE LOT — auto-détection d'articles parmi N photos
-const BULK_SYSTEM_PROMPT = `Tu es un vendeur Vinted humain. Style: naturel, vendeur, court.
+  const hashtagsRule = f.hashtags
+    ? 'Description finit par ligne vide + 6-10 #hashtags minuscules sans accents.'
+    : 'PAS de hashtags dans la description.';
+  parts.push(`RÈGLE ABSOLUE : "title" et "description" prêts à coller sur Vinted, SANS conseil/astuce. ${hashtagsRule}`);
 
-Photos NUMÉROTÉES (Photo 0, 1, 2…). Plusieurs photos peuvent montrer le MÊME article (face/dos/étiquette/défaut).
+  if (f.warnings) {
+    parts.push(VINTED_POLICY);
+    parts.push('"warnings" = strings courtes signalant uniquement des risques RÉELS pour cet article. [] sinon.');
+  }
 
-Tâche:
-1. Identifie chaque article distinct
-2. Regroupe les photos du même article
-3. Génère 1 annonce par article — PAS de questions, déduis ou utilise des valeurs génériques cohérentes
+  const fields = ['"photo_indices":[0,1]', '"title":"max 60 chars"', '"description":"..."'];
+  if (f.details) fields.push('"details":{"marque":"","taille":"","etat":"Neuf|Neuf sans étiquette|Très bon état|Bon état|Satisfaisant","couleur":"","categorie":"","matiere":"","isbn":"(livres uniquement, sinon vide)"}');
+  if (f.prices)  fields.push('"prices":{"ideal":"15€","rapide":"10€","minimum":"8€"}');
+  if (f.tips)    fields.push('"tips":[]');
+  if (f.warnings) fields.push('"warnings":[]');
 
-LIVRES : si c'est un livre, remplis le champ "isbn" dans les détails (repère le code sur la 4ème couv ou page de garde). Mentionne auteur/éditeur/format dans la description.
-
-RÈGLE ABSOLUE : "title" et "description" doivent être prêts à coller directement sur Vinted, SANS aucun conseil, recommandation, astuce ou mention de mesures à faire. Les conseils vont UNIQUEMENT dans "tips". La description se termine par une ligne vide puis 6-10 #hashtags minuscules sans accents.
-
-${VINTED_POLICY}
-"warnings" = tableau de strings courtes signalant uniquement des risques RÉELS pour cet article. Tableau vide sinon.
-
-Prix idéal/rapide/min en euros selon marché 2nde main.
-
-JSON UNIQUEMENT, sans texte/markdown autour:
-{"listings":[{"photo_indices":[0,1],"title":"max 60 chars","description":"...","details":{"marque":"","taille":"","etat":"Neuf|Neuf sans étiquette|Très bon état|Bon état|Satisfaisant","couleur":"","categorie":"","matiere":"","isbn":"(livres uniquement, sinon vide)"},"prices":{"ideal":"15€","rapide":"10€","minimum":"8€"},"tips":[],"warnings":[]}]}
-
-photo_indices = numéros des photos (0-indexés). Chaque photo dans UNE seule annonce.`;
+  parts.push(`JSON UNIQUEMENT, sans texte/markdown autour:\n{"listings":[{${fields.join(',')}}]}`);
+  parts.push('photo_indices = numéros des photos (0-indexés). Chaque photo dans UNE seule annonce.');
+  return parts.join('\n\n');
+}
 
 // ─── DOM ─────────────────────────────────────────────
 const $ = (id) => document.getElementById(id);
@@ -403,7 +442,7 @@ analyzeBtn.addEventListener('click', async () => {
   ];
 
   state.conversation = [
-    { role: 'system', content: SYSTEM_PROMPT },
+    { role: 'system', content: buildSystemPrompt() },
     { role: 'user', content: userContent }
   ];
 
@@ -500,7 +539,7 @@ async function runBulk() {
   });
 
   const conv = [
-    { role: 'system', content: BULK_SYSTEM_PROMPT },
+    { role: 'system', content: buildBulkSystemPrompt() },
     { role: 'user', content: userContent },
   ];
 
@@ -601,19 +640,21 @@ function createBulkCard(photos, index) {
 }
 
 function renderBulkBody(l, index, photoArr) {
+  const f = state.features || DEFAULT_FEATURES;
   const d = l.details || {};
   const p = l.prices || {};
-  const tips = (l.tips || []).map(t => `<li>${escapeHtml(t)}</li>`).join('');
+  const tipsRaw = (f.tips ? (l.tips || []) : []);
+  const tips = tipsRaw.map(t => `<li>${escapeHtml(t)}</li>`).join('');
   const detailLabels = { marque: 'Marque', taille: 'Taille', etat: 'État', couleur: 'Couleur', categorie: 'Catégorie', matiere: 'Matière', isbn: 'ISBN' };
-  const details = Object.entries(detailLabels)
+  const details = f.details ? Object.entries(detailLabels)
     .filter(([k]) => d[k])
-    .map(([k, label]) => `<li><strong>${label}</strong>${escapeHtml(d[k])}</li>`).join('');
+    .map(([k, label]) => `<li><strong>${label}</strong>${escapeHtml(d[k])}</li>`).join('') : '';
 
   const thumbs = (photoArr && photoArr.length > 1)
     ? `<div class="bulk-item-thumbs">${photoArr.map(p => `<img src="${p.dataUrl}" alt="">`).join('')}</div>`
     : '';
 
-  const warnings = Array.isArray(l.warnings) ? l.warnings.filter(Boolean) : [];
+  const warnings = (f.warnings && Array.isArray(l.warnings)) ? l.warnings.filter(Boolean) : [];
   const warningsHtml = warnings.length
     ? `<div class="result-warnings">
          <div class="result-warnings-head">⚠ Attention — règles Vinted</div>
@@ -640,14 +681,14 @@ function renderBulkBody(l, index, photoArr) {
       <p class="result-description">${escapeHtml(l.description || '')}</p>
     </div>
     ${details ? `<div class="result-block"><span class="result-label">Détails</span><ul class="result-details">${details}</ul></div>` : ''}
-    <div class="result-block">
+    ${f.prices ? `<div class="result-block">
       <span class="result-label">Prix conseillés</span>
       <div class="price-grid">
         <div class="price-cell"><span class="price-cell-label">Idéal</span><span class="price-cell-value">${escapeHtml(p.ideal || '—')}</span></div>
         <div class="price-cell"><span class="price-cell-label">Vente rapide</span><span class="price-cell-value">${escapeHtml(p.rapide || '—')}</span></div>
         <div class="price-cell"><span class="price-cell-label">Minimum</span><span class="price-cell-value">${escapeHtml(p.minimum || '—')}</span></div>
       </div>
-    </div>
+    </div>` : ''}
     ${tips ? `<div class="result-block"><span class="result-label">Conseils</span><ul class="result-tips">${tips}</ul></div>` : ''}
     <div class="result-actions"><button class="btn-ghost" data-bcopy="all">Copier toute l'annonce</button></div>
   `;
@@ -672,9 +713,23 @@ function bindBulkBodyActions(bodyEl, listing) {
 }
 
 function formatFullListing(l) {
+  const f = state.features || DEFAULT_FEATURES;
   const d = l.details || {};
   const p = l.prices || {};
-  return `${l.title}\n\n${l.description}\n\n— Marque : ${d.marque || ''}\n— Taille : ${d.taille || ''}\n— État : ${d.etat || ''}\n— Couleur : ${d.couleur || ''}\n— Catégorie : ${d.categorie || ''}\n${d.matiere ? '— Matière : ' + d.matiere + '\n' : ''}${d.isbn ? '— ISBN : ' + d.isbn + '\n' : ''}\nPrix : ${p.ideal || ''}`;
+  let out = `${l.title}\n\n${l.description}`;
+  if (f.details) {
+    const lines = [];
+    if (d.marque)    lines.push(`— Marque : ${d.marque}`);
+    if (d.taille)    lines.push(`— Taille : ${d.taille}`);
+    if (d.etat)      lines.push(`— État : ${d.etat}`);
+    if (d.couleur)   lines.push(`— Couleur : ${d.couleur}`);
+    if (d.categorie) lines.push(`— Catégorie : ${d.categorie}`);
+    if (d.matiere)   lines.push(`— Matière : ${d.matiere}`);
+    if (d.isbn)      lines.push(`— ISBN : ${d.isbn}`);
+    if (lines.length) out += '\n\n' + lines.join('\n');
+  }
+  if (f.prices && p.ideal) out += `\n\nPrix : ${p.ideal}`;
+  return out;
 }
 
 $('bulk-copy-all-btn').addEventListener('click', () => {
@@ -987,33 +1042,38 @@ function renderListing(listing) {
   $('r-title').textContent = listing.title || '';
   $('r-description').textContent = listing.description || '';
 
+  const f = state.features || DEFAULT_FEATURES;
   const details = listing.details || {};
   const detailLabels = {
     marque: 'Marque', taille: 'Taille', etat: 'État',
     couleur: 'Couleur', categorie: 'Catégorie', matiere: 'Matière',
     isbn: 'ISBN'
   };
-  $('r-details').innerHTML = Object.entries(detailLabels)
+  const detailsHtml = Object.entries(detailLabels)
     .filter(([k]) => details[k])
     .map(([k, label]) => `<li><strong>${label}</strong>${escapeHtml(details[k])}</li>`)
     .join('');
+  $('r-details').innerHTML = detailsHtml;
+  $('r-details-block').hidden = !f.details || !detailsHtml;
 
   const prices = listing.prices || {};
+  const hasPrices = f.prices && (prices.ideal || prices.rapide || prices.minimum);
   $('r-prices').innerHTML = `
     <div class="price-cell"><span class="price-cell-label">Idéal</span><span class="price-cell-value">${escapeHtml(prices.ideal || '—')}</span></div>
     <div class="price-cell"><span class="price-cell-label">Vente rapide</span><span class="price-cell-value">${escapeHtml(prices.rapide || '—')}</span></div>
     <div class="price-cell"><span class="price-cell-label">Minimum</span><span class="price-cell-value">${escapeHtml(prices.minimum || '—')}</span></div>
   `;
+  $('r-prices-block').hidden = !hasPrices;
 
   const tips = listing.tips || [];
-  if (tips.length) {
+  if (f.tips && tips.length) {
     $('r-tips').innerHTML = tips.map(t => `<li>${escapeHtml(t)}</li>`).join('');
     $('r-tips-block').hidden = false;
   } else {
     $('r-tips-block').hidden = true;
   }
 
-  const warnings = Array.isArray(listing.warnings) ? listing.warnings.filter(Boolean) : [];
+  const warnings = (f.warnings && Array.isArray(listing.warnings)) ? listing.warnings.filter(Boolean) : [];
   const warnEl = $('r-warnings');
   if (warnings.length) {
     warnEl.innerHTML = `
@@ -1060,10 +1120,7 @@ document.addEventListener('click', (e) => {
 $('copy-all-btn').addEventListener('click', () => {
   const l = state.lastListing;
   if (!l) return;
-  const d = l.details || {};
-  const p = l.prices || {};
-  const text = `${l.title}\n\n${l.description}\n\n— Marque : ${d.marque || ''}\n— Taille : ${d.taille || ''}\n— État : ${d.etat || ''}\n— Couleur : ${d.couleur || ''}\n— Catégorie : ${d.categorie || ''}\n${d.matiere ? '— Matière : ' + d.matiere + '\n' : ''}${d.isbn ? '— ISBN : ' + d.isbn + '\n' : ''}\nPrix : ${p.ideal || ''}`;
-  navigator.clipboard.writeText(text).then(() => showToast('Annonce copiée ✓'));
+  navigator.clipboard.writeText(formatFullListing(l)).then(() => showToast('Annonce copiée ✓'));
 });
 
 $('restart-btn').addEventListener('click', doRestart);
@@ -1126,9 +1183,26 @@ modelSelect.addEventListener('change', () => {
   localStorage.setItem('av-model-' + providerSelect.value, modelSelect.value);
 });
 
+// ─── Personnalisation (features) ─────────────────────
+function renderFeatureToggles() {
+  const list = $('features-list');
+  list.innerHTML = Object.entries(FEATURE_LABELS).map(([key, info]) => `
+    <label class="feature-toggle">
+      <input type="checkbox" data-feature="${key}" ${state.features[key] ? 'checked' : ''} />
+      <span class="feature-toggle-track"><span class="feature-toggle-thumb"></span></span>
+      <span class="feature-toggle-text">
+        <span class="feature-toggle-label">${info.label}</span>
+        <span class="feature-toggle-hint">${info.hint}</span>
+      </span>
+    </label>
+  `).join('');
+}
+renderFeatureToggles();
+
 $('settings-toggle').addEventListener('click', () => {
   providerSelect.value = state.provider;
   syncProviderUI();
+  renderFeatureToggles();
   settingsModal.hidden = false;
 });
 $('settings-close').addEventListener('click', () => { settingsModal.hidden = true; });
@@ -1143,6 +1217,13 @@ $('settings-save').addEventListener('click', () => {
   if (PROVIDERS[providerId].needsKey) {
     setApiKey(providerId, apiKeyInput.value.trim());
   }
+  // Save feature toggles
+  const newFeatures = { ...state.features };
+  document.querySelectorAll('#features-list input[data-feature]').forEach(cb => {
+    newFeatures[cb.dataset.feature] = cb.checked;
+  });
+  state.features = newFeatures;
+  saveFeatures(newFeatures);
   settingsModal.hidden = true;
   showToast('Paramètres enregistrés');
   updateEstimate();

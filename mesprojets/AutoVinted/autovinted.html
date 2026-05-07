@@ -171,12 +171,12 @@
           <p class="result-description" id="r-description"></p>
         </div>
 
-        <div class="result-block">
+        <div class="result-block" id="r-details-block">
           <span class="result-label">Détails</span>
           <ul class="result-details" id="r-details"></ul>
         </div>
 
-        <div class="result-block">
+        <div class="result-block" id="r-prices-block">
           <span class="result-label">Prix conseillés</span>
           <div class="price-grid" id="r-prices"></div>
         </div>
@@ -220,6 +220,13 @@
         <span class="field-label">Modèle</span>
         <select id="model-select"></select>
       </label>
+
+      <div class="field">
+        <span class="field-label">Personnalisation</span>
+        <span class="field-hint">Désactive ce dont tu n'as pas besoin pour économiser des tokens.</span>
+        <div class="features-list" id="features-list"></div>
+      </div>
+
       <button class="btn-primary" id="settings-save">Enregistrer</button>
     </div>
   </div>
