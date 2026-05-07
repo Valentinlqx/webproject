@@ -30,14 +30,27 @@
   <main>
     <!-- Upload zone -->
     <section class="upload-section" id="upload-section">
+      <div class="mode-toggle" role="tablist">
+        <button class="mode-btn active" data-mode="single" type="button">Une annonce</button>
+        <button class="mode-btn" data-mode="bulk" type="button">En lot</button>
+      </div>
+
       <label for="file-input" class="dropzone" id="dropzone">
         <div class="dropzone-icon">📸</div>
-        <p class="dropzone-title">Glisse tes photos ici</p>
-        <p class="dropzone-sub">ou clique pour parcourir — jusqu'à 8 photos</p>
+        <p class="dropzone-title" id="dropzone-title">Glisse tes photos ici</p>
+        <p class="dropzone-sub" id="dropzone-sub">ou clique pour parcourir — jusqu'à 8 photos</p>
         <input type="file" id="file-input" accept="image/*" multiple hidden />
       </label>
 
       <div class="previews" id="previews"></div>
+
+      <div class="bulk-context" id="bulk-context" hidden>
+        <label class="field">
+          <span class="field-label">Contexte commun (optionnel)</span>
+          <textarea id="bulk-context-input" rows="2" placeholder="Ex : tous des livres en bon état, prix d'achat ~10€, je veux vendre vite"></textarea>
+          <span class="field-hint">Une info qui s'applique à tous les articles, pour éviter que l'IA pose des questions.</span>
+        </label>
+      </div>
 
       <button class="btn-primary" id="analyze-btn" disabled>
         <span class="btn-label">Analyser mes photos</span>
@@ -60,6 +73,19 @@
         <button type="submit" class="chat-send" title="Envoyer">→</button>
       </form>
       <button class="btn-ghost" id="generate-btn" hidden>Générer l'annonce maintenant</button>
+    </section>
+
+    <!-- Résultat lot -->
+    <section class="bulk-section" id="bulk-section" hidden>
+      <div class="bulk-progress" id="bulk-progress" hidden>
+        <div class="bulk-progress-text" id="bulk-progress-text"></div>
+        <div class="bulk-progress-bar"><div class="bulk-progress-fill" id="bulk-progress-fill"></div></div>
+      </div>
+      <div class="bulk-results" id="bulk-results"></div>
+      <div class="result-actions" id="bulk-actions" hidden>
+        <button class="btn-primary" id="bulk-copy-all-btn">Copier toutes les annonces</button>
+        <button class="btn-ghost" id="bulk-restart-btn">Recommencer</button>
+      </div>
     </section>
 
     <!-- Résultat -->

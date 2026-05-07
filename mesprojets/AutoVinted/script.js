@@ -105,6 +105,8 @@ const PROVIDERS = {
 const state = {
   photos: [],          // [{ id, file, dataUrl }]
   conversation: [],    // [{ role, content }] — messages
+  mode: 'single',      // 'single' | 'bulk'
+  bulkContext: '',
   provider: localStorage.getItem('av-provider') || 'pollinations',
   model: localStorage.getItem('av-model-' + (localStorage.getItem('av-provider') || 'pollinations')) || '',
   history: JSON.parse(localStorage.getItem('av-history') || '[]'),
@@ -123,8 +125,10 @@ function getStoredModel(providerId) {
   return valid ? stored : PROVIDERS[providerId].models[0].id;
 }
 
-const MAX_PHOTOS = 8;
+const MAX_PHOTOS_SINGLE = 8;
+const MAX_PHOTOS_BULK = 30;
 const MAX_PHOTO_SIZE = 1280; // px (downscale before sending)
+const maxPhotos = () => state.mode === 'bulk' ? MAX_PHOTOS_BULK : MAX_PHOTOS_SINGLE;
 
 // ─── System prompt (le cœur de l'IA) ─────────────────
 const SYSTEM_PROMPT = `Tu es un vendeur Vinted expérimenté qui rédige des annonces qui se vendent vite. Tu écris comme un humain, pas comme une IA marketing : ton simple, naturel, concis, crédible. Phrases courtes et vendeuses.
@@ -218,9 +222,9 @@ dropzone.addEventListener('drop', (e) => {
 fileInput.addEventListener('change', (e) => addPhotos([...e.target.files]));
 
 async function addPhotos(files) {
-  const room = MAX_PHOTOS - state.photos.length;
+  const room = maxPhotos() - state.photos.length;
   const accepted = files.slice(0, room);
-  if (files.length > room) showToast(`Maximum ${MAX_PHOTOS} photos`);
+  if (files.length > room) showToast(`Maximum ${maxPhotos()} photos`);
 
   for (const file of accepted) {
     const dataUrl = await downscaleImage(file, MAX_PHOTO_SIZE);
@@ -269,6 +273,11 @@ analyzeBtn.addEventListener('click', async () => {
   if (!checkProvider()) return;
   if (state.photos.length === 0) return;
 
+  if (state.mode === 'bulk') {
+    await runBulk();
+    return;
+  }
+
   setBtnLoading(analyzeBtn, true, 'Analyse...');
 
   // Build initial message with all images
@@ -289,6 +298,263 @@ analyzeBtn.addEventListener('click', async () => {
     showToast('Erreur : ' + err.message);
     setBtnLoading(analyzeBtn, false, 'Analyser mes photos');
   }
+});
+
+// ─── Mode toggle ─────────────────────────────────────
+const modeBtns = document.querySelectorAll('.mode-btn');
+const bulkContextEl = $('bulk-context');
+const dropzoneTitle = $('dropzone-title');
+const dropzoneSub = $('dropzone-sub');
+
+modeBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const mode = btn.dataset.mode;
+    if (mode === state.mode) return;
+    state.mode = mode;
+    modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+    bulkContextEl.hidden = mode !== 'bulk';
+    if (mode === 'bulk') {
+      dropzoneTitle.textContent = 'Glisse tes photos ici';
+      dropzoneSub.textContent = `1 photo = 1 article — jusqu'à ${MAX_PHOTOS_BULK} articles`;
+    } else {
+      dropzoneTitle.textContent = 'Glisse tes photos ici';
+      dropzoneSub.textContent = `ou clique pour parcourir — jusqu'à ${MAX_PHOTOS_SINGLE} photos`;
+    }
+    updateAnalyzeBtnLabel();
+  });
+});
+
+function updateAnalyzeBtnLabel() {
+  const label = analyzeBtn.querySelector('.btn-label');
+  if (state.mode === 'bulk') {
+    label.textContent = state.photos.length > 0
+      ? `Générer ${state.photos.length} annonce${state.photos.length > 1 ? 's' : ''}`
+      : 'Générer les annonces';
+  } else {
+    label.textContent = 'Analyser mes photos';
+  }
+}
+
+// Hook into renderPreviews to refresh button label
+const _origRenderPreviews = renderPreviews;
+renderPreviews = function () {
+  _origRenderPreviews();
+  updateAnalyzeBtnLabel();
+};
+
+// ─── Bulk run ────────────────────────────────────────
+const bulkSection = $('bulk-section');
+const bulkResults = $('bulk-results');
+const bulkActions = $('bulk-actions');
+const bulkProgress = $('bulk-progress');
+const bulkProgressText = $('bulk-progress-text');
+const bulkProgressFill = $('bulk-progress-fill');
+
+async function runBulk() {
+  const total = state.photos.length;
+  state.bulkContext = $('bulk-context-input').value.trim();
+
+  // Switch UI
+  uploadSection.style.display = 'none';
+  bulkSection.hidden = false;
+  bulkResults.innerHTML = '';
+  bulkProgress.hidden = false;
+  bulkActions.hidden = true;
+
+  // Pre-create cards in pending state
+  const cards = state.photos.map((photo, i) => createBulkCard(photo, i));
+  cards.forEach(c => bulkResults.appendChild(c.el));
+
+  let done = 0;
+  let errors = 0;
+  for (let i = 0; i < state.photos.length; i++) {
+    const photo = state.photos[i];
+    const card = cards[i];
+    updateProgress(done, total);
+
+    try {
+      const listing = await generateOneFromPhoto(photo);
+      card.fillListing(listing);
+      saveToHistory(listing);
+      done++;
+    } catch (err) {
+      card.setError(err.message);
+      errors++;
+    }
+  }
+
+  bulkProgress.hidden = true;
+  bulkActions.hidden = false;
+  showToast(`${done}/${total} annonce${done > 1 ? 's' : ''} générée${done > 1 ? 's' : ''}${errors ? ` — ${errors} erreur${errors > 1 ? 's' : ''}` : ''}`);
+}
+
+function updateProgress(done, total) {
+  const next = Math.min(done + 1, total);
+  bulkProgressText.textContent = `Génération ${next}/${total}…`;
+  bulkProgressFill.style.width = `${(done / total) * 100}%`;
+}
+
+async function generateOneFromPhoto(photo) {
+  const ctx = state.bulkContext
+    ? `Contexte commun donné par le vendeur : "${state.bulkContext}"\n\n`
+    : '';
+  const conv = [
+    { role: 'system', content: SYSTEM_PROMPT + '\n\nMODE LOT : tu génères directement l\'annonce sans poser de questions. Si une info précise manque, déduis-la de la photo ou laisse une valeur générique cohérente. action="generate" obligatoirement.' },
+    {
+      role: 'user',
+      content: [
+        { type: 'text', text: ctx + 'Voici la photo d\'un article. Génère directement l\'annonce Vinted (action="generate").' },
+        { type: 'image_url', image_url: { url: photo.dataUrl } },
+      ],
+    },
+  ];
+
+  // Use a temporary state-like object so we don't pollute conversation
+  const tmpState = { ...state, conversation: conv };
+  const provider = PROVIDERS[state.provider];
+  if (!provider.models.find(m => m.id === state.model)) {
+    state.model = getStoredModel(state.provider);
+    tmpState.model = state.model;
+  }
+  const resp = await provider.call(tmpState);
+  if (resp.action !== 'generate' || !resp.listing) {
+    throw new Error(resp.message || 'Pas d\'annonce générée');
+  }
+  return resp.listing;
+}
+
+function createBulkCard(photo, index) {
+  const el = document.createElement('div');
+  el.className = 'bulk-item';
+  el.innerHTML = `
+    <div class="bulk-item-head">
+      <img class="bulk-item-thumb" src="${photo.dataUrl}" alt="" />
+      <div class="bulk-item-info">
+        <div class="bulk-item-title">Article ${index + 1}</div>
+        <div class="bulk-item-meta">En attente…</div>
+      </div>
+      <span class="bulk-item-status"><span class="spinner-sm"></span></span>
+    </div>
+    <div class="bulk-item-body"></div>
+  `;
+  const head = el.querySelector('.bulk-item-head');
+  const titleEl = el.querySelector('.bulk-item-title');
+  const metaEl = el.querySelector('.bulk-item-meta');
+  const statusEl = el.querySelector('.bulk-item-status');
+  const bodyEl = el.querySelector('.bulk-item-body');
+
+  head.addEventListener('click', () => {
+    if (bodyEl.children.length > 0) el.classList.toggle('open');
+  });
+
+  let listing = null;
+
+  return {
+    el,
+    fillListing(l) {
+      listing = l;
+      titleEl.textContent = l.title || `Article ${index + 1}`;
+      metaEl.textContent = (l.prices?.ideal || '—') + ' • ' + (l.details?.etat || '—');
+      statusEl.className = 'bulk-item-status done';
+      statusEl.innerHTML = '✓ <span class="bulk-chevron">▾</span>';
+      bodyEl.innerHTML = renderBulkBody(l, index);
+      bindBulkBodyActions(bodyEl, l);
+    },
+    setError(msg) {
+      titleEl.textContent = `Article ${index + 1}`;
+      metaEl.textContent = msg.length > 60 ? msg.slice(0, 60) + '…' : msg;
+      statusEl.className = 'bulk-item-status error';
+      statusEl.textContent = '⚠ Erreur';
+    },
+  };
+}
+
+function renderBulkBody(l, index) {
+  const d = l.details || {};
+  const p = l.prices || {};
+  const tips = (l.tips || []).map(t => `<li>${escapeHtml(t)}</li>`).join('');
+  const detailLabels = { marque: 'Marque', taille: 'Taille', etat: 'État', couleur: 'Couleur', categorie: 'Catégorie', matiere: 'Matière' };
+  const details = Object.entries(detailLabels)
+    .filter(([k]) => d[k])
+    .map(([k, label]) => `<li><strong>${label}</strong>${escapeHtml(d[k])}</li>`).join('');
+
+  return `
+    <div class="result-block">
+      <div class="result-block-head">
+        <span class="result-label">Titre</span>
+        <button class="copy-btn" data-bcopy="title">Copier</button>
+      </div>
+      <p class="result-title">${escapeHtml(l.title || '')}</p>
+    </div>
+    <div class="result-block">
+      <div class="result-block-head">
+        <span class="result-label">Description</span>
+        <button class="copy-btn" data-bcopy="description">Copier</button>
+      </div>
+      <p class="result-description">${escapeHtml(l.description || '')}</p>
+    </div>
+    ${details ? `<div class="result-block"><span class="result-label">Détails</span><ul class="result-details">${details}</ul></div>` : ''}
+    <div class="result-block">
+      <span class="result-label">Prix conseillés</span>
+      <div class="price-grid">
+        <div class="price-cell"><span class="price-cell-label">Idéal</span><span class="price-cell-value">${escapeHtml(p.ideal || '—')}</span></div>
+        <div class="price-cell"><span class="price-cell-label">Vente rapide</span><span class="price-cell-value">${escapeHtml(p.rapide || '—')}</span></div>
+        <div class="price-cell"><span class="price-cell-label">Minimum</span><span class="price-cell-value">${escapeHtml(p.minimum || '—')}</span></div>
+      </div>
+    </div>
+    ${tips ? `<div class="result-block"><span class="result-label">Conseils</span><ul class="result-tips">${tips}</ul></div>` : ''}
+    <div class="result-actions"><button class="btn-ghost" data-bcopy="all">Copier toute l'annonce</button></div>
+  `;
+}
+
+function bindBulkBodyActions(bodyEl, listing) {
+  bodyEl.querySelectorAll('[data-bcopy]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const what = btn.dataset.bcopy;
+      const text = what === 'all' ? formatFullListing(listing)
+        : what === 'title' ? listing.title
+        : listing.description;
+      navigator.clipboard.writeText(text).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = '✓ Copié';
+        btn.classList.add('done');
+        setTimeout(() => { btn.textContent = orig; btn.classList.remove('done'); }, 1500);
+      });
+    });
+  });
+}
+
+function formatFullListing(l) {
+  const d = l.details || {};
+  const p = l.prices || {};
+  return `${l.title}\n\n${l.description}\n\n— Marque : ${d.marque || ''}\n— Taille : ${d.taille || ''}\n— État : ${d.etat || ''}\n— Couleur : ${d.couleur || ''}\n— Catégorie : ${d.categorie || ''}\n${d.matiere ? '— Matière : ' + d.matiere + '\n' : ''}\nPrix : ${p.ideal || ''}`;
+}
+
+$('bulk-copy-all-btn').addEventListener('click', () => {
+  const items = bulkResults.querySelectorAll('.bulk-item');
+  const texts = [];
+  items.forEach((el, i) => {
+    const titleEl = el.querySelector('.bulk-item-title');
+    const descEl = el.querySelector('.result-description');
+    if (titleEl && descEl) {
+      texts.push(`━━━ Article ${i + 1} ━━━\n${titleEl.textContent}\n\n${descEl.textContent}`);
+    }
+  });
+  if (texts.length === 0) { showToast('Aucune annonce à copier'); return; }
+  navigator.clipboard.writeText(texts.join('\n\n\n')).then(() => showToast(`${texts.length} annonces copiées ✓`));
+});
+
+$('bulk-restart-btn').addEventListener('click', () => {
+  state.photos = [];
+  renderPreviews();
+  bulkResults.innerHTML = '';
+  bulkSection.hidden = true;
+  bulkActions.hidden = true;
+  uploadSection.style.display = '';
+  $('bulk-context-input').value = '';
+  state.bulkContext = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
 // ─── Chat ────────────────────────────────────────────
