@@ -1073,8 +1073,67 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     settingsModal.hidden = true;
     historyModal.hidden = true;
+    tutorialModal.hidden = true;
   }
 });
+
+// ─── Tutorial ────────────────────────────────────────
+const tutorialModal = $('tutorial-modal');
+const tutorialSteps = document.querySelectorAll('.tutorial-step');
+const tutorialDots = $('tutorial-dots');
+const tutorialPrev = $('tutorial-prev');
+const tutorialNext = $('tutorial-next');
+const TUTORIAL_TOTAL = tutorialSteps.length;
+let tutorialStep = 0;
+
+// Build dots
+for (let i = 0; i < TUTORIAL_TOTAL; i++) {
+  const d = document.createElement('button');
+  d.className = 'tutorial-dot' + (i === 0 ? ' active' : '');
+  d.setAttribute('aria-label', `Étape ${i + 1}`);
+  d.addEventListener('click', () => goToStep(i));
+  tutorialDots.appendChild(d);
+}
+
+function goToStep(i) {
+  tutorialStep = Math.max(0, Math.min(TUTORIAL_TOTAL - 1, i));
+  tutorialSteps.forEach((s, idx) => s.classList.toggle('active', idx === tutorialStep));
+  tutorialDots.querySelectorAll('.tutorial-dot').forEach((d, idx) =>
+    d.classList.toggle('active', idx === tutorialStep)
+  );
+  tutorialPrev.hidden = tutorialStep === 0;
+  tutorialNext.textContent = tutorialStep === TUTORIAL_TOTAL - 1 ? 'Commencer' : 'Suivant';
+}
+
+tutorialPrev.addEventListener('click', () => goToStep(tutorialStep - 1));
+tutorialNext.addEventListener('click', () => {
+  if (tutorialStep === TUTORIAL_TOTAL - 1) {
+    closeTutorial();
+  } else {
+    goToStep(tutorialStep + 1);
+  }
+});
+
+function openTutorial() {
+  goToStep(0);
+  tutorialModal.hidden = false;
+}
+function closeTutorial() {
+  tutorialModal.hidden = true;
+  localStorage.setItem('av-tutorial-seen', '1');
+}
+
+$('tutorial-toggle').addEventListener('click', openTutorial);
+$('tutorial-close').addEventListener('click', closeTutorial);
+tutorialModal.addEventListener('click', (e) => {
+  if (e.target === tutorialModal) closeTutorial();
+});
+
+// Auto-show on first visit
+if (!localStorage.getItem('av-tutorial-seen')) {
+  // Small delay so the page renders first
+  setTimeout(openTutorial, 350);
+}
 
 function checkProvider() {
   const p = PROVIDERS[state.provider];

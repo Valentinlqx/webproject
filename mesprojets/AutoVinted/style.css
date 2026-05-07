@@ -801,6 +801,127 @@ section { margin-bottom: 24px; }
   font-size: 0.9rem;
 }
 
+/* ── Tutorial ── */
+.tutorial-card {
+  position: relative;
+  padding: 32px 24px 22px;
+  max-width: 460px;
+  text-align: center;
+}
+
+.tutorial-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: var(--bg-soft);
+  color: var(--text);
+  z-index: 1;
+}
+
+.tutorial-steps {
+  position: relative;
+  min-height: 280px;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.tutorial-step {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  animation: fadeIn 0.3s ease;
+}
+.tutorial-step.active { display: flex; }
+
+.tutorial-emoji {
+  font-size: 3rem;
+  line-height: 1;
+  margin-top: 8px;
+}
+
+.tutorial-step h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.tutorial-step p {
+  font-size: 0.96rem;
+  color: var(--text-2);
+  line-height: 1.55;
+  max-width: 380px;
+}
+.tutorial-step p strong { color: var(--text); }
+
+.tutorial-list {
+  list-style: none;
+  text-align: left;
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.tutorial-list li {
+  font-size: 0.92rem;
+  color: var(--text-2);
+  padding-left: 18px;
+  position: relative;
+}
+.tutorial-list li::before {
+  content: '✦';
+  position: absolute;
+  left: 0;
+  color: var(--text);
+}
+
+.tutorial-tip {
+  background: var(--bg-soft);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  color: var(--text-2);
+  margin-top: 6px;
+  text-align: left;
+  max-width: 380px;
+  line-height: 1.5;
+}
+
+.tutorial-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+  margin-bottom: 6px;
+}
+.tutorial-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--bg-soft-2);
+  transition: background 0.2s, transform 0.2s;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+.tutorial-dot.active {
+  background: var(--accent);
+  transform: scale(1.3);
+}
+
+.tutorial-nav {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+.tutorial-nav button {
+  flex: 1;
+  margin-top: 0 !important;
+}
+.tutorial-nav button[hidden] { display: none; }
+
 /* ── Toast ── */
 .toast {
   position: fixed;
