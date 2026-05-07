@@ -214,11 +214,12 @@
       <label class="field" id="apikey-field" hidden>
         <span class="field-label" id="apikey-label">Clé API</span>
         <input type="password" id="api-key" placeholder="..." />
-        <span class="field-hint">Stockée uniquement dans ton navigateur. <a id="apikey-link" href="#" target="_blank" rel="noopener">Obtenir une clé →</a></span>
+        <span class="field-hint" id="apikey-hint">Stockée uniquement dans ton navigateur. <a id="apikey-link" href="#" target="_blank" rel="noopener">Obtenir une clé →</a></span>
       </label>
       <label class="field" id="model-field" hidden>
         <span class="field-label">Modèle</span>
         <select id="model-select"></select>
+        <button type="button" class="btn-ghost btn-sm" id="ollama-fetch-models" hidden style="margin-top:8px">↻ Charger les modèles installés</button>
       </label>
 
       <div class="field">

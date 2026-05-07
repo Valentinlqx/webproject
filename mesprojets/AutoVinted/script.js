@@ -99,7 +99,86 @@ const PROVIDERS = {
     ],
     call: (s) => callOpenAICompatible(s, 'https://api.deepseek.com/chat/completions', true),
   },
+  ollama: {
+    label: 'Ollama (local, gratuit, 100% privé)',
+    needsKey: false,
+    needsHost: true,
+    vision: true,
+    keyUrl: 'https://ollama.com/download',
+    keyLabel: 'URL du serveur Ollama',
+    keyPrefix: 'http',
+    hint: "⚙️ Nécessite Ollama installé et lancé localement. 100 % privé, 100 % gratuit, aucun token consommé. Lance Ollama puis tire un modèle vision (ex: ollama pull llama3.2-vision). Si la page ne tourne pas en local, lance Ollama avec OLLAMA_ORIGINS=* ollama serve.",
+    models: [
+      { id: 'llama3.2-vision',       label: 'Llama 3.2 Vision (11B, défaut)' },
+      { id: 'llama3.2-vision:11b',   label: 'Llama 3.2 Vision 11B' },
+      { id: 'llama3.2-vision:90b',   label: 'Llama 3.2 Vision 90B (gros)' },
+      { id: 'llava',                 label: 'LLaVA (par défaut)' },
+      { id: 'llava:13b',             label: 'LLaVA 13B' },
+      { id: 'llava:34b',             label: 'LLaVA 34B' },
+      { id: 'bakllava',              label: 'BakLLaVA' },
+      { id: 'minicpm-v',             label: 'MiniCPM-V' },
+      { id: 'qwen2.5vl',             label: 'Qwen2.5-VL' },
+      { id: 'gemma3:4b',             label: 'Gemma 3 4B (vision)' },
+      { id: 'gemma3:12b',            label: 'Gemma 3 12B (vision)' },
+    ],
+    call: callOllama,
+  },
 };
+
+const DEFAULT_OLLAMA_HOST = 'http://localhost:11434';
+function getOllamaHost() {
+  const stored = localStorage.getItem('av-ollama-host');
+  return (stored && stored.trim()) ? stored.trim().replace(/\/$/, '') : DEFAULT_OLLAMA_HOST;
+}
+function setOllamaHost(h) { localStorage.setItem('av-ollama-host', h); }
+
+async function callOllama(s) {
+  const host = getOllamaHost();
+  // Ollama expose un endpoint compatible OpenAI à /v1/chat/completions
+  const endpoint = `${host}/v1/chat/completions`;
+  const provider = PROVIDERS[s.provider];
+
+  const messages = provider.vision ? s.conversation : s.conversation.map(m => {
+    if (typeof m.content === 'string') return m;
+    const text = m.content.filter(p => p.type === 'text').map(p => p.text).join('\n');
+    return { role: m.role, content: text };
+  });
+
+  const body = {
+    model: s.model || 'llama3.2-vision',
+    messages,
+    temperature: 0.7,
+    max_tokens: state.mode === 'bulk' ? 6000 : 2000,
+    response_format: { type: 'json_object' },
+  };
+
+  let res;
+  try {
+    res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  } catch (e) {
+    throw new Error(`Connexion à Ollama impossible (${host}). Vérifie qu'Ollama est lancé. Si la page n'est pas en local, lance : OLLAMA_ORIGINS=* ollama serve`);
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || err.message || `HTTP ${res.status} — modèle "${body.model}" introuvable ? Tire-le avec : ollama pull ${body.model}`);
+  }
+  const data = await res.json();
+  const content = data.choices[0].message.content;
+  s.conversation.push({ role: 'assistant', content });
+  return parseJSON(content);
+}
+
+// Récupère la liste des modèles installés sur le serveur Ollama
+async function fetchOllamaModels(host) {
+  const res = await fetch(`${host}/api/tags`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  return (data.models || []).map(m => ({ id: m.name, label: m.name + (m.size ? ` (${(m.size / 1e9).toFixed(1)} Go)` : '') }));
+}
 
 // ─── Pricing & token estimation ─────────────────────
 // Prix indicatifs en USD (≈ EUR) par 1M tokens [input, output]
@@ -139,6 +218,7 @@ const IMAGE_TOKENS_PER_PROVIDER = {
   groq:         1200,
   mistral:      1000,
   deepseek:     0,     // pas de vision
+  ollama:       800,   // dépend du modèle, ordre de grandeur (LLaVA/Llama-Vision)
 };
 
 const USD_TO_EUR = 0.93;
@@ -185,6 +265,8 @@ function updateEstimate() {
   let costStr;
   if (state.provider === 'pollinations') {
     costStr = ' · gratuit';
+  } else if (state.provider === 'ollama') {
+    costStr = ' · local & gratuit';
   } else if (cost === null) {
     costStr = '';
   } else if (cost < 0.005) {
@@ -1160,23 +1242,59 @@ function syncProviderUI() {
     modelSelect.appendChild(opt);
   });
   modelSelect.value = getStoredModel(id);
-  modelField.hidden = p.models.length <= 1;
+  modelField.hidden = p.models.length <= 1 && !p.needsHost;
 
-  // API key
-  apikeyField.hidden = !p.needsKey;
-  if (p.needsKey) {
+  // API key OU URL host
+  apikeyField.hidden = !(p.needsKey || p.needsHost);
+  if (p.needsKey || p.needsHost) {
     apikeyLabel.textContent = p.keyLabel;
-    apiKeyInput.placeholder = (p.keyPrefix || '') + '...';
-    apiKeyInput.value = getApiKey(id);
+    apiKeyInput.type = p.needsHost ? 'text' : 'password';
+    apiKeyInput.placeholder = p.needsHost ? DEFAULT_OLLAMA_HOST : ((p.keyPrefix || '') + '...');
+    apiKeyInput.value = p.needsHost ? getOllamaHost() : getApiKey(id);
     if (p.keyUrl) {
       apikeyLink.href = p.keyUrl;
+      apikeyLink.textContent = p.needsHost ? 'Installer Ollama →' : 'Obtenir une clé →';
       apikeyLink.style.display = '';
     } else {
       apikeyLink.style.display = 'none';
     }
   }
+
+  // Bouton "charger modèles installés" pour Ollama
+  $('ollama-fetch-models').hidden = !p.needsHost;
 }
 providerSelect.addEventListener('change', syncProviderUI);
+
+// ─── Ollama : récupérer la liste des modèles installés ─────
+$('ollama-fetch-models').addEventListener('click', async () => {
+  const btn = $('ollama-fetch-models');
+  const host = (apiKeyInput.value.trim() || DEFAULT_OLLAMA_HOST).replace(/\/$/, '');
+  btn.disabled = true;
+  btn.textContent = '… recherche en cours';
+  try {
+    const models = await fetchOllamaModels(host);
+    if (!models.length) {
+      showToast('Aucun modèle installé. Lance : ollama pull llama3.2-vision');
+    } else {
+      // Remplace la liste de modèles
+      PROVIDERS.ollama.models = models;
+      modelSelect.innerHTML = '';
+      models.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.id;
+        opt.textContent = m.label;
+        modelSelect.appendChild(opt);
+      });
+      modelSelect.value = getStoredModel('ollama') || models[0].id;
+      showToast(`${models.length} modèle${models.length > 1 ? 's' : ''} trouvé${models.length > 1 ? 's' : ''} ✓`);
+    }
+  } catch (e) {
+    showToast(`Connexion impossible : ${e.message}. Vérifie qu'Ollama tourne (OLLAMA_ORIGINS=*).`);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '↻ Charger les modèles installés';
+  }
+});
 
 // Save key/model on change so user doesn't lose them between providers
 modelSelect.addEventListener('change', () => {
@@ -1216,6 +1334,8 @@ $('settings-save').addEventListener('click', () => {
   if (state.model) localStorage.setItem('av-model-' + providerId, state.model);
   if (PROVIDERS[providerId].needsKey) {
     setApiKey(providerId, apiKeyInput.value.trim());
+  } else if (PROVIDERS[providerId].needsHost) {
+    setOllamaHost(apiKeyInput.value.trim() || DEFAULT_OLLAMA_HOST);
   }
   // Save feature toggles
   const newFeatures = { ...state.features };
