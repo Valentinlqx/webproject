@@ -654,17 +654,40 @@ $('bulk-copy-all-btn').addEventListener('click', () => {
   navigator.clipboard.writeText(texts.join('\n\n\n')).then(() => showToast(`${texts.length} annonces copiées ✓`));
 });
 
-$('bulk-restart-btn').addEventListener('click', () => {
+function doRestart() {
   state.photos = [];
+  state.conversation = [];
+  state.lastListing = null;
+  state.context = '';
+  $('context-input').value = '';
   renderPreviews();
+  chatMessages.innerHTML = '';
+  resultSection.hidden = true;
+  chatSection.hidden = true;
+  generateBtn.hidden = true;
   bulkResults.innerHTML = '';
   bulkSection.hidden = true;
   bulkActions.hidden = true;
   uploadSection.style.display = '';
-  $('context-input').value = '';
-  state.context = '';
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function isOnUploadView() {
+  return uploadSection.style.display !== 'none';
+}
+
+$('back-btn').addEventListener('click', (e) => {
+  if (!isOnUploadView()) {
+    e.preventDefault();
+    doRestart();
+  }
 });
+
+$('site-title').addEventListener('click', () => {
+  if (!isOnUploadView()) doRestart();
+});
+
+$('bulk-restart-btn').addEventListener('click', doRestart);
 
 // ─── Chat ────────────────────────────────────────────
 chatForm.addEventListener('submit', async (e) => {
@@ -993,20 +1016,7 @@ $('copy-all-btn').addEventListener('click', () => {
   navigator.clipboard.writeText(text).then(() => showToast('Annonce copiée ✓'));
 });
 
-$('restart-btn').addEventListener('click', () => {
-  state.photos = [];
-  state.conversation = [];
-  state.lastListing = null;
-  state.context = '';
-  $('context-input').value = '';
-  renderPreviews();
-  chatMessages.innerHTML = '';
-  resultSection.hidden = true;
-  chatSection.hidden = true;
-  generateBtn.hidden = true;
-  uploadSection.style.display = '';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
+$('restart-btn').addEventListener('click', doRestart);
 
 // ─── Settings ────────────────────────────────────────
 const settingsModal = $('settings-modal');
