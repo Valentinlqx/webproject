@@ -1326,6 +1326,7 @@ function modelSizeHint(model) {
 function buildLauncherWindows(model) {
   const size = modelSizeHint(model);
   return `@echo off
+setlocal
 title AutoVinted - Ollama Launcher
 echo ===============================
 echo  AutoVinted x Ollama Launcher
@@ -1342,35 +1343,60 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo [1/3] Arret des instances Ollama existantes...
+echo [1/4] Arret des instances Ollama existantes...
+echo       (Necessaire pour reactiver CORS pour cette page)
 taskkill /F /IM ollama.exe >nul 2>nul
 taskkill /F /IM "ollama app.exe" >nul 2>nul
-timeout /t 2 /nobreak >nul
+taskkill /F /IM "ollama_llama_server.exe" >nul 2>nul
+timeout /t 3 /nobreak >nul
 
 echo.
-echo [2/3] Verification / telechargement du modele "${model}" (~${size})
+echo [2/4] Verification / telechargement du modele "${model}" (~${size})
 echo       Premiere fois : peut prendre plusieurs minutes selon ta connexion.
 echo       Si le modele est deja installe, c'est instantane.
 echo.
+set OLLAMA_HOST=127.0.0.1:11434
 ollama pull ${model}
 if errorlevel 1 (
   echo.
-  echo [X] Echec du telechargement. Verifie ta connexion ou choisis un modele plus leger.
+  echo [X] Echec du telechargement.
+  echo     - Verifie ta connexion Internet
+  echo     - Le modele "${model}" existe-t-il ? (tape: ollama list)
+  echo     - Choisis un modele plus leger dans AutoVinted
+  echo.
   pause
   exit /b 1
 )
 
 echo.
-echo [3/3] Demarrage du serveur avec CORS active...
+echo [3/4] Configuration de CORS...
+set OLLAMA_ORIGINS=*
+
+echo.
+echo [4/4] Demarrage du serveur Ollama...
 echo.
 echo ============================================================
-echo  Pret ! Tu peux maintenant utiliser AutoVinted.
+echo  Le serveur va tourner ici. Tu peux utiliser AutoVinted.
 echo  GARDE CETTE FENETRE OUVERTE pendant que tu utilises l'app.
 echo  Ferme-la (ou Ctrl+C) pour arreter Ollama.
 echo ============================================================
 echo.
-set OLLAMA_ORIGINS=*
 ollama serve
+
+REM Si on arrive ici, c'est que ollama serve a quitte/crashe
+echo.
+echo ============================================================
+echo  /!\\ Ollama s'est arrete (code: %errorlevel%)
+echo.
+echo  Causes possibles :
+echo    - Le port 11434 est deja utilise (Ollama Desktop tourne deja)
+echo      -^> Quitte Ollama dans la zone de notification (icone llama)
+echo         puis relance ce launcher.
+echo    - Antivirus/parefeu bloque ollama.exe
+echo    - Erreur affichee plus haut dans cette fenetre
+echo ============================================================
+echo.
+pause
 `;
 }
 
@@ -1391,32 +1417,57 @@ if ! command -v ollama &> /dev/null; then
   exit 1
 fi
 
-echo "[1/3] Arrêt des instances Ollama existantes..."
+echo "[1/4] Arrêt des instances Ollama existantes..."
+echo "      (Nécessaire pour réactiver CORS pour cette page)"
 pkill -f "ollama serve" 2>/dev/null || true
-sleep 2
+pkill -f "ollama runner" 2>/dev/null || true
+sleep 3
 
 echo
-echo "[2/3] Vérification / téléchargement du modèle \\"${model}\\" (~${size})"
+echo "[2/4] Vérification / téléchargement du modèle \\"${model}\\" (~${size})"
 echo "      Première fois : peut prendre plusieurs minutes selon ta connexion."
 echo "      Si déjà installé, c'est instantané."
 echo
 if ! ollama pull ${model}; then
   echo
-  echo "[X] Échec du téléchargement. Vérifie ta connexion ou choisis un modèle plus léger."
+  echo "[X] Échec du téléchargement."
+  echo "    - Vérifie ta connexion Internet"
+  echo "    - Le modèle \\"${model}\\" existe-t-il ? (tape: ollama list)"
+  echo "    - Choisis un modèle plus léger dans AutoVinted"
+  echo
   read -p "Appuie sur Entrée pour quitter..."
   exit 1
 fi
 
 echo
-echo "[3/3] Démarrage du serveur avec CORS activé..."
+echo "[3/4] Configuration de CORS..."
+export OLLAMA_ORIGINS="*"
+
+echo
+echo "[4/4] Démarrage du serveur Ollama..."
 echo
 echo "============================================================"
-echo " Prêt ! Tu peux maintenant utiliser AutoVinted."
+echo " Le serveur va tourner ici. Tu peux utiliser AutoVinted."
 echo " GARDE CE TERMINAL OUVERT pendant que tu utilises l'app."
 echo " (Ctrl+C pour arrêter Ollama)"
 echo "============================================================"
 echo
-OLLAMA_ORIGINS=* ollama serve
+ollama serve
+EXIT_CODE=$?
+
+# Si on arrive ici, ollama serve a quitté
+echo
+echo "============================================================"
+echo " /!\\\\ Ollama s'est arrêté (code: $EXIT_CODE)"
+echo
+echo " Causes possibles :"
+echo "   - Le port 11434 est déjà utilisé (Ollama tourne déjà)"
+echo "     -> Tue le processus existant : pkill -f ollama"
+echo "        puis relance ce launcher."
+echo "   - Erreur affichée plus haut dans ce terminal."
+echo "============================================================"
+echo
+read -p "Appuie sur Entrée pour quitter..."
 `;
 }
 
