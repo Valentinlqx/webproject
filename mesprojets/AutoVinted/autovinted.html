@@ -222,25 +222,48 @@
           <span>📖 Guide Ollama étape par étape</span>
           <span class="ollama-guide-chevron">▾</span>
         </summary>
-        <div class="ollama-steps">
-          <div class="ollama-step">
-            <div class="ollama-step-title">1. Installe Ollama</div>
+        <div class="ollama-progress">
+          <div class="ollama-progress-bar"><div class="ollama-progress-fill" id="ollama-progress-fill"></div></div>
+          <div class="ollama-progress-text" id="ollama-progress-text">Étape 1 sur 6</div>
+        </div>
+        <div class="ollama-steps" id="ollama-steps-list">
+          <div class="ollama-step" data-step="0">
+            <div class="ollama-step-head">
+              <span class="ollama-step-num">1</span>
+              <div class="ollama-step-title">Installe Ollama</div>
+              <span class="ollama-step-check">✓</span>
+            </div>
             <div class="ollama-step-body">
               Télécharge l'app pour ton OS sur <a href="https://ollama.com/download" target="_blank" rel="noopener">ollama.com/download</a> et installe-la. Ollama tourne en tâche de fond.
+              <div class="ollama-step-actions">
+                <button type="button" class="ollama-step-next">✓ C'est fait</button>
+              </div>
             </div>
           </div>
 
-          <div class="ollama-step">
-            <div class="ollama-step-title">2. Tire un modèle vision</div>
+          <div class="ollama-step" data-step="1">
+            <div class="ollama-step-head">
+              <span class="ollama-step-num">2</span>
+              <div class="ollama-step-title">Tire un modèle vision</div>
+              <span class="ollama-step-check">✓</span>
+            </div>
             <div class="ollama-step-body">
               Ouvre ton terminal et lance :
               <div class="ollama-cmd"><code id="ollama-cmd-pull">ollama pull llama3.2-vision</code><button type="button" class="ollama-copy" data-copy-target="ollama-cmd-pull">Copier</button></div>
               <div class="ollama-tip">Alternatives plus légères : <code>llava</code> (4 Go), <code>minicpm-v</code> (5 Go), <code>gemma3:4b</code> (3 Go).</div>
+              <div class="ollama-step-actions">
+                <button type="button" class="ollama-step-prev">← Retour</button>
+                <button type="button" class="ollama-step-next">✓ Modèle téléchargé</button>
+              </div>
             </div>
           </div>
 
-          <div class="ollama-step">
-            <div class="ollama-step-title">3. Autorise cette page (CORS)</div>
+          <div class="ollama-step" data-step="2">
+            <div class="ollama-step-head">
+              <span class="ollama-step-num">3</span>
+              <div class="ollama-step-title">Autorise cette page (CORS)</div>
+              <span class="ollama-step-check">✓</span>
+            </div>
             <div class="ollama-step-body">
               Si tu ouvres AutoVinted depuis une URL distante (github.io, etc.), Ollama doit être lancé avec une variable d'environnement. Sinon, saute cette étape.
               <div class="ollama-os-tabs" id="ollama-os-tabs">
@@ -250,28 +273,64 @@
               </div>
               <div class="ollama-cmd"><code id="ollama-cmd-cors">OLLAMA_ORIGINS=* ollama serve</code><button type="button" class="ollama-copy" data-copy-target="ollama-cmd-cors">Copier</button></div>
               <div class="ollama-tip">Sur macOS, tu peux aussi définir la variable globalement avec <code>launchctl setenv OLLAMA_ORIGINS "*"</code> puis redémarrer Ollama.</div>
+              <div class="ollama-step-actions">
+                <button type="button" class="ollama-step-prev">← Retour</button>
+                <button type="button" class="ollama-step-skip">Sauter</button>
+                <button type="button" class="ollama-step-next">✓ Ollama relancé</button>
+              </div>
             </div>
           </div>
 
-          <div class="ollama-step">
-            <div class="ollama-step-title">4. Vérifie l'URL du serveur</div>
+          <div class="ollama-step" data-step="3">
+            <div class="ollama-step-head">
+              <span class="ollama-step-num">4</span>
+              <div class="ollama-step-title">Vérifie l'URL du serveur</div>
+              <span class="ollama-step-check">✓</span>
+            </div>
             <div class="ollama-step-body">
-              Le champ ci-dessus doit pointer vers ton serveur. Par défaut : <code>http://localhost:11434</code>.
+              Le champ <b>URL du serveur Ollama</b> ci-dessus doit pointer vers ton serveur. Par défaut : <code>http://localhost:11434</code>.
+              <div class="ollama-step-actions">
+                <button type="button" class="ollama-step-prev">← Retour</button>
+                <button type="button" class="ollama-step-next">✓ URL vérifiée</button>
+              </div>
             </div>
           </div>
 
-          <div class="ollama-step">
-            <div class="ollama-step-title">5. Charge tes modèles installés</div>
+          <div class="ollama-step" data-step="4">
+            <div class="ollama-step-head">
+              <span class="ollama-step-num">5</span>
+              <div class="ollama-step-title">Charge tes modèles installés</div>
+              <span class="ollama-step-check">✓</span>
+            </div>
             <div class="ollama-step-body">
-              Clique sur <b>↻ Charger les modèles installés</b> juste sous le sélecteur de modèle. Choisis le modèle souhaité.
+              Clique sur <b>↻ Charger les modèles installés</b> juste sous le sélecteur de modèle. Choisis ensuite le modèle souhaité dans la liste.
+              <div class="ollama-step-actions">
+                <button type="button" class="ollama-step-prev">← Retour</button>
+                <button type="button" class="ollama-step-next">✓ Modèle sélectionné</button>
+              </div>
             </div>
           </div>
 
-          <div class="ollama-step">
-            <div class="ollama-step-title">6. Enregistre et profite</div>
-            <div class="ollama-step-body">
-              Clique sur <b>Enregistrer</b>. C'est tout — tes annonces sont maintenant générées 100 % en local, gratuitement, sans envoyer aucune photo dans le cloud.
+          <div class="ollama-step" data-step="5">
+            <div class="ollama-step-head">
+              <span class="ollama-step-num">6</span>
+              <div class="ollama-step-title">Enregistre et profite</div>
+              <span class="ollama-step-check">✓</span>
             </div>
+            <div class="ollama-step-body">
+              Clique sur <b>Enregistrer</b> en bas. C'est tout — tes annonces sont maintenant générées 100 % en local, gratuitement, sans envoyer aucune photo dans le cloud. 🎉
+              <div class="ollama-step-actions">
+                <button type="button" class="ollama-step-prev">← Retour</button>
+                <button type="button" class="ollama-step-next">✓ Terminé</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="ollama-step-done" id="ollama-step-done" hidden>
+            <div class="ollama-done-emoji">🎉</div>
+            <div class="ollama-done-title">Tu es prêt !</div>
+            <div class="ollama-done-text">Toutes les étapes sont validées. N'oublie pas de cliquer sur <b>Enregistrer</b> en bas.</div>
+            <button type="button" class="ollama-step-prev" id="ollama-restart-guide">Recommencer le guide</button>
           </div>
         </div>
       </details>

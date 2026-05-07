@@ -1265,6 +1265,67 @@ function syncProviderUI() {
   $('ollama-guide').hidden = !p.needsHost;
 }
 
+// ─── Ollama guide : checklist progressive ────────────
+const OLLAMA_TOTAL_STEPS = 6;
+let ollamaCurrentStep = parseInt(localStorage.getItem('av-ollama-step') || '0', 10);
+if (isNaN(ollamaCurrentStep) || ollamaCurrentStep < 0) ollamaCurrentStep = 0;
+
+function renderOllamaSteps() {
+  const steps = document.querySelectorAll('.ollama-step[data-step]');
+  const doneScreen = $('ollama-step-done');
+  const allDone = ollamaCurrentStep >= OLLAMA_TOTAL_STEPS;
+
+  steps.forEach(el => {
+    const idx = parseInt(el.dataset.step, 10);
+    el.classList.remove('pending', 'active', 'done');
+    if (idx < ollamaCurrentStep) el.classList.add('done');
+    else if (idx === ollamaCurrentStep) el.classList.add('active');
+    else el.classList.add('pending');
+  });
+
+  if (doneScreen) doneScreen.hidden = !allDone;
+
+  const fill = $('ollama-progress-fill');
+  if (fill) fill.style.width = `${Math.min(100, (ollamaCurrentStep / OLLAMA_TOTAL_STEPS) * 100)}%`;
+  const txt = $('ollama-progress-text');
+  if (txt) txt.textContent = allDone
+    ? `✓ ${OLLAMA_TOTAL_STEPS} étapes validées`
+    : `Étape ${ollamaCurrentStep + 1} sur ${OLLAMA_TOTAL_STEPS}`;
+}
+
+function setOllamaStep(n) {
+  ollamaCurrentStep = Math.max(0, Math.min(OLLAMA_TOTAL_STEPS, n));
+  localStorage.setItem('av-ollama-step', String(ollamaCurrentStep));
+  renderOllamaSteps();
+  // Scroll the active step into view inside the modal
+  const active = document.querySelector('.ollama-step.active') || $('ollama-step-done');
+  if (active) active.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+document.querySelectorAll('.ollama-step-next').forEach(b => {
+  b.addEventListener('click', (e) => { e.preventDefault(); setOllamaStep(ollamaCurrentStep + 1); });
+});
+document.querySelectorAll('.ollama-step-prev').forEach(b => {
+  b.addEventListener('click', (e) => { e.preventDefault(); setOllamaStep(ollamaCurrentStep - 1); });
+});
+document.querySelectorAll('.ollama-step-skip').forEach(b => {
+  b.addEventListener('click', (e) => { e.preventDefault(); setOllamaStep(ollamaCurrentStep + 1); });
+});
+$('ollama-restart-guide')?.addEventListener('click', (e) => { e.preventDefault(); setOllamaStep(0); });
+
+// Click on a done step's head re-opens it
+document.querySelectorAll('.ollama-step[data-step]').forEach(el => {
+  el.querySelector('.ollama-step-head').addEventListener('click', (e) => {
+    if (el.classList.contains('done')) {
+      e.preventDefault();
+      const idx = parseInt(el.dataset.step, 10);
+      setOllamaStep(idx);
+    }
+  });
+});
+
+renderOllamaSteps();
+
 // ─── Ollama guide : OS tabs + copy buttons ───────────
 const OLLAMA_CORS_CMD = {
   'mac':     'OLLAMA_ORIGINS=* ollama serve',

@@ -1015,24 +1015,79 @@ section { margin-bottom: 24px; }
 }
 .ollama-guide[open] .ollama-guide-chevron { transform: rotate(180deg); }
 
-.ollama-steps {
-  padding: 14px;
+/* Progress bar */
+.ollama-progress {
+  padding: 10px 14px 6px;
   border-top: 1px solid var(--card-border);
 }
-.ollama-step {
-  padding: 10px 0;
-  border-bottom: 1px solid var(--card-border);
+.ollama-progress-bar {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--card-border);
+  overflow: hidden;
 }
-.ollama-step:last-child { border-bottom: none; padding-bottom: 0; }
-.ollama-step:first-child { padding-top: 0; }
+.ollama-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  width: 0%;
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ollama-progress-text {
+  font-size: 0.72rem;
+  color: var(--text-2);
+  margin-top: 6px;
+  text-align: center;
+}
 
-.ollama-step-title {
-  font-size: 0.92rem;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 6px;
+/* Steps list */
+.ollama-steps { padding: 8px 14px 14px; }
+
+.ollama-step {
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s, background 0.2s;
 }
+.ollama-step:last-child { margin-bottom: 0; }
+
+.ollama-step-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+}
+.ollama-step-num {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--card-border);
+  color: var(--text-2);
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.ollama-step-title {
+  flex: 1;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.ollama-step-check {
+  flex-shrink: 0;
+  font-size: 0.95rem;
+  color: #10b981;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
 .ollama-step-body {
+  display: none;
+  padding: 0 12px 12px 44px;
   font-size: 0.84rem;
   color: var(--text-2);
   line-height: 1.55;
@@ -1047,6 +1102,76 @@ section { margin-bottom: 24px; }
   font-size: 0.8rem;
   font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 }
+
+/* Pending : grisé, head only */
+.ollama-step.pending {
+  opacity: 0.45;
+}
+.ollama-step.pending .ollama-step-body { display: none; }
+
+/* Active : bordure accent, body visible */
+.ollama-step.active {
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.02);
+}
+.ollama-step.active .ollama-step-num {
+  background: var(--accent);
+  color: var(--bg);
+}
+.ollama-step.active .ollama-step-body { display: block; }
+
+/* Done : check vert + titre barré */
+.ollama-step.done .ollama-step-num {
+  background: rgba(16, 185, 129, 0.18);
+  color: #10b981;
+}
+.ollama-step.done .ollama-step-check { opacity: 1; }
+.ollama-step.done .ollama-step-title {
+  color: var(--text-2);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+.ollama-step.done .ollama-step-head { cursor: pointer; }
+
+.ollama-step-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+.ollama-step-actions button {
+  background: none;
+  border: 1px solid var(--card-border);
+  color: var(--text-2);
+  font-size: 0.78rem;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.ollama-step-actions button:hover { color: var(--text); border-color: var(--text-2); }
+.ollama-step-actions .ollama-step-next {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+  font-weight: 600;
+  margin-left: auto;
+}
+.ollama-step-actions .ollama-step-next:hover { opacity: 0.9; color: var(--bg); border-color: var(--accent); }
+
+/* Done screen */
+.ollama-step-done {
+  text-align: center;
+  padding: 18px 14px;
+  border: 1px solid #10b981;
+  border-radius: 10px;
+  background: rgba(16, 185, 129, 0.08);
+}
+.ollama-step-done[hidden] { display: none; }
+.ollama-done-emoji { font-size: 2rem; margin-bottom: 6px; }
+.ollama-done-title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.ollama-done-text { font-size: 0.84rem; color: var(--text-2); line-height: 1.5; margin-bottom: 12px; }
+.ollama-done-text b { color: var(--text); }
 
 .ollama-tip {
   margin-top: 8px;
