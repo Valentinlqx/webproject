@@ -1342,11 +1342,20 @@ ollama pull ${model}
 if errorlevel 1 goto :pull_error
 
 echo.
-echo [3/4] Configuration de CORS...
+echo [3/4] Configuration de CORS et liberation du port...
 set OLLAMA_ORIGINS=*
 
+REM 'ollama pull' a demarre une instance d'Ollama pour telecharger.
+REM Il faut la tuer pour pouvoir relancer 'ollama serve' avec OLLAMA_ORIGINS.
+taskkill /F /T /IM "ollama.exe" >nul 2>nul
+taskkill /F /T /IM "ollama app.exe" >nul 2>nul
+taskkill /F /T /IM "ollama_llama_server.exe" >nul 2>nul
+powershell -NoProfile -Command "Get-Process -Name 'ollama*' -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue" >nul 2>nul
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":11434" ^| findstr "LISTENING" 2^>nul') do taskkill /F /PID %%a >nul 2>nul
+timeout /t 2 /nobreak >nul
+
 echo.
-echo [4/4] Demarrage du serveur Ollama...
+echo [4/4] Demarrage du serveur Ollama avec CORS active...
 echo.
 echo ============================================================
 echo  Le serveur tourne maintenant ici. Tu peux utiliser AutoVinted.
@@ -1442,11 +1451,19 @@ if ! ollama pull ${model}; then
 fi
 
 echo
-echo "[3/4] Configuration de CORS..."
+echo "[3/4] Configuration de CORS et libération du port..."
 export OLLAMA_ORIGINS="*"
 
+# 'ollama pull' a démarré une instance d'Ollama pour télécharger.
+# Il faut la tuer pour pouvoir relancer 'ollama serve' avec OLLAMA_ORIGINS.
+pkill -9 -f "ollama" 2>/dev/null || true
+if command -v lsof &> /dev/null; then
+  lsof -ti :11434 2>/dev/null | xargs -r kill -9 2>/dev/null || true
+fi
+sleep 2
+
 echo
-echo "[4/4] Démarrage du serveur Ollama..."
+echo "[4/4] Démarrage du serveur Ollama avec CORS activé..."
 echo
 echo "============================================================"
 echo " Le serveur va tourner ici. Tu peux utiliser AutoVinted."
