@@ -44,13 +44,72 @@
 
       <div class="previews" id="previews"></div>
 
-      <div class="bulk-context" id="bulk-context" hidden>
+      <div class="context-field">
         <label class="field">
-          <span class="field-label">Contexte commun (optionnel)</span>
-          <textarea id="bulk-context-input" rows="2" placeholder="Ex : tous des livres en bon état, prix d'achat ~10€, je veux vendre vite"></textarea>
-          <span class="field-hint">Une info qui s'applique à tous les articles, pour éviter que l'IA pose des questions.</span>
+          <span class="field-label">Contexte (optionnel)</span>
+          <textarea id="context-input" rows="2" placeholder="Ex : porté 3 fois, prix d'achat 80€, je veux vendre vite"></textarea>
+          <span class="field-hint" id="context-hint">Toute info utile que l'IA ne peut pas deviner (taille, état réel, prix d'achat...).</span>
         </label>
       </div>
+
+      <details class="tips-section">
+        <summary>
+          <span class="tips-summary-text">💡 Conseils pour vendre vite sur Vinted</span>
+          <span class="tips-chevron">▾</span>
+        </summary>
+        <div class="tips-body">
+          <div class="tip">
+            <strong>📸 Photos qui convertissent</strong>
+            <p>Fond uni clair, lumière naturelle (jour, fenêtre). 4 à 6 photos minimum : face, dos, étiquette, composition, défauts éventuels.</p>
+          </div>
+          <div class="tip">
+            <strong>👗 Photo portée</strong>
+            <p>Pour les vêtements, ajoute toujours une photo portée — ça multiplie les ventes par 2-3. Montre la coupe et la tombée du tissu.</p>
+          </div>
+          <div class="tip">
+            <strong>📏 Mesures précises (en cm)</strong>
+            <p>
+              <span class="tip-mini">Hauts : largeur épaules • longueur dos • largeur poitrine (sous bras) • longueur manches</span>
+              <span class="tip-mini">Pantalons : tour de taille • longueur jambes (entrejambe) • largeur cuisse • largeur ourlet</span>
+              <span class="tip-mini">Robes : épaules • longueur totale • poitrine • tour de taille</span>
+              <span class="tip-mini">Chaussures : longueur intérieure de la semelle</span>
+            </p>
+          </div>
+          <div class="tip">
+            <strong>🌍 Guide des tailles internationales</strong>
+            <p>Si la taille est étrangère, donne la correspondance pour rassurer :</p>
+            <p>
+              <span class="tip-mini">Femme : XS=34 • S=36 • M=38 • L=40 • XL=42</span>
+              <span class="tip-mini">Homme : S=44/46 • M=48 • L=50/52 • XL=54</span>
+              <span class="tip-mini">Tailles UK/US : 6=34, 8=36, 10=38, 12=40, 14=42</span>
+            </p>
+          </div>
+          <div class="tip">
+            <strong>🔍 Défauts honnêtes</strong>
+            <p>Photographie et signale clairement les défauts (taches, bouloches, accrocs). Tu auras de meilleurs avis et zéro retour.</p>
+          </div>
+          <div class="tip">
+            <strong>🏷️ Hashtags & mots-clés</strong>
+            <p>Marque, style (vintage, oversize, Y2K, streetwear), saison, occasion. Utilise des termes que les acheteurs tapent vraiment.</p>
+          </div>
+          <div class="tip">
+            <strong>💰 Prix réaliste</strong>
+            <p>Regarde 5-10 annonces similaires vendues récemment. Vise le milieu de la fourchette. Tu peux toujours baisser ensuite.</p>
+          </div>
+          <div class="tip">
+            <strong>⚡ Réactivité</strong>
+            <p>Réponds en moins d'1h aux messages — Vinted boost les vendeurs réactifs. Active les notifications.</p>
+          </div>
+          <div class="tip">
+            <strong>📦 Bundle & frais</strong>
+            <p>Active la remise lot (-10% pour 2+ articles). Les acheteurs achètent plus, tu paies moins de frais d'envoi par article.</p>
+          </div>
+          <div class="tip">
+            <strong>🕐 Timing</strong>
+            <p>Poste tes annonces en soirée (19h-22h) ou dimanche après-midi : pic d'activité Vinted.</p>
+          </div>
+        </div>
+      </details>
 
       <button class="btn-primary" id="analyze-btn" disabled>
         <span class="btn-label">Analyser mes photos</span>

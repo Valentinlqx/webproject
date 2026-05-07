@@ -106,7 +106,7 @@ const state = {
   photos: [],          // [{ id, file, dataUrl }]
   conversation: [],    // [{ role, content }] — messages
   mode: 'single',      // 'single' | 'bulk'
-  bulkContext: '',
+  context: '',         // optional user-provided context for current run
   provider: localStorage.getItem('av-provider') || 'pollinations',
   model: localStorage.getItem('av-model-' + (localStorage.getItem('av-provider') || 'pollinations')) || '',
   history: JSON.parse(localStorage.getItem('av-history') || '[]'),
@@ -172,6 +172,52 @@ FORMAT DE RÉPONSE — tu réponds TOUJOURS en JSON valide avec ce schéma :
 }
 
 Aucun texte hors JSON. Pas de markdown autour du JSON.`;
+
+// System prompt utilisé en MODE LOT — détecte plusieurs articles depuis un set de photos
+const BULK_SYSTEM_PROMPT = `Tu es un vendeur Vinted expérimenté qui rédige des annonces qui se vendent vite. Ton style : humain, naturel, concis, crédible. Phrases courtes et vendeuses, jamais de ton "IA marketing".
+
+ON TE DONNE PLUSIEURS PHOTOS NUMÉROTÉES (Photo 0, Photo 1, Photo 2…). Plusieurs photos peuvent montrer le MÊME article (face/dos/étiquette/défaut/porté). Ton job :
+
+1. ANALYSE chaque photo
+2. REGROUPE les photos qui appartiennent au même article (même produit, même couleur, même contexte visuel)
+3. Pour CHAQUE article distinct détecté, génère une annonce Vinted optimisée
+4. Ne pose PAS de questions — déduis ce que tu peux des photos et du contexte fourni. Si une info ne peut pas être devinée, mets une valeur générique cohérente ("Bon état", "Taille M" si visiblement standard, etc.)
+
+Pour chaque annonce :
+- Titre Vinted optimisé (max 60 caractères)
+- Description naturelle, courte, vendeuse, AVEC ligne vide puis 6-10 hashtags pertinents en minuscules sans accents (ex: #marque #typeproduit #couleur #style #occasion)
+- Détails (marque, taille, état, couleur, catégorie, matière)
+- 3 prix : idéal, vente rapide, minimum acceptable (en euros)
+- Quelques conseils si pertinents
+
+FORMAT DE RÉPONSE — uniquement du JSON valide :
+
+{
+  "listings": [
+    {
+      "photo_indices": [0, 1, 2],
+      "title": "...",
+      "description": "...\\n\\n#tag1 #tag2 #tag3",
+      "details": {
+        "marque": "...",
+        "taille": "...",
+        "etat": "Neuf avec étiquette | Neuf sans étiquette | Très bon état | Bon état | Satisfaisant",
+        "couleur": "...",
+        "categorie": "...",
+        "matiere": "..."
+      },
+      "prices": { "ideal": "15€", "rapide": "10€", "minimum": "8€" },
+      "tips": ["conseil 1", "conseil 2"]
+    },
+    {
+      "photo_indices": [3],
+      "title": "...",
+      ...
+    }
+  ]
+}
+
+photo_indices = liste des numéros de photos (0-indexés) qui montrent ce même article. Chaque photo doit appartenir à une seule annonce. Aucun texte hors JSON, pas de markdown autour.`;
 
 // ─── DOM ─────────────────────────────────────────────
 const $ = (id) => document.getElementById(id);
@@ -279,10 +325,12 @@ analyzeBtn.addEventListener('click', async () => {
   }
 
   setBtnLoading(analyzeBtn, true, 'Analyse...');
+  state.context = $('context-input').value.trim();
 
   // Build initial message with all images
+  const ctxLine = state.context ? `\n\nContexte donné par le vendeur : "${state.context}"` : '';
   const userContent = [
-    { type: 'text', text: `Voici ${state.photos.length} photo(s) du produit. Analyse-les et soit pose-moi des questions sur les infos manquantes, soit génère directement l'annonce si tu as toutes les infos.` },
+    { type: 'text', text: `Voici ${state.photos.length} photo(s) du produit. Analyse-les et soit pose-moi des questions sur les infos manquantes, soit génère directement l'annonce si tu as toutes les infos.${ctxLine}` },
     ...state.photos.map(p => ({ type: 'image_url', image_url: { url: p.dataUrl } }))
   ];
 
@@ -302,7 +350,6 @@ analyzeBtn.addEventListener('click', async () => {
 
 // ─── Mode toggle ─────────────────────────────────────
 const modeBtns = document.querySelectorAll('.mode-btn');
-const bulkContextEl = $('bulk-context');
 const dropzoneTitle = $('dropzone-title');
 const dropzoneSub = $('dropzone-sub');
 
@@ -312,13 +359,14 @@ modeBtns.forEach(btn => {
     if (mode === state.mode) return;
     state.mode = mode;
     modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
-    bulkContextEl.hidden = mode !== 'bulk';
     if (mode === 'bulk') {
-      dropzoneTitle.textContent = 'Glisse tes photos ici';
-      dropzoneSub.textContent = `1 photo = 1 article — jusqu'à ${MAX_PHOTOS_BULK} articles`;
+      dropzoneSub.textContent = `Plusieurs articles à la fois — l'IA détecte chaque article (jusqu'à ${MAX_PHOTOS_BULK} photos)`;
+      $('context-hint').textContent = 'Info qui s\'applique à tous les articles, pour éviter que l\'IA pose des questions.';
+      $('context-input').placeholder = 'Ex : tous des livres en bon état, prix d\'achat ~10€, je veux vendre vite';
     } else {
-      dropzoneTitle.textContent = 'Glisse tes photos ici';
       dropzoneSub.textContent = `ou clique pour parcourir — jusqu'à ${MAX_PHOTOS_SINGLE} photos`;
+      $('context-hint').textContent = 'Toute info utile que l\'IA ne peut pas deviner (taille, état réel, prix d\'achat...).';
+      $('context-input').placeholder = 'Ex : porté 3 fois, prix d\'achat 80€, je veux vendre vite';
     }
     updateAnalyzeBtnLabel();
   });
@@ -328,7 +376,7 @@ function updateAnalyzeBtnLabel() {
   const label = analyzeBtn.querySelector('.btn-label');
   if (state.mode === 'bulk') {
     label.textContent = state.photos.length > 0
-      ? `Générer ${state.photos.length} annonce${state.photos.length > 1 ? 's' : ''}`
+      ? `Détecter & générer (${state.photos.length} photo${state.photos.length > 1 ? 's' : ''})`
       : 'Générer les annonces';
   } else {
     label.textContent = 'Analyser mes photos';
@@ -351,8 +399,8 @@ const bulkProgressText = $('bulk-progress-text');
 const bulkProgressFill = $('bulk-progress-fill');
 
 async function runBulk() {
+  state.context = $('context-input').value.trim();
   const total = state.photos.length;
-  state.bulkContext = $('bulk-context-input').value.trim();
 
   // Switch UI
   uploadSection.style.display = 'none';
@@ -360,78 +408,76 @@ async function runBulk() {
   bulkResults.innerHTML = '';
   bulkProgress.hidden = false;
   bulkActions.hidden = true;
+  bulkProgressText.textContent = `L'IA analyse ${total} photo${total > 1 ? 's' : ''} et regroupe les articles…`;
+  bulkProgressFill.style.width = '15%';
 
-  // Pre-create cards in pending state
-  const cards = state.photos.map((photo, i) => createBulkCard(photo, i));
-  cards.forEach(c => bulkResults.appendChild(c.el));
+  // Build single multi-image request with photo numbering
+  const ctxLine = state.context ? `\n\nContexte donné par le vendeur (s'applique à tous les articles) : "${state.context}"` : '';
+  const intro = `Voici ${total} photos. Plusieurs photos peuvent montrer le MÊME article (sous différents angles, étiquettes, défauts...). Identifie chaque article distinct, regroupe les photos qui appartiennent au même article, et génère UNE annonce Vinted par article détecté.${ctxLine}`;
 
-  let done = 0;
-  let errors = 0;
-  for (let i = 0; i < state.photos.length; i++) {
-    const photo = state.photos[i];
-    const card = cards[i];
-    updateProgress(done, total);
+  const userContent = [{ type: 'text', text: intro }];
+  state.photos.forEach((p, i) => {
+    userContent.push({ type: 'text', text: `\nPhoto ${i} :` });
+    userContent.push({ type: 'image_url', image_url: { url: p.dataUrl } });
+  });
 
-    try {
-      const listing = await generateOneFromPhoto(photo);
-      card.fillListing(listing);
-      saveToHistory(listing);
-      done++;
-    } catch (err) {
-      card.setError(err.message);
-      errors++;
-    }
-  }
-
-  bulkProgress.hidden = true;
-  bulkActions.hidden = false;
-  showToast(`${done}/${total} annonce${done > 1 ? 's' : ''} générée${done > 1 ? 's' : ''}${errors ? ` — ${errors} erreur${errors > 1 ? 's' : ''}` : ''}`);
-}
-
-function updateProgress(done, total) {
-  const next = Math.min(done + 1, total);
-  bulkProgressText.textContent = `Génération ${next}/${total}…`;
-  bulkProgressFill.style.width = `${(done / total) * 100}%`;
-}
-
-async function generateOneFromPhoto(photo) {
-  const ctx = state.bulkContext
-    ? `Contexte commun donné par le vendeur : "${state.bulkContext}"\n\n`
-    : '';
   const conv = [
-    { role: 'system', content: SYSTEM_PROMPT + '\n\nMODE LOT : tu génères directement l\'annonce sans poser de questions. Si une info précise manque, déduis-la de la photo ou laisse une valeur générique cohérente. action="generate" obligatoirement.' },
-    {
-      role: 'user',
-      content: [
-        { type: 'text', text: ctx + 'Voici la photo d\'un article. Génère directement l\'annonce Vinted (action="generate").' },
-        { type: 'image_url', image_url: { url: photo.dataUrl } },
-      ],
-    },
+    { role: 'system', content: BULK_SYSTEM_PROMPT },
+    { role: 'user', content: userContent },
   ];
 
-  // Use a temporary state-like object so we don't pollute conversation
+  bulkProgressFill.style.width = '40%';
+
   const tmpState = { ...state, conversation: conv };
   const provider = PROVIDERS[state.provider];
   if (!provider.models.find(m => m.id === state.model)) {
     state.model = getStoredModel(state.provider);
     tmpState.model = state.model;
   }
-  const resp = await provider.call(tmpState);
-  if (resp.action !== 'generate' || !resp.listing) {
-    throw new Error(resp.message || 'Pas d\'annonce générée');
+
+  try {
+    const resp = await provider.call(tmpState);
+    bulkProgressFill.style.width = '100%';
+
+    const listings = Array.isArray(resp.listings) ? resp.listings : [];
+    if (listings.length === 0) {
+      throw new Error(resp.message || 'Aucun article détecté dans les photos');
+    }
+
+    // Render each detected article
+    listings.forEach((listing, i) => {
+      const indices = Array.isArray(listing.photo_indices) ? listing.photo_indices : [i];
+      const photos = indices
+        .map(idx => state.photos[idx])
+        .filter(Boolean);
+      const card = createBulkCard(photos, i);
+      bulkResults.appendChild(card.el);
+      card.fillListing(listing);
+      saveToHistory(listing);
+    });
+
+    bulkProgress.hidden = true;
+    bulkActions.hidden = false;
+    showToast(`${listings.length} article${listings.length > 1 ? 's' : ''} détecté${listings.length > 1 ? 's' : ''} ✓`);
+  } catch (err) {
+    bulkProgress.hidden = true;
+    bulkResults.innerHTML = `<div class="bulk-item"><div class="bulk-item-head"><div class="bulk-item-info"><div class="bulk-item-title">Erreur</div><div class="bulk-item-meta">${escapeHtml(err.message)}</div></div></div></div>`;
+    bulkActions.hidden = false;
+    showToast('Erreur : ' + err.message);
   }
-  return resp.listing;
 }
 
-function createBulkCard(photo, index) {
+function createBulkCard(photos, index) {
+  const photoArr = Array.isArray(photos) ? photos : [photos];
+  const mainPhoto = photoArr[0];
   const el = document.createElement('div');
   el.className = 'bulk-item';
   el.innerHTML = `
     <div class="bulk-item-head">
-      <img class="bulk-item-thumb" src="${photo.dataUrl}" alt="" />
+      <img class="bulk-item-thumb" src="${mainPhoto?.dataUrl || ''}" alt="" />
       <div class="bulk-item-info">
         <div class="bulk-item-title">Article ${index + 1}</div>
-        <div class="bulk-item-meta">En attente…</div>
+        <div class="bulk-item-meta">${photoArr.length} photo${photoArr.length > 1 ? 's' : ''}</div>
       </div>
       <span class="bulk-item-status"><span class="spinner-sm"></span></span>
     </div>
@@ -447,17 +493,16 @@ function createBulkCard(photo, index) {
     if (bodyEl.children.length > 0) el.classList.toggle('open');
   });
 
-  let listing = null;
-
   return {
     el,
     fillListing(l) {
-      listing = l;
       titleEl.textContent = l.title || `Article ${index + 1}`;
-      metaEl.textContent = (l.prices?.ideal || '—') + ' • ' + (l.details?.etat || '—');
+      const priceTxt = l.prices?.ideal || '—';
+      const etatTxt = l.details?.etat || '—';
+      metaEl.textContent = `${priceTxt} • ${etatTxt} • ${photoArr.length} photo${photoArr.length > 1 ? 's' : ''}`;
       statusEl.className = 'bulk-item-status done';
       statusEl.innerHTML = '✓ <span class="bulk-chevron">▾</span>';
-      bodyEl.innerHTML = renderBulkBody(l, index);
+      bodyEl.innerHTML = renderBulkBody(l, index, photoArr);
       bindBulkBodyActions(bodyEl, l);
     },
     setError(msg) {
@@ -469,7 +514,7 @@ function createBulkCard(photo, index) {
   };
 }
 
-function renderBulkBody(l, index) {
+function renderBulkBody(l, index, photoArr) {
   const d = l.details || {};
   const p = l.prices || {};
   const tips = (l.tips || []).map(t => `<li>${escapeHtml(t)}</li>`).join('');
@@ -478,7 +523,12 @@ function renderBulkBody(l, index) {
     .filter(([k]) => d[k])
     .map(([k, label]) => `<li><strong>${label}</strong>${escapeHtml(d[k])}</li>`).join('');
 
+  const thumbs = (photoArr && photoArr.length > 1)
+    ? `<div class="bulk-item-thumbs">${photoArr.map(p => `<img src="${p.dataUrl}" alt="">`).join('')}</div>`
+    : '';
+
   return `
+    ${thumbs}
     <div class="result-block">
       <div class="result-block-head">
         <span class="result-label">Titre</span>
@@ -552,8 +602,8 @@ $('bulk-restart-btn').addEventListener('click', () => {
   bulkSection.hidden = true;
   bulkActions.hidden = true;
   uploadSection.style.display = '';
-  $('bulk-context-input').value = '';
-  state.bulkContext = '';
+  $('context-input').value = '';
+  state.context = '';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
@@ -866,6 +916,8 @@ $('restart-btn').addEventListener('click', () => {
   state.photos = [];
   state.conversation = [];
   state.lastListing = null;
+  state.context = '';
+  $('context-input').value = '';
   renderPreviews();
   chatMessages.innerHTML = '';
   resultSection.hidden = true;

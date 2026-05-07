@@ -155,9 +155,9 @@ section { margin-bottom: 24px; }
   box-shadow: var(--shadow);
 }
 
-/* ── Bulk context ── */
-.bulk-context { margin-top: 16px; }
-.bulk-context textarea {
+/* ── Context field ── */
+.context-field { margin-top: 16px; }
+.context-field textarea {
   padding: 12px 14px;
   background: var(--bg-input);
   border: 1px solid var(--border);
@@ -171,7 +171,65 @@ section { margin-bottom: 24px; }
   transition: border-color 0.18s;
   width: 100%;
 }
-.bulk-context textarea:focus { border-color: var(--border-hover); }
+.context-field textarea:focus { border-color: var(--border-hover); }
+
+/* ── Tips section ── */
+.tips-section {
+  margin-top: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.tips-section summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 0.94rem;
+  user-select: none;
+  transition: background 0.15s;
+}
+.tips-section summary::-webkit-details-marker { display: none; }
+.tips-section summary:hover { background: var(--bg-soft); }
+.tips-chevron {
+  font-size: 0.9rem;
+  color: var(--text-3);
+  transition: transform 0.2s;
+}
+.tips-section[open] .tips-chevron { transform: rotate(180deg); }
+
+.tips-body {
+  padding: 4px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-top: 1px solid var(--border);
+}
+.tip strong {
+  display: block;
+  font-size: 0.92rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.tip p {
+  font-size: 0.86rem;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+.tip-mini {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--text-2);
+  background: var(--bg-soft);
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
 
 /* ── Bulk results ── */
 .bulk-progress {
@@ -230,6 +288,19 @@ section { margin-bottom: 24px; }
   border-radius: 10px;
   object-fit: cover;
   flex-shrink: 0;
+  background: var(--bg-soft);
+}
+.bulk-item-thumbs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 12px 0 4px;
+}
+.bulk-item-thumbs img {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  object-fit: cover;
   background: var(--bg-soft);
 }
 .bulk-item-info { flex: 1; min-width: 0; }
