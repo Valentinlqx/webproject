@@ -1260,10 +1260,20 @@ function syncProviderUI() {
     }
   }
 
-  // Bouton "charger modèles installés" pour Ollama
+  // Bouton "charger modèles installés" + lien guide pour Ollama
   $('ollama-fetch-models').hidden = !p.needsHost;
-  $('ollama-guide').hidden = !p.needsHost;
+  $('ollama-open-guide').hidden = !p.needsHost;
 }
+
+// ─── Ollama modal open/close ────────────────────────
+const ollamaModal = $('ollama-modal');
+$('ollama-open-guide').addEventListener('click', () => {
+  ollamaModal.hidden = false;
+});
+$('ollama-modal-close').addEventListener('click', () => { ollamaModal.hidden = true; });
+ollamaModal.addEventListener('click', (e) => {
+  if (e.target === ollamaModal) ollamaModal.hidden = true;
+});
 
 // ─── Ollama guide : checklist progressive ────────────
 const OLLAMA_TOTAL_STEPS = 6;
@@ -1458,6 +1468,7 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     settingsModal.hidden = true;
     historyModal.hidden = true;
+    ollamaModal.hidden = true;
     closeTutorial();
   }
 });
