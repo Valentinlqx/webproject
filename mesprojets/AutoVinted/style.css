@@ -482,6 +482,7 @@ section { margin-bottom: 24px; }
   animation: fadeIn 0.2s ease;
   backdrop-filter: blur(6px);
 }
+.modal[hidden] { display: none; }
 .modal-card {
   background: var(--bg-card);
   width: 100%;

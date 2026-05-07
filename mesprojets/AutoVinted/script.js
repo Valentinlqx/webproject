@@ -364,6 +364,14 @@ $('settings-save').addEventListener('click', () => {
   showToast('Paramètres enregistrés');
 });
 
+// Close modals with Escape
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    settingsModal.hidden = true;
+    historyModal.hidden = true;
+  }
+});
+
 function checkApiKey() {
   if (!state.apiKey) {
     showToast('Ajoute ta clé API OpenAI dans les paramètres');
