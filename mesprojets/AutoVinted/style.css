@@ -1016,41 +1016,43 @@ section { margin-bottom: 24px; }
 .ollama-guide[open] .ollama-guide-chevron { transform: rotate(180deg); }
 
 .ollama-steps {
-  list-style: none;
-  padding: 0 14px 14px;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+  padding: 14px;
   border-top: 1px solid var(--card-border);
-  padding-top: 14px;
 }
-.ollama-steps li { display: flex; flex-direction: column; gap: 6px; }
-.ollama-steps li strong {
-  font-size: 0.9rem;
-  color: var(--text);
+.ollama-step {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--card-border);
+}
+.ollama-step:last-child { border-bottom: none; padding-bottom: 0; }
+.ollama-step:first-child { padding-top: 0; }
+
+.ollama-step-title {
+  font-size: 0.92rem;
   font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
 }
-.ollama-steps li p {
+.ollama-step-body {
   font-size: 0.84rem;
   color: var(--text-2);
-  line-height: 1.5;
-  margin: 0;
+  line-height: 1.55;
 }
-.ollama-steps li p code,
-.ollama-steps li p a {
-  color: var(--text);
-}
-.ollama-steps li p code {
+.ollama-step-body a { color: var(--text); }
+.ollama-step-body b { color: var(--text); }
+.ollama-step-body code {
   background: var(--card-border);
+  color: var(--text);
   padding: 1px 6px;
   border-radius: 4px;
   font-size: 0.8rem;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 }
+
 .ollama-tip {
+  margin-top: 8px;
   font-style: italic;
-  font-size: 0.78rem !important;
-  color: var(--text-2) !important;
+  font-size: 0.78rem;
+  color: var(--text-2);
   opacity: 0.85;
 }
 
