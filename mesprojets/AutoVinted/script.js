@@ -35,9 +35,11 @@ const PROVIDERS = {
     keyPrefix: 'sk-ant-',
     hint: "Excellent pour les descriptions naturelles. Vision native Claude.",
     models: [
+      { id: 'claude-opus-4-7', label: 'Claude Opus 4.7 (max qualité)' },
+      { id: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6 (recommandé)' },
+      { id: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5 (rapide)' },
       { id: 'claude-sonnet-4-5-20250929', label: 'Claude Sonnet 4.5' },
       { id: 'claude-3-5-sonnet-20241022', label: 'Claude Sonnet 3.5' },
-      { id: 'claude-3-5-haiku-20241022', label: 'Claude Haiku 3.5 (rapide)' },
     ],
     call: callAnthropic,
   },
@@ -116,7 +118,9 @@ function setApiKey(providerId, key) {
   localStorage.setItem('av-key-' + providerId, key);
 }
 function getStoredModel(providerId) {
-  return localStorage.getItem('av-model-' + providerId) || PROVIDERS[providerId].models[0].id;
+  const stored = localStorage.getItem('av-model-' + providerId);
+  const valid = PROVIDERS[providerId].models.find(m => m.id === stored);
+  return valid ? stored : PROVIDERS[providerId].models[0].id;
 }
 
 const MAX_PHOTOS = 8;
