@@ -1301,11 +1301,31 @@ document.querySelectorAll('#ollama-os-pick .ollama-os-tab').forEach(b => {
 
 const OLLAMA_DEFAULT_MODEL = 'llama3.2-vision';
 
+// Tailles approximatives des modèles (informationnel)
+const MODEL_SIZES = {
+  'llama3.2-vision':       '7.9 Go',
+  'llama3.2-vision:11b':   '7.9 Go',
+  'llama3.2-vision:90b':   '55 Go',
+  'llava':                 '4.7 Go',
+  'llava:13b':             '8.0 Go',
+  'llava:34b':             '20 Go',
+  'bakllava':              '4.7 Go',
+  'minicpm-v':             '5.5 Go',
+  'qwen2.5vl':             '6 Go',
+  'gemma3:4b':             '3.3 Go',
+  'gemma3:12b':            '8.1 Go',
+};
+function modelSizeHint(model) {
+  return MODEL_SIZES[model] || '? Go';
+}
+
 function buildLauncherWindows(model) {
+  const size = modelSizeHint(model);
   return `@echo off
 title AutoVinted - Ollama Launcher
 echo ===============================
 echo  AutoVinted x Ollama Launcher
+echo  Modele : ${model} (~${size})
 echo ===============================
 echo.
 
@@ -1321,21 +1341,28 @@ if errorlevel 1 (
 echo [1/3] Arret des instances Ollama existantes...
 taskkill /F /IM ollama.exe >nul 2>nul
 taskkill /F /IM "ollama app.exe" >nul 2>nul
-timeout /t 1 /nobreak >nul
+timeout /t 2 /nobreak >nul
 
-echo [2/3] Verification du modele ${model}...
-ollama list 2>nul | findstr "${model}" >nul
+echo.
+echo [2/3] Verification / telechargement du modele "${model}" (~${size})
+echo       Premiere fois : peut prendre plusieurs minutes selon ta connexion.
+echo       Si le modele est deja installe, c'est instantane.
+echo.
+ollama pull ${model}
 if errorlevel 1 (
-  echo     Telechargement (premiere fois uniquement, peut prendre du temps)...
-  ollama pull ${model}
+  echo.
+  echo [X] Echec du telechargement. Verifie ta connexion ou choisis un modele plus leger.
+  pause
+  exit /b 1
 )
 
+echo.
 echo [3/3] Demarrage du serveur avec CORS active...
 echo.
 echo ============================================================
 echo  Pret ! Tu peux maintenant utiliser AutoVinted.
 echo  GARDE CETTE FENETRE OUVERTE pendant que tu utilises l'app.
-echo  (Ferme-la pour arreter Ollama)
+echo  Ferme-la (ou Ctrl+C) pour arreter Ollama.
 echo ============================================================
 echo.
 set OLLAMA_ORIGINS=*
@@ -1344,10 +1371,11 @@ ollama serve
 }
 
 function buildLauncherUnix(model) {
+  const size = modelSizeHint(model);
   return `#!/usr/bin/env bash
-set -e
 echo "==============================="
 echo " AutoVinted x Ollama Launcher"
+echo " Modèle : ${model} (~${size})"
 echo "==============================="
 echo
 
@@ -1361,14 +1389,21 @@ fi
 
 echo "[1/3] Arrêt des instances Ollama existantes..."
 pkill -f "ollama serve" 2>/dev/null || true
-sleep 1
+sleep 2
 
-echo "[2/3] Vérification du modèle ${model}..."
-if ! ollama list 2>/dev/null | grep -q "${model}"; then
-  echo "    Téléchargement (première fois uniquement, peut prendre du temps)..."
-  ollama pull ${model}
+echo
+echo "[2/3] Vérification / téléchargement du modèle \\"${model}\\" (~${size})"
+echo "      Première fois : peut prendre plusieurs minutes selon ta connexion."
+echo "      Si déjà installé, c'est instantané."
+echo
+if ! ollama pull ${model}; then
+  echo
+  echo "[X] Échec du téléchargement. Vérifie ta connexion ou choisis un modèle plus léger."
+  read -p "Appuie sur Entrée pour quitter..."
+  exit 1
 fi
 
+echo
 echo "[3/3] Démarrage du serveur avec CORS activé..."
 echo
 echo "============================================================"
@@ -1383,6 +1418,16 @@ OLLAMA_ORIGINS=* ollama serve
 
 function downloadLauncher() {
   const model = state.model || OLLAMA_DEFAULT_MODEL;
+  const size = modelSizeHint(model);
+  // Avertit pour les modèles >15 Go
+  const heavy = ['llama3.2-vision:90b', 'llava:34b'];
+  if (heavy.includes(model)) {
+    const ok = confirm(
+      `⚠️ Le modèle ${model} pèse ~${size} et peut mettre plus d'1 heure à télécharger sur une connexion classique.\n\n` +
+      `Confirme pour continuer, ou clique Annuler et choisis un modèle plus léger dans le menu Modèle (ex : llama3.2-vision = 7.9 Go, gemma3:4b = 3.3 Go).`
+    );
+    if (!ok) return;
+  }
   const isWin = ollamaOS === 'windows';
   const content = isWin ? buildLauncherWindows(model) : buildLauncherUnix(model);
   const filename = isWin ? 'autovinted-launcher.bat' : 'autovinted-launcher.sh';
@@ -1395,7 +1440,7 @@ function downloadLauncher() {
   a.click();
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 1000);
-  showToast(`✓ ${filename} téléchargé`);
+  showToast(`✓ ${filename} téléchargé (modèle : ${model}, ~${size})`);
 }
 
 $('ollama-download-launcher').addEventListener('click', downloadLauncher);
