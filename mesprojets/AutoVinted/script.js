@@ -1296,7 +1296,11 @@ function setOllamaOSPick(os) {
 }
 setOllamaOSPick(ollamaOS);
 document.querySelectorAll('#ollama-os-pick .ollama-os-tab').forEach(b => {
-  b.addEventListener('click', (e) => { e.preventDefault(); setOllamaOSPick(b.dataset.os); });
+  b.addEventListener('click', (e) => {
+    e.preventDefault();
+    setOllamaOSPick(b.dataset.os);
+    refreshLauncherPreview();
+  });
 });
 
 const OLLAMA_DEFAULT_MODEL = 'llama3.2-vision';
@@ -1444,6 +1448,41 @@ function downloadLauncher() {
 }
 
 $('ollama-download-launcher').addEventListener('click', downloadLauncher);
+
+// Aperçu du contenu du launcher
+function getCurrentLauncherContent() {
+  const model = state.model || OLLAMA_DEFAULT_MODEL;
+  return ollamaOS === 'windows' ? buildLauncherWindows(model) : buildLauncherUnix(model);
+}
+function refreshLauncherPreview() {
+  const previewEl = $('ollama-launcher-preview');
+  if (previewEl.hidden) return; // ne mets à jour que s'il est ouvert
+  $('ollama-launcher-code').textContent = getCurrentLauncherContent();
+  $('ollama-launcher-filename').textContent = ollamaOS === 'windows' ? 'autovinted-launcher.bat' : 'autovinted-launcher.sh';
+}
+$('ollama-preview-launcher').addEventListener('click', () => {
+  const previewEl = $('ollama-launcher-preview');
+  const btn = $('ollama-preview-launcher');
+  if (previewEl.hidden) {
+    $('ollama-launcher-code').textContent = getCurrentLauncherContent();
+    $('ollama-launcher-filename').textContent = ollamaOS === 'windows' ? 'autovinted-launcher.bat' : 'autovinted-launcher.sh';
+    previewEl.hidden = false;
+    btn.textContent = '✕ Masquer';
+  } else {
+    previewEl.hidden = true;
+    btn.textContent = '👁 Voir le contenu';
+  }
+});
+$('ollama-launcher-copy').addEventListener('click', () => {
+  const txt = $('ollama-launcher-code').textContent;
+  navigator.clipboard.writeText(txt).then(() => {
+    const btn = $('ollama-launcher-copy');
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copié';
+    btn.classList.add('done');
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove('done'); }, 1500);
+  });
+});
 
 // Live status check while modal is open
 let ollamaStatusTimer = null;

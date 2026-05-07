@@ -300,7 +300,17 @@
               <button type="button" class="ollama-os-tab" data-os="mac">🍎 macOS</button>
               <button type="button" class="ollama-os-tab" data-os="linux">🐧 Linux</button>
             </div>
-            <button type="button" class="btn-primary btn-sm" id="ollama-download-launcher" style="margin-top:8px">⬇ Télécharger le launcher</button>
+            <div class="ollama-launcher-actions">
+              <button type="button" class="btn-primary btn-sm" id="ollama-download-launcher">⬇ Télécharger le launcher</button>
+              <button type="button" class="btn-ghost btn-sm" id="ollama-preview-launcher">👁 Voir le contenu</button>
+            </div>
+            <div class="ollama-launcher-preview" id="ollama-launcher-preview" hidden>
+              <div class="ollama-launcher-preview-head">
+                <span id="ollama-launcher-filename">autovinted-launcher.bat</span>
+                <button type="button" class="ollama-copy" id="ollama-launcher-copy">Copier</button>
+              </div>
+              <pre><code id="ollama-launcher-code"></code></pre>
+            </div>
             <div class="ollama-tip" id="ollama-launcher-hint">Une fois téléchargé, double-clique sur le fichier (Windows) ou lance <code>bash autovinted-launcher.sh</code> dans le terminal (Mac/Linux).</div>
           </div>
         </div>

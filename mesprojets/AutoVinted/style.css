@@ -1109,6 +1109,45 @@ section { margin-bottom: 24px; }
   margin: 6px 0 0;
 }
 
+.ollama-launcher-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.ollama-launcher-preview {
+  margin-top: 8px;
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+.ollama-launcher-preview[hidden] { display: none; }
+.ollama-launcher-preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: var(--card-border);
+  font-size: 0.78rem;
+  color: var(--text-2);
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+.ollama-launcher-preview pre {
+  margin: 0;
+  padding: 10px 12px;
+  max-height: 260px;
+  overflow: auto;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: var(--text);
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  white-space: pre;
+  tab-size: 2;
+}
+.ollama-launcher-preview code { background: none; padding: 0; color: inherit; }
+
 /* Manual / fallback */
 .ollama-manual {
   background: var(--bg-soft, #0e1219);
