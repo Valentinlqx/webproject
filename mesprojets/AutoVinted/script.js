@@ -235,6 +235,8 @@ Analyse les photos et rédige une annonce Vinted optimisée pour vente rapide.
 Si une info clé manque (marque, taille, état, défauts, matière), pose 1-3 questions courtes. Sinon, génère.
 N'invente jamais ce qui n'est pas visible.
 
+LIVRES : si l'article est un livre, repère l'ISBN sur la 4ème de couverture ou la page de garde et indique-le dans la description (ligne dédiée "ISBN : 978-..."). Mentionne aussi auteur, éditeur, année, format (poche/broché) si visibles.
+
 Prix idéal/rapide/min selon marque, état, demande marché 2nde main. En euros.
 
 RÉPONDS UNIQUEMENT EN JSON VALIDE, sans texte/markdown autour:
@@ -249,6 +251,8 @@ Tâche:
 1. Identifie chaque article distinct
 2. Regroupe les photos du même article
 3. Génère 1 annonce par article — PAS de questions, déduis ou utilise des valeurs génériques cohérentes
+
+LIVRES : si c'est un livre, repère l'ISBN (4ème couv ou page de garde) et indique-le dans la description ("ISBN : 978-..."). Mentionne aussi auteur, éditeur, format (poche/broché) si visibles.
 
 Description: courte, vendeuse, FINIR par ligne vide + 6-10 #hashtags minuscules sans accents.
 Prix idéal/rapide/min en euros selon marché 2nde main.
