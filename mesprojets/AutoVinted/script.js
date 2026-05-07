@@ -107,7 +107,7 @@ const PROVIDERS = {
     keyUrl: 'https://ollama.com/download',
     keyLabel: 'URL du serveur Ollama',
     keyPrefix: 'http',
-    hint: "⚙️ Nécessite Ollama installé localement. 100 % privé, 100 % gratuit, aucun token consommé. Le launcher télécharge automatiquement le modèle vision recommandé (Llama 3.2 Vision, ~7.9 Go).",
+    hint: "⚙️ 100% privé, gratuit, aucun token. ⚠️ Le modèle local (Llama 3.2 Vision 11B) est moins précis que GPT-4o/Claude/Gemini : il peut halluciner sur des détails (marques, livres). Pour des annonces critiques, préfère un fournisseur cloud.",
     // Modèle unique : Llama 3.2 Vision (11B) — meilleur compromis qualité/taille pour vision Vinted
     models: [
       { id: 'llama3.2-vision', label: 'Llama 3.2 Vision (recommandé, 7.9 Go)' },
@@ -346,8 +346,22 @@ function buildSystemPrompt() {
   const parts = [];
   parts.push('Tu es un vendeur Vinted humain. Style: naturel, vendeur, phrases courtes, jamais "IA marketing".');
   parts.push('Analyse les photos et rédige une annonce Vinted optimisée pour vente rapide.');
-  parts.push('Si une info clé manque, pose 1-3 questions courtes. Sinon, génère. N\'invente jamais ce qui n\'est pas visible.');
-  parts.push('LIVRES : si c\'est un livre, remplis "isbn" et mentionne auteur/éditeur/format dans la description.');
+
+  parts.push(`MÉTHODE OBLIGATOIRE :
+1. IDENTIFIE D'ABORD le type d'objet visible : livre, vêtement, chaussure, sac, bijou, électronique, jouet, déco, vaisselle, etc. Regarde forme, format, texte visible, logo.
+2. Lis TOUT le texte visible sur les photos (titre, auteur, marque, étiquette, ISBN, taille…).
+3. Génère l'annonce UNIQUEMENT à partir de ce que tu vois réellement.
+
+INTERDIT ABSOLU :
+- N'invente JAMAIS de marque, taille, matière ou catégorie qui n'est pas clairement visible.
+- Si tu hésites entre "livre" et "vêtement" ou n'importe quoi d'autre, utilise action="ask" pour demander à l'utilisateur.
+- Pas de "Dolce Gabbana", "Nike", "Zara" etc. sans logo/étiquette visible.`);
+
+  parts.push(`PAR TYPE :
+- LIVRE : titre exact, auteur, éditeur (Pocket/Folio/Gallimard…), ISBN si visible (4ème couv ou page de garde), genre, état. categorie="Livre". marque=éditeur.
+- VÊTEMENT : marque (étiquette), taille (étiquette), matière (composition), couleur, coupe.
+- CHAUSSURE : marque, pointure (semelle), modèle, couleur.
+- AUTRE : marque visible, dimensions/capacité si pertinent.`);
 
   const hashtagsRule = f.hashtags
     ? 'La description finit par une ligne vide puis 6-10 #hashtags minuscules sans accents.'
@@ -375,8 +389,16 @@ function buildBulkSystemPrompt() {
   const parts = [];
   parts.push('Tu es un vendeur Vinted humain. Style: naturel, vendeur, court.');
   parts.push('Photos NUMÉROTÉES (Photo 0, 1, 2…). Plusieurs photos peuvent montrer le MÊME article.');
-  parts.push('Tâche : identifie chaque article distinct, regroupe les photos, génère 1 annonce par article. PAS de questions, déduis.');
-  parts.push('LIVRES : si c\'est un livre, remplis "isbn" et mentionne auteur/éditeur/format dans la description.');
+  parts.push('Tâche : identifie chaque article distinct, regroupe les photos, génère 1 annonce par article.');
+
+  parts.push(`MÉTHODE OBLIGATOIRE pour chaque article :
+1. IDENTIFIE le type : livre, vêtement, chaussure, sac, électronique, jouet, déco… Regarde forme et texte.
+2. Lis TOUT le texte visible (titre, marque, étiquette, ISBN, taille…).
+3. Génère uniquement à partir du visible. INTERDIT d'inventer une marque/taille/matière non visible.
+- LIVRE : titre, auteur, éditeur (Pocket/Folio…), ISBN si visible, categorie="Livre", marque=éditeur.
+- VÊTEMENT : marque (étiquette), taille (étiquette), matière, couleur.
+- CHAUSSURE : marque, pointure, modèle.
+Si tu n'es vraiment pas sûr du type d'objet, mets categorie="Inconnu" et donne une description neutre basée sur ce que tu vois.`);
 
   const hashtagsRule = f.hashtags
     ? 'Description finit par ligne vide + 6-10 #hashtags minuscules sans accents.'
