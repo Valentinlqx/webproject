@@ -1335,16 +1335,10 @@ echo ===============================
 echo.
 
 where ollama >nul 2>nul
-if errorlevel 1 (
-  echo [X] Ollama n'est pas installe.
-  echo     Telecharge-le sur https://ollama.com/download
-  echo.
-  pause
-  exit /b 1
-)
+if errorlevel 1 goto :no_ollama
 
 echo [1/4] Arret des instances Ollama existantes...
-echo       (Necessaire pour reactiver CORS pour cette page)
+echo       Necessaire pour activer CORS pour cette page.
 taskkill /F /IM ollama.exe >nul 2>nul
 taskkill /F /IM "ollama app.exe" >nul 2>nul
 taskkill /F /IM "ollama_llama_server.exe" >nul 2>nul
@@ -1353,20 +1347,11 @@ timeout /t 3 /nobreak >nul
 echo.
 echo [2/4] Verification / telechargement du modele "${model}" (~${size})
 echo       Premiere fois : peut prendre plusieurs minutes selon ta connexion.
-echo       Si le modele est deja installe, c'est instantane.
+echo       Si deja installe, c'est instantane.
 echo.
 set OLLAMA_HOST=127.0.0.1:11434
 ollama pull ${model}
-if errorlevel 1 (
-  echo.
-  echo [X] Echec du telechargement.
-  echo     - Verifie ta connexion Internet
-  echo     - Le modele "${model}" existe-t-il ? (tape: ollama list)
-  echo     - Choisis un modele plus leger dans AutoVinted
-  echo.
-  pause
-  exit /b 1
-)
+if errorlevel 1 goto :pull_error
 
 echo.
 echo [3/4] Configuration de CORS...
@@ -1376,24 +1361,42 @@ echo.
 echo [4/4] Demarrage du serveur Ollama...
 echo.
 echo ============================================================
-echo  Le serveur va tourner ici. Tu peux utiliser AutoVinted.
+echo  Le serveur tourne maintenant ici. Tu peux utiliser AutoVinted.
 echo  GARDE CETTE FENETRE OUVERTE pendant que tu utilises l'app.
-echo  Ferme-la (ou Ctrl+C) pour arreter Ollama.
+echo  Ferme-la ou Ctrl+C pour arreter Ollama.
 echo ============================================================
 echo.
 ollama serve
+goto :server_stopped
 
-REM Si on arrive ici, c'est que ollama serve a quitte/crashe
+:no_ollama
+echo [X] Ollama n'est pas installe.
+echo     Telecharge-le sur https://ollama.com/download
+echo.
+pause
+exit /b 1
+
+:pull_error
+echo.
+echo [X] Echec du telechargement du modele.
+echo     - Verifie ta connexion Internet.
+echo     - Verifie que le modele existe : ouvre cmd et tape : ollama list
+echo     - Choisis un modele plus leger dans AutoVinted.
+echo.
+pause
+exit /b 1
+
+:server_stopped
 echo.
 echo ============================================================
-echo  /!\\ Ollama s'est arrete (code: %errorlevel%)
+echo  /!\\ Ollama s'est arrete.
 echo.
 echo  Causes possibles :
-echo    - Le port 11434 est deja utilise (Ollama Desktop tourne deja)
-echo      -^> Quitte Ollama dans la zone de notification (icone llama)
-echo         puis relance ce launcher.
-echo    - Antivirus/parefeu bloque ollama.exe
-echo    - Erreur affichee plus haut dans cette fenetre
+echo    - Le port 11434 est deja utilise par Ollama Desktop.
+echo      -^> Clic droit sur l'icone llama dans la zone de notification,
+echo         puis Quit Ollama. Relance ce launcher ensuite.
+echo    - Antivirus / parefeu bloque ollama.exe.
+echo    - Erreur affichee plus haut dans cette fenetre.
 echo ============================================================
 echo.
 pause
