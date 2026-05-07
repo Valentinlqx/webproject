@@ -985,6 +985,132 @@ section { margin-bottom: 24px; }
 }
 .btn-sm[hidden] { display: none; }
 
+/* ── Ollama guide ── */
+.ollama-guide {
+  background: var(--bg-soft, #0e1219);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  margin: 4px 0;
+  overflow: hidden;
+}
+.ollama-guide[hidden] { display: none; }
+.ollama-guide > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text);
+  user-select: none;
+}
+.ollama-guide > summary::-webkit-details-marker { display: none; }
+.ollama-guide > summary:hover { background: var(--card-border); }
+.ollama-guide-chevron {
+  transition: transform 0.2s;
+  color: var(--text-2);
+  font-size: 0.9rem;
+}
+.ollama-guide[open] .ollama-guide-chevron { transform: rotate(180deg); }
+
+.ollama-steps {
+  list-style: none;
+  padding: 0 14px 14px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-top: 1px solid var(--card-border);
+  padding-top: 14px;
+}
+.ollama-steps li { display: flex; flex-direction: column; gap: 6px; }
+.ollama-steps li strong {
+  font-size: 0.9rem;
+  color: var(--text);
+  font-weight: 700;
+}
+.ollama-steps li p {
+  font-size: 0.84rem;
+  color: var(--text-2);
+  line-height: 1.5;
+  margin: 0;
+}
+.ollama-steps li p code,
+.ollama-steps li p a {
+  color: var(--text);
+}
+.ollama-steps li p code {
+  background: var(--card-border);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+.ollama-tip {
+  font-style: italic;
+  font-size: 0.78rem !important;
+  color: var(--text-2) !important;
+  opacity: 0.85;
+}
+
+.ollama-cmd {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin: 4px 0;
+}
+.ollama-cmd code {
+  flex: 1;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.82rem;
+  color: var(--text);
+  background: none;
+  padding: 0;
+  word-break: break-all;
+  align-self: center;
+}
+.ollama-copy {
+  background: none;
+  border: 1px solid var(--card-border);
+  color: var(--text-2);
+  font-size: 0.74rem;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.15s, border-color 0.15s;
+}
+.ollama-copy:hover { color: var(--text); border-color: var(--text-2); }
+.ollama-copy.done { color: #10b981; border-color: #10b981; }
+
+.ollama-os-tabs {
+  display: flex;
+  gap: 4px;
+  margin: 4px 0 2px;
+  flex-wrap: wrap;
+}
+.ollama-os-tab {
+  background: none;
+  border: 1px solid var(--card-border);
+  color: var(--text-2);
+  font-size: 0.76rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.ollama-os-tab:hover { color: var(--text); }
+.ollama-os-tab.active {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
 /* ── Feature toggles ── */
 .features-list {
   display: flex;

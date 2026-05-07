@@ -216,6 +216,50 @@
         <input type="password" id="api-key" placeholder="..." />
         <span class="field-hint" id="apikey-hint">Stockée uniquement dans ton navigateur. <a id="apikey-link" href="#" target="_blank" rel="noopener">Obtenir une clé →</a></span>
       </label>
+
+      <details class="ollama-guide" id="ollama-guide" hidden>
+        <summary>
+          <span>📖 Guide Ollama étape par étape</span>
+          <span class="ollama-guide-chevron">▾</span>
+        </summary>
+        <ol class="ollama-steps">
+          <li>
+            <strong>1. Installe Ollama</strong>
+            <p>Télécharge l'app pour ton OS sur <a href="https://ollama.com/download" target="_blank" rel="noopener">ollama.com/download</a> et installe-la. Ollama tourne en tâche de fond.</p>
+          </li>
+          <li>
+            <strong>2. Tire un modèle vision</strong>
+            <p>Ouvre ton terminal et lance :</p>
+            <div class="ollama-cmd"><code id="ollama-cmd-pull">ollama pull llama3.2-vision</code><button type="button" class="ollama-copy" data-copy-target="ollama-cmd-pull">Copier</button></div>
+            <p class="ollama-tip">Alternatives plus légères : <code>llava</code> (4 Go), <code>minicpm-v</code> (5 Go), <code>gemma3:4b</code> (3 Go).</p>
+          </li>
+          <li>
+            <strong>3. Autorise cette page (CORS)</strong>
+            <p>Si tu ouvres AutoVinted depuis une URL distante (github.io, etc.), Ollama doit être lancé avec une variable d'environnement. Sinon, saute cette étape.</p>
+            <div class="ollama-os-tabs" id="ollama-os-tabs">
+              <button type="button" class="ollama-os-tab" data-os="mac">macOS / Linux</button>
+              <button type="button" class="ollama-os-tab" data-os="win-ps">Windows (PowerShell)</button>
+              <button type="button" class="ollama-os-tab" data-os="win-cmd">Windows (CMD)</button>
+            </div>
+            <div class="ollama-cmd"><code id="ollama-cmd-cors">OLLAMA_ORIGINS=* ollama serve</code><button type="button" class="ollama-copy" data-copy-target="ollama-cmd-cors">Copier</button></div>
+            <p class="ollama-tip">Sur macOS, tu peux aussi définir la variable globalement :
+              <code>launchctl setenv OLLAMA_ORIGINS "*"</code> puis redémarre Ollama.</p>
+          </li>
+          <li>
+            <strong>4. Vérifie l'URL du serveur</strong>
+            <p>Le champ ci-dessus doit pointer vers ton serveur. Par défaut : <code>http://localhost:11434</code>.</p>
+          </li>
+          <li>
+            <strong>5. Charge tes modèles installés</strong>
+            <p>Clique sur <strong>↻ Charger les modèles installés</strong> juste sous le sélecteur de modèle. Choisis le modèle souhaité.</p>
+          </li>
+          <li>
+            <strong>6. Enregistre et profite</strong>
+            <p>Clique sur <strong>Enregistrer</strong>. C'est tout — tes annonces sont maintenant générées 100 % en local, gratuitement, sans envoyer aucune photo dans le cloud.</p>
+          </li>
+        </ol>
+      </details>
+
       <label class="field" id="model-field" hidden>
         <span class="field-label">Modèle</span>
         <select id="model-select"></select>

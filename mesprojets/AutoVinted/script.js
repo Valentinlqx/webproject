@@ -1262,7 +1262,50 @@ function syncProviderUI() {
 
   // Bouton "charger modèles installés" pour Ollama
   $('ollama-fetch-models').hidden = !p.needsHost;
+  $('ollama-guide').hidden = !p.needsHost;
 }
+
+// ─── Ollama guide : OS tabs + copy buttons ───────────
+const OLLAMA_CORS_CMD = {
+  'mac':     'OLLAMA_ORIGINS=* ollama serve',
+  'win-ps':  '$env:OLLAMA_ORIGINS="*"; ollama serve',
+  'win-cmd': 'set OLLAMA_ORIGINS=* && ollama serve',
+};
+
+function detectDefaultOS() {
+  const ua = (navigator.userAgent || '').toLowerCase();
+  if (ua.includes('windows')) return 'win-ps';
+  return 'mac';
+}
+
+function setOllamaOSTab(os) {
+  document.querySelectorAll('#ollama-os-tabs .ollama-os-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.os === os);
+  });
+  $('ollama-cmd-cors').textContent = OLLAMA_CORS_CMD[os] || OLLAMA_CORS_CMD.mac;
+}
+setOllamaOSTab(detectDefaultOS());
+
+document.querySelectorAll('#ollama-os-tabs .ollama-os-tab').forEach(b => {
+  b.addEventListener('click', (e) => {
+    e.preventDefault();
+    setOllamaOSTab(b.dataset.os);
+  });
+});
+
+document.querySelectorAll('.ollama-copy').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    const target = $(btn.dataset.copyTarget);
+    if (!target) return;
+    navigator.clipboard.writeText(target.textContent).then(() => {
+      const orig = btn.textContent;
+      btn.textContent = '✓ Copié';
+      btn.classList.add('done');
+      setTimeout(() => { btn.textContent = orig; btn.classList.remove('done'); }, 1500);
+    });
+  });
+});
 providerSelect.addEventListener('change', syncProviderUI);
 
 // ─── Ollama : récupérer la liste des modèles installés ─────
