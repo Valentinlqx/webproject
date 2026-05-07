@@ -533,6 +533,7 @@ function createBulkCard(photos, index) {
         <div class="bulk-item-meta">${photoArr.length} photo${photoArr.length > 1 ? 's' : ''}</div>
       </div>
       <span class="bulk-item-status"><span class="spinner-sm"></span></span>
+      <button class="bulk-item-delete" title="Supprimer cet article">✕</button>
     </div>
     <div class="bulk-item-body"></div>
   `;
@@ -541,6 +542,12 @@ function createBulkCard(photos, index) {
   const metaEl = el.querySelector('.bulk-item-meta');
   const statusEl = el.querySelector('.bulk-item-status');
   const bodyEl = el.querySelector('.bulk-item-body');
+  const deleteBtn = el.querySelector('.bulk-item-delete');
+
+  deleteBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    el.remove();
+  });
 
   head.addEventListener('click', () => {
     if (bodyEl.children.length > 0) el.classList.toggle('open');
@@ -549,7 +556,7 @@ function createBulkCard(photos, index) {
   return {
     el,
     fillListing(l) {
-      titleEl.textContent = l.title || `Article ${index + 1}`;
+      titleEl.innerHTML = `<span class="bulk-item-num">#${index + 1}</span> ${escapeHtml(l.title || `Article ${index + 1}`)}`;
       const priceTxt = l.prices?.ideal || '—';
       const etatTxt = l.details?.etat || '—';
       metaEl.textContent = `${priceTxt} • ${etatTxt} • ${photoArr.length} photo${photoArr.length > 1 ? 's' : ''}`;
@@ -559,7 +566,7 @@ function createBulkCard(photos, index) {
       bindBulkBodyActions(bodyEl, l);
     },
     setError(msg) {
-      titleEl.textContent = `Article ${index + 1}`;
+      titleEl.innerHTML = `<span class="bulk-item-num">#${index + 1}</span> Article ${index + 1}`;
       metaEl.textContent = msg.length > 60 ? msg.slice(0, 60) + '…' : msg;
       statusEl.className = 'bulk-item-status error';
       statusEl.textContent = '⚠ Erreur';

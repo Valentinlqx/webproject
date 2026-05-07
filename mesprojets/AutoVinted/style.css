@@ -335,6 +335,39 @@ section { margin-bottom: 24px; }
   animation: spin 0.7s linear infinite;
 }
 
+.bulk-item-num {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-2);
+  background: var(--card-border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
+.bulk-item-delete {
+  background: none;
+  border: none;
+  color: var(--text-2);
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
+  line-height: 1;
+}
+.bulk-item:hover .bulk-item-delete,
+.bulk-item.open .bulk-item-delete {
+  opacity: 1;
+}
+.bulk-item-delete:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
 .bulk-item-body {
   padding: 4px 14px 14px;
   border-top: 1px solid var(--border);
