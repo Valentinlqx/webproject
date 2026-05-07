@@ -228,6 +228,22 @@ const JPEG_QUALITY = 0.80;
 const maxPhotos = () => state.mode === 'bulk' ? MAX_PHOTOS_BULK : MAX_PHOTOS_SINGLE;
 
 // ─── System prompts (compacts pour économiser les tokens) ─────
+// Règles Vinted (résumé des CGU/CGV vinted.fr) injectées dans les prompts
+const VINTED_POLICY = `RÈGLES VINTED (détecte si visible et signale dans "warnings"):
+- Contrefaçons / répliques / faux (sacs, sneakers, montres de luxe, parfums)
+- Produits sans marque vendus comme luxe ; logos non authentiques
+- Sous-vêtements/chaussettes/maillots de bain D'OCCASION (interdit ; neufs avec étiquette OK)
+- Cosmétiques/parfums OUVERTS ou usagés ; médicaments, compléments, dispositifs médicaux
+- Aliments, boissons, alcool, tabac, e-cigarettes, vapes, CBD
+- Armes (vraies/répliques), couteaux, gaz, munitions, articles dangereux
+- Animaux, produits issus d'espèces protégées (ivoire, fourrure, écaille)
+- Contenu adulte, jouets sexuels usagés, lingerie d'occasion sexualisée
+- Articles cassés/non fonctionnels non clairement signalés
+- Billets, cartes cadeaux, devises, services, NFT
+- Produits rappelés ou non conformes CE
+- Textiles avec gros défauts non visibles sur photo
+Signale aussi si la photo n'est clairement pas de toi (image stock, fond pro évident).`;
+
 const SYSTEM_PROMPT = `Tu es un vendeur Vinted humain. Style: naturel, vendeur, phrases courtes, jamais "IA marketing".
 
 Analyse les photos et rédige une annonce Vinted optimisée pour vente rapide.
@@ -241,8 +257,11 @@ Prix idéal/rapide/min selon marque, état, demande marché 2nde main. En euros.
 
 RÈGLE ABSOLUE : "title" et "description" doivent être prêts à coller directement sur Vinted, SANS aucun conseil, recommandation, astuce ou mention de mesures à faire. Les conseils vont UNIQUEMENT dans "tips". La description se termine par une ligne vide puis 6-10 #hashtags minuscules sans accents.
 
+${VINTED_POLICY}
+"warnings" = tableau de strings courtes (1 phrase) signalant uniquement des risques RÉELS détectés. Tableau vide si rien.
+
 RÉPONDS UNIQUEMENT EN JSON VALIDE, sans texte/markdown autour:
-{"action":"ask"|"generate","message":"...","listing":null|{"title":"max 60 chars","description":"courte, vendeuse, retours ligne, FINIR par ligne vide + 6-10 #hashtags","details":{"marque":"","taille":"","etat":"Neuf avec étiquette|Neuf sans étiquette|Très bon état|Bon état|Satisfaisant","couleur":"","categorie":"","matiere":"","isbn":"(livres uniquement, sinon vide)"},"prices":{"ideal":"15€","rapide":"10€","minimum":"8€"},"tips":["conseils pratiques pour le vendeur, jamais dans la description"]}}`;
+{"action":"ask"|"generate","message":"...","listing":null|{"title":"max 60 chars","description":"courte, vendeuse, retours ligne, FINIR par ligne vide + 6-10 #hashtags","details":{"marque":"","taille":"","etat":"Neuf avec étiquette|Neuf sans étiquette|Très bon état|Bon état|Satisfaisant","couleur":"","categorie":"","matiere":"","isbn":"(livres uniquement, sinon vide)"},"prices":{"ideal":"15€","rapide":"10€","minimum":"8€"},"tips":["conseils pratiques pour le vendeur, jamais dans la description"],"warnings":["risques Vinted ou []"]}}`;
 
 // MODE LOT — auto-détection d'articles parmi N photos
 const BULK_SYSTEM_PROMPT = `Tu es un vendeur Vinted humain. Style: naturel, vendeur, court.
@@ -258,10 +277,13 @@ LIVRES : si c'est un livre, remplis le champ "isbn" dans les détails (repère l
 
 RÈGLE ABSOLUE : "title" et "description" doivent être prêts à coller directement sur Vinted, SANS aucun conseil, recommandation, astuce ou mention de mesures à faire. Les conseils vont UNIQUEMENT dans "tips". La description se termine par une ligne vide puis 6-10 #hashtags minuscules sans accents.
 
+${VINTED_POLICY}
+"warnings" = tableau de strings courtes signalant uniquement des risques RÉELS pour cet article. Tableau vide sinon.
+
 Prix idéal/rapide/min en euros selon marché 2nde main.
 
 JSON UNIQUEMENT, sans texte/markdown autour:
-{"listings":[{"photo_indices":[0,1],"title":"max 60 chars","description":"...","details":{"marque":"","taille":"","etat":"Neuf|Neuf sans étiquette|Très bon état|Bon état|Satisfaisant","couleur":"","categorie":"","matiere":"","isbn":"(livres uniquement, sinon vide)"},"prices":{"ideal":"15€","rapide":"10€","minimum":"8€"},"tips":[]}]}
+{"listings":[{"photo_indices":[0,1],"title":"max 60 chars","description":"...","details":{"marque":"","taille":"","etat":"Neuf|Neuf sans étiquette|Très bon état|Bon état|Satisfaisant","couleur":"","categorie":"","matiere":"","isbn":"(livres uniquement, sinon vide)"},"prices":{"ideal":"15€","rapide":"10€","minimum":"8€"},"tips":[],"warnings":[]}]}
 
 photo_indices = numéros des photos (0-indexés). Chaque photo dans UNE seule annonce.`;
 
@@ -558,12 +580,14 @@ function createBulkCard(photos, index) {
   return {
     el,
     fillListing(l) {
-      titleEl.innerHTML = `<span class="bulk-item-num">#${index + 1}</span> ${escapeHtml(l.title || `Article ${index + 1}`)}`;
+      const hasWarn = Array.isArray(l.warnings) && l.warnings.filter(Boolean).length > 0;
+      const warnBadge = hasWarn ? '<span class="bulk-item-warn" title="Risque règles Vinted">⚠</span>' : '';
+      titleEl.innerHTML = `<span class="bulk-item-num">#${index + 1}</span> ${warnBadge} ${escapeHtml(l.title || `Article ${index + 1}`)}`;
       const priceTxt = l.prices?.ideal || '—';
       const etatTxt = l.details?.etat || '—';
       metaEl.textContent = `${priceTxt} • ${etatTxt} • ${photoArr.length} photo${photoArr.length > 1 ? 's' : ''}`;
-      statusEl.className = 'bulk-item-status done';
-      statusEl.innerHTML = '✓ <span class="bulk-chevron">▾</span>';
+      statusEl.className = 'bulk-item-status done' + (hasWarn ? ' has-warn' : '');
+      statusEl.innerHTML = (hasWarn ? '⚠ ' : '✓ ') + '<span class="bulk-chevron">▾</span>';
       bodyEl.innerHTML = renderBulkBody(l, index, photoArr);
       bindBulkBodyActions(bodyEl, l);
     },
@@ -589,8 +613,18 @@ function renderBulkBody(l, index, photoArr) {
     ? `<div class="bulk-item-thumbs">${photoArr.map(p => `<img src="${p.dataUrl}" alt="">`).join('')}</div>`
     : '';
 
+  const warnings = Array.isArray(l.warnings) ? l.warnings.filter(Boolean) : [];
+  const warningsHtml = warnings.length
+    ? `<div class="result-warnings">
+         <div class="result-warnings-head">⚠ Attention — règles Vinted</div>
+         <ul>${warnings.map(w => `<li>${escapeHtml(w)}</li>`).join('')}</ul>
+         <div class="result-warnings-foot">Risque de retrait par Vinted — à vérifier avant publication.</div>
+       </div>`
+    : '';
+
   return `
     ${thumbs}
+    ${warningsHtml}
     <div class="result-block">
       <div class="result-block-head">
         <span class="result-label">Titre</span>
@@ -977,6 +1011,19 @@ function renderListing(listing) {
     $('r-tips-block').hidden = false;
   } else {
     $('r-tips-block').hidden = true;
+  }
+
+  const warnings = Array.isArray(listing.warnings) ? listing.warnings.filter(Boolean) : [];
+  const warnEl = $('r-warnings');
+  if (warnings.length) {
+    warnEl.innerHTML = `
+      <div class="result-warnings-head">⚠ Attention — règles Vinted</div>
+      <ul>${warnings.map(w => `<li>${escapeHtml(w)}</li>`).join('')}</ul>
+      <div class="result-warnings-foot">Ton annonce risque d'être retirée par Vinted. Vérifie avant de publier.</div>
+    `;
+    warnEl.hidden = false;
+  } else {
+    warnEl.hidden = true;
   }
 
   const srcBlock = $('r-source-block');
