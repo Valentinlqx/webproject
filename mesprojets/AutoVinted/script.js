@@ -149,7 +149,7 @@ FORMAT DE RÉPONSE — tu réponds TOUJOURS en JSON valide avec ce schéma :
   "message": "ton message si action=ask, sinon court résumé",
   "listing": null | {
     "title": "titre Vinted optimisé (max 60 caractères, sans emojis abusifs)",
-    "description": "description prête à copier-coller, naturelle, courte, vendeuse, avec retours ligne",
+    "description": "description prête à copier-coller, naturelle, courte, vendeuse, avec retours ligne. TERMINE TOUJOURS par une ligne vide puis 6 à 10 hashtags pertinents séparés par des espaces (ex: #marque #typeProduit #couleur #style #occasion #saison) — tout en minuscules, sans accents, sans espaces dans les tags",
     "details": {
       "marque": "...",
       "taille": "...",
