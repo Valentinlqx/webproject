@@ -107,19 +107,10 @@ const PROVIDERS = {
     keyUrl: 'https://ollama.com/download',
     keyLabel: 'URL du serveur Ollama',
     keyPrefix: 'http',
-    hint: "⚙️ Nécessite Ollama installé et lancé localement. 100 % privé, 100 % gratuit, aucun token consommé. Lance Ollama puis tire un modèle vision (ex: ollama pull llama3.2-vision). Si la page ne tourne pas en local, lance Ollama avec OLLAMA_ORIGINS=* ollama serve.",
+    hint: "⚙️ Nécessite Ollama installé localement. 100 % privé, 100 % gratuit, aucun token consommé. Le launcher télécharge automatiquement le modèle vision recommandé (Llama 3.2 Vision, ~7.9 Go).",
+    // Modèle unique : Llama 3.2 Vision (11B) — meilleur compromis qualité/taille pour vision Vinted
     models: [
-      { id: 'llama3.2-vision',       label: 'Llama 3.2 Vision (11B, défaut)' },
-      { id: 'llama3.2-vision:11b',   label: 'Llama 3.2 Vision 11B' },
-      { id: 'llama3.2-vision:90b',   label: 'Llama 3.2 Vision 90B (gros)' },
-      { id: 'llava',                 label: 'LLaVA (par défaut)' },
-      { id: 'llava:13b',             label: 'LLaVA 13B' },
-      { id: 'llava:34b',             label: 'LLaVA 34B' },
-      { id: 'bakllava',              label: 'BakLLaVA' },
-      { id: 'minicpm-v',             label: 'MiniCPM-V' },
-      { id: 'qwen2.5vl',             label: 'Qwen2.5-VL' },
-      { id: 'gemma3:4b',             label: 'Gemma 3 4B (vision)' },
-      { id: 'gemma3:12b',            label: 'Gemma 3 12B (vision)' },
+      { id: 'llama3.2-vision', label: 'Llama 3.2 Vision (recommandé, 7.9 Go)' },
     ],
     call: callOllama,
   },
@@ -1242,7 +1233,8 @@ function syncProviderUI() {
     modelSelect.appendChild(opt);
   });
   modelSelect.value = getStoredModel(id);
-  modelField.hidden = p.models.length <= 1 && !p.needsHost;
+  // Cache la liste si un seul modèle (cas Ollama : verrouillé sur le meilleur modèle pour AutoVinted)
+  modelField.hidden = p.models.length <= 1;
 
   // API key OU URL host
   apikeyField.hidden = !(p.needsKey || p.needsHost);
@@ -1260,8 +1252,8 @@ function syncProviderUI() {
     }
   }
 
-  // Bouton "charger modèles installés" + lien guide pour Ollama
-  $('ollama-fetch-models').hidden = !p.needsHost;
+  // Lien guide pour Ollama (le bouton "fetch models" est inutile : modèle unique verrouillé)
+  $('ollama-fetch-models').hidden = true;
   $('ollama-open-guide').hidden = !p.needsHost;
 }
 
@@ -1305,23 +1297,9 @@ document.querySelectorAll('#ollama-os-pick .ollama-os-tab').forEach(b => {
 
 const OLLAMA_DEFAULT_MODEL = 'llama3.2-vision';
 
-// Tailles approximatives des modèles (informationnel)
-const MODEL_SIZES = {
-  'llama3.2-vision':       '7.9 Go',
-  'llama3.2-vision:11b':   '7.9 Go',
-  'llama3.2-vision:90b':   '55 Go',
-  'llava':                 '4.7 Go',
-  'llava:13b':             '8.0 Go',
-  'llava:34b':             '20 Go',
-  'bakllava':              '4.7 Go',
-  'minicpm-v':             '5.5 Go',
-  'qwen2.5vl':             '6 Go',
-  'gemma3:4b':             '3.3 Go',
-  'gemma3:12b':            '8.1 Go',
-};
-function modelSizeHint(model) {
-  return MODEL_SIZES[model] || '? Go';
-}
+// Taille du modèle vision recommandé pour AutoVinted
+const MODEL_SIZES = { 'llama3.2-vision': '7.9 Go' };
+function modelSizeHint(model) { return MODEL_SIZES[model] || '? Go'; }
 
 function buildLauncherWindows(model) {
   const size = modelSizeHint(model);
@@ -1475,17 +1453,9 @@ read -p "Appuie sur Entrée pour quitter..."
 }
 
 function downloadLauncher() {
-  const model = state.model || OLLAMA_DEFAULT_MODEL;
+  // Modèle verrouillé pour AutoVinted : le mieux adapté pour vision Vinted
+  const model = OLLAMA_DEFAULT_MODEL;
   const size = modelSizeHint(model);
-  // Avertit pour les modèles >15 Go
-  const heavy = ['llama3.2-vision:90b', 'llava:34b'];
-  if (heavy.includes(model)) {
-    const ok = confirm(
-      `⚠️ Le modèle ${model} pèse ~${size} et peut mettre plus d'1 heure à télécharger sur une connexion classique.\n\n` +
-      `Confirme pour continuer, ou clique Annuler et choisis un modèle plus léger dans le menu Modèle (ex : llama3.2-vision = 7.9 Go, gemma3:4b = 3.3 Go).`
-    );
-    if (!ok) return;
-  }
   const isWin = ollamaOS === 'windows';
   const content = isWin ? buildLauncherWindows(model) : buildLauncherUnix(model);
   const filename = isWin ? 'autovinted-launcher.bat' : 'autovinted-launcher.sh';
@@ -1498,15 +1468,15 @@ function downloadLauncher() {
   a.click();
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 1000);
-  showToast(`✓ ${filename} téléchargé (modèle : ${model}, ~${size})`);
+  showToast(`✓ ${filename} téléchargé (Llama 3.2 Vision, ~${size})`);
 }
 
 $('ollama-download-launcher').addEventListener('click', downloadLauncher);
 
 // Aperçu du contenu du launcher
 function getCurrentLauncherContent() {
-  const model = state.model || OLLAMA_DEFAULT_MODEL;
-  return ollamaOS === 'windows' ? buildLauncherWindows(model) : buildLauncherUnix(model);
+  // Même modèle verrouillé que pour le téléchargement
+  return ollamaOS === 'windows' ? buildLauncherWindows(OLLAMA_DEFAULT_MODEL) : buildLauncherUnix(OLLAMA_DEFAULT_MODEL);
 }
 function refreshLauncherPreview() {
   const previewEl = $('ollama-launcher-preview');
