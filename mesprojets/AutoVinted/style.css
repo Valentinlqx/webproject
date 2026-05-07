@@ -539,6 +539,8 @@ section { margin-bottom: 24px; }
 }
 .field-hint a { color: var(--text); text-decoration: underline; }
 
+.field[hidden] { display: none; }
+
 .history-list {
   display: flex;
   flex-direction: column;

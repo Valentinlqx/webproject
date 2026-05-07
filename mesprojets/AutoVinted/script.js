@@ -5,7 +5,8 @@
 // ─── State ───────────────────────────────────────────
 const state = {
   photos: [],          // [{ id, file, dataUrl }]
-  conversation: [],    // [{ role, content }] — for OpenAI messages
+  conversation: [],    // [{ role, content }] — messages
+  provider: localStorage.getItem('av-provider') || 'pollinations',
   apiKey: localStorage.getItem('av-api-key') || '',
   model: localStorage.getItem('av-model') || 'gpt-4o',
   history: JSON.parse(localStorage.getItem('av-history') || '[]'),
@@ -155,7 +156,7 @@ function renderPreviews() {
 
 // ─── Analyse (1er appel) ─────────────────────────────
 analyzeBtn.addEventListener('click', async () => {
-  if (!checkApiKey()) return;
+  if (!checkProvider()) return;
   if (state.photos.length === 0) return;
 
   setBtnLoading(analyzeBtn, true, 'Analyse...');
@@ -172,7 +173,7 @@ analyzeBtn.addEventListener('click', async () => {
   ];
 
   try {
-    const response = await callOpenAI();
+    const response = await callAI();
     handleAIResponse(response);
   } catch (err) {
     showToast('Erreur : ' + err.message);
@@ -199,7 +200,7 @@ async function sendUserMessage(text) {
 
   const thinking = addBubble('thinking');
   try {
-    const response = await callOpenAI();
+    const response = await callAI();
     thinking.remove();
     handleAIResponse(response);
   } catch (err) {
@@ -221,7 +222,12 @@ function addBubble(type, text = '') {
   return el;
 }
 
-// ─── OpenAI call ─────────────────────────────────────
+// ─── AI call (dispatch on provider) ──────────────────
+async function callAI() {
+  if (state.provider === 'openai') return callOpenAI();
+  return callPollinations();
+}
+
 async function callOpenAI() {
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -245,7 +251,46 @@ async function callOpenAI() {
   const data = await res.json();
   const content = data.choices[0].message.content;
   state.conversation.push({ role: 'assistant', content });
-  return JSON.parse(content);
+  return parseJSON(content);
+}
+
+// Pollinations.ai — gratuit, sans clé, vision via openai-large
+async function callPollinations() {
+  const res = await fetch('https://text.pollinations.ai/openai', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'openai-large',
+      messages: state.conversation,
+      temperature: 0.7,
+      max_tokens: 1500,
+      referrer: 'autovinted',
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Service IA gratuit indisponible (${res.status}). Réessaie ou passe à OpenAI dans les paramètres.`);
+  }
+  const data = await res.json();
+  const content = data.choices?.[0]?.message?.content || '';
+  state.conversation.push({ role: 'assistant', content });
+  return parseJSON(content);
+}
+
+// Parse JSON tolerantly — Pollinations may wrap in markdown code blocks
+function parseJSON(text) {
+  try { return JSON.parse(text); } catch {}
+  // strip ```json ... ``` fences
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fenced) {
+    try { return JSON.parse(fenced[1].trim()); } catch {}
+  }
+  // grab first {...} block
+  const braced = text.match(/\{[\s\S]*\}/);
+  if (braced) {
+    try { return JSON.parse(braced[0]); } catch {}
+  }
+  throw new Error('Réponse IA invalide. Réessaie.');
 }
 
 // ─── Handle AI response ──────────────────────────────
@@ -347,17 +392,32 @@ $('restart-btn').addEventListener('click', () => {
 
 // ─── Settings ────────────────────────────────────────
 const settingsModal = $('settings-modal');
+const providerSelect = $('provider-select');
+const apikeyField = $('apikey-field');
+const modelField = $('model-field');
+
+function syncProviderUI() {
+  const isOpenAI = providerSelect.value === 'openai';
+  apikeyField.hidden = !isOpenAI;
+  modelField.hidden = !isOpenAI;
+}
+providerSelect.addEventListener('change', syncProviderUI);
+
 $('settings-toggle').addEventListener('click', () => {
+  providerSelect.value = state.provider;
   $('api-key').value = state.apiKey;
   $('model-select').value = state.model;
+  syncProviderUI();
   settingsModal.hidden = false;
 });
 $('settings-close').addEventListener('click', () => { settingsModal.hidden = true; });
 settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) settingsModal.hidden = true; });
 
 $('settings-save').addEventListener('click', () => {
+  state.provider = providerSelect.value;
   state.apiKey = $('api-key').value.trim();
   state.model = $('model-select').value;
+  localStorage.setItem('av-provider', state.provider);
   localStorage.setItem('av-api-key', state.apiKey);
   localStorage.setItem('av-model', state.model);
   settingsModal.hidden = true;
@@ -372,9 +432,11 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-function checkApiKey() {
-  if (!state.apiKey) {
-    showToast('Ajoute ta clé API OpenAI dans les paramètres');
+function checkProvider() {
+  if (state.provider === 'openai' && !state.apiKey) {
+    showToast('Ajoute ta clé API OpenAI ou repasse en mode gratuit');
+    providerSelect.value = state.provider;
+    syncProviderUI();
     settingsModal.hidden = false;
     return false;
   }

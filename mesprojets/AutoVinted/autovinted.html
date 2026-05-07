@@ -112,12 +112,20 @@
         <button class="icon-btn" id="settings-close">✕</button>
       </div>
       <label class="field">
+        <span class="field-label">Fournisseur IA</span>
+        <select id="provider-select">
+          <option value="pollinations">Gratuit — Pollinations (aucune clé)</option>
+          <option value="openai">OpenAI (clé perso, meilleure qualité)</option>
+        </select>
+        <span class="field-hint" id="provider-hint">L'option gratuite fonctionne sans inscription. Si la qualité ne te convient pas, passe à OpenAI.</span>
+      </label>
+      <label class="field" id="apikey-field" hidden>
         <span class="field-label">Clé API OpenAI</span>
         <input type="password" id="api-key" placeholder="sk-..." />
         <span class="field-hint">Stockée uniquement dans ton navigateur. <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">Obtenir une clé →</a></span>
       </label>
-      <label class="field">
-        <span class="field-label">Modèle</span>
+      <label class="field" id="model-field" hidden>
+        <span class="field-label">Modèle OpenAI</span>
         <select id="model-select">
           <option value="gpt-4o">GPT-4o (recommandé)</option>
           <option value="gpt-4o-mini">GPT-4o mini (économique)</option>
