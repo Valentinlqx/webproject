@@ -1675,7 +1675,8 @@ footer {
     width: 100%;
     max-width: 100%;
     border-radius: var(--radius);
-    max-height: calc(100vh - 48px);
+    /* Fixed height so left/right panels match — content scrolls inside */
+    height: calc(100vh - 48px);
     padding: 20px;
     gap: 14px;
     animation: none;
@@ -1684,6 +1685,15 @@ footer {
   }
   .app-shell .modal-head .icon-btn { display: none; }
   .app-shell .modal-head h2 { font-size: 1.05rem; }
+
+  /* History: keep head + clear button pinned, scroll the list in between */
+  .app-shell #history-modal .modal-card { overflow: hidden; }
+  .app-shell #history-modal .history-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
 
   /* Header buttons no longer needed on desktop */
   #history-toggle, #settings-toggle { display: none; }
