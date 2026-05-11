@@ -1891,6 +1891,14 @@ function tryPersistHistory() {
 }
 
 async function saveToHistory(listing, photos = null) {
+  await _doSaveToHistory(listing, photos);
+  // Re-render the sidebar list so new entries appear immediately on desktop
+  // (on mobile this is also fine — the modal will already show fresh data
+  // next time it's opened).
+  try { renderHistory(); } catch {}
+}
+
+async function _doSaveToHistory(listing, photos = null) {
   let thumbnail = null;
   let backupPhotos = [];
   const src = photos || state.photos;
@@ -2005,6 +2013,10 @@ function seedDemoListing() {
   localStorage.setItem('av-demo-seeded', DEMO_ID);
 }
 seedDemoListing();
+// Render the history list once at startup so the desktop sidebar panel
+// (always visible) is populated. The mobile modal also benefits — no
+// flash of empty content when it's first opened.
+renderHistory();
 
 // ─── Helpers ─────────────────────────────────────────
 function setBtnLoading(btn, loading, label) {
