@@ -77,20 +77,6 @@ const PROVIDERS = {
     ],
     call: (s) => callOpenAICompatible(s, 'https://api.mistral.ai/v1/chat/completions', false),
   },
-  deepseek: {
-    label: 'DeepSeek (texte uniquement)',
-    needsKey: true,
-    vision: false,
-    keyUrl: 'https://platform.deepseek.com/api_keys',
-    keyLabel: 'Clé API DeepSeek',
-    keyPrefix: 'sk-',
-    hint: "⚠️ DeepSeek ne lit pas les images : il te demandera de tout décrire en texte.",
-    models: [
-      { id: 'deepseek-chat', label: 'DeepSeek V3' },
-      { id: 'deepseek-reasoner', label: 'DeepSeek R1 (raisonnement)' },
-    ],
-    call: (s) => callOpenAICompatible(s, 'https://api.deepseek.com/chat/completions', true),
-  },
 };
 
 const DEFAULT_OLLAMA_HOST = 'http://localhost:11434';
@@ -170,23 +156,15 @@ const PRICING = {
   // Mistral
   'pixtral-large-latest':        { in: 2.00, out: 6.00 },
   'pixtral-12b-2409':            { in: 0.15, out: 0.15 },
-  // DeepSeek
-  'deepseek-chat':               { in: 0.27, out: 1.10 },
-  'deepseek-reasoner':           { in: 0.55, out: 2.19 },
-  // Pollinations free
-  'openai-large':                { in: 0, out: 0 },
 };
 
 // Tokens approximatifs par image selon le provider
 const IMAGE_TOKENS_PER_PROVIDER = {
-  pollinations: 425,   // OpenAI tile-based, image ≤1024 = 425 tokens (85 + 4 tiles)
   openai:       425,
   anthropic:    1300,  // Claude ~1568 max, ~1300 moyenne pour 1024
   gemini:       258,   // forfait par image
   groq:         1200,
   mistral:      1000,
-  deepseek:     0,     // pas de vision
-  ollama:       800,   // dépend du modèle, ordre de grandeur (LLaVA/Llama-Vision)
 };
 
 const USD_TO_EUR = 0.93;
