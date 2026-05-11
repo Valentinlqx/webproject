@@ -32,7 +32,11 @@
       "Bash(git push *)",
       "Bash(node -c c:/Users/valen/Desktop/web/mesprojets/AutoVinted/script.js)",
       "WebFetch(domain:walkinparis.com)",
-      "PowerShell($dest = \"mesprojets\\\\AutoVinted\\\\demo\"; New-Item -ItemType Directory -Path $dest -Force | Out-Null; 1..4 | ForEach-Object { $url = \"https://walkinparis.com/cdn/shop/files/walk-in-paris-clarks-craft-james-lo-brique-$_.jpg?width=800\"; $out = Join-Path $dest \"clarks-$_.jpg\"; Invoke-WebRequest -Uri $url -OutFile $out -UseBasicParsing }; Get-ChildItem $dest | Select-Object Name, @{N='KB';E={[math]::Round\\($_.Length/1KB,1\\)}})"
+      "PowerShell($dest = \"mesprojets\\\\AutoVinted\\\\demo\"; New-Item -ItemType Directory -Path $dest -Force | Out-Null; 1..4 | ForEach-Object { $url = \"https://walkinparis.com/cdn/shop/files/walk-in-paris-clarks-craft-james-lo-brique-$_.jpg?width=800\"; $out = Join-Path $dest \"clarks-$_.jpg\"; Invoke-WebRequest -Uri $url -OutFile $out -UseBasicParsing }; Get-ChildItem $dest | Select-Object Name, @{N='KB';E={[math]::Round\\($_.Length/1KB,1\\)}})",
+      "Bash(sed -i '1215,1542d' mesprojets/AutoVinted/script.js)",
+      "Bash(sed -n '1210,1220p' mesprojets/AutoVinted/script.js)",
+      "Bash(awk 'NR==1050{print \"/* Ollama styles removed */\"; skip=1} skip && /^\\\\/\\\\* ── Feature toggles ── \\\\*\\\\/$/{skip=0} !skip' mesprojets/AutoVinted/style.css)",
+      "Bash(mv /tmp/style.css.new mesprojets/AutoVinted/style.css)"
     ]
   }
 }

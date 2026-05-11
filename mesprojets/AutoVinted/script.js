@@ -79,61 +79,6 @@ const PROVIDERS = {
   },
 };
 
-const DEFAULT_OLLAMA_HOST = 'http://localhost:11434';
-function getOllamaHost() {
-  const stored = localStorage.getItem('av-ollama-host');
-  return (stored && stored.trim()) ? stored.trim().replace(/\/$/, '') : DEFAULT_OLLAMA_HOST;
-}
-function setOllamaHost(h) { localStorage.setItem('av-ollama-host', h); }
-
-async function callOllama(s) {
-  const host = getOllamaHost();
-  // Ollama expose un endpoint compatible OpenAI à /v1/chat/completions
-  const endpoint = `${host}/v1/chat/completions`;
-  const provider = PROVIDERS[s.provider];
-
-  const messages = provider.vision ? s.conversation : s.conversation.map(m => {
-    if (typeof m.content === 'string') return m;
-    const text = m.content.filter(p => p.type === 'text').map(p => p.text).join('\n');
-    return { role: m.role, content: text };
-  });
-
-  const body = {
-    model: s.model || 'llama3.2-vision',
-    messages,
-    temperature: 0.7,
-    max_tokens: state.mode === 'bulk' ? 6000 : 2000,
-    response_format: { type: 'json_object' },
-  };
-
-  let res;
-  try {
-    res = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-  } catch (e) {
-    throw new Error(`Connexion à Ollama impossible (${host}). Vérifie qu'Ollama est lancé. Si la page n'est pas en local, lance : OLLAMA_ORIGINS=* ollama serve`);
-  }
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error?.message || err.message || `HTTP ${res.status} — modèle "${body.model}" introuvable ? Tire-le avec : ollama pull ${body.model}`);
-  }
-  const data = await res.json();
-  const content = data.choices[0].message.content;
-  s.conversation.push({ role: 'assistant', content });
-  return parseJSON(content);
-}
-
-// Récupère la liste des modèles installés sur le serveur Ollama
-async function fetchOllamaModels(host) {
-  const res = await fetch(`${host}/api/tags`);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const data = await res.json();
-  return (data.models || []).map(m => ({ id: m.name, label: m.name + (m.size ? ` (${(m.size / 1e9).toFixed(1)} Go)` : '') }));
-}
-
 // ─── Pricing & token estimation ─────────────────────
 // Prix indicatifs en USD (≈ EUR) par 1M tokens [input, output]
 // Source : pages tarifaires officielles, novembre 2025
@@ -1243,398 +1188,27 @@ function syncProviderUI() {
     modelSelect.appendChild(opt);
   });
   modelSelect.value = getStoredModel(id);
-  // Cache la liste si un seul modèle (cas Ollama : verrouillé sur le meilleur modèle pour AutoVinted)
+  // Cache la liste si un seul modèle
   modelField.hidden = p.models.length <= 1;
 
-  // API key OU URL host
-  apikeyField.hidden = !(p.needsKey || p.needsHost);
-  if (p.needsKey || p.needsHost) {
+  // API key
+  apikeyField.hidden = !p.needsKey;
+  if (p.needsKey) {
     apikeyLabel.textContent = p.keyLabel;
-    apiKeyInput.type = p.needsHost ? 'text' : 'password';
-    apiKeyInput.placeholder = p.needsHost ? DEFAULT_OLLAMA_HOST : ((p.keyPrefix || '') + '...');
-    apiKeyInput.value = p.needsHost ? getOllamaHost() : getApiKey(id);
+    apiKeyInput.type = 'password';
+    apiKeyInput.placeholder = (p.keyPrefix || '') + '...';
+    apiKeyInput.value = getApiKey(id);
     if (p.keyUrl) {
       apikeyLink.href = p.keyUrl;
-      apikeyLink.textContent = p.needsHost ? 'Installer Ollama →' : 'Obtenir une clé →';
+      apikeyLink.textContent = 'Obtenir une clé →';
       apikeyLink.style.display = '';
     } else {
       apikeyLink.style.display = 'none';
     }
   }
-
-  // Lien guide pour Ollama (le bouton "fetch models" est inutile : modèle unique verrouillé)
-  $('ollama-fetch-models').hidden = true;
-  $('ollama-open-guide').hidden = !p.needsHost;
 }
 
-// ─── Ollama modal open/close ────────────────────────
-const ollamaModal = $('ollama-modal');
-function openOllamaModal()  { ollamaModal.hidden = false; startOllamaStatusPolling(); }
-function closeOllamaModal() { ollamaModal.hidden = true;  stopOllamaStatusPolling(); }
-$('ollama-open-guide').addEventListener('click', openOllamaModal);
-$('ollama-modal-close').addEventListener('click', closeOllamaModal);
-ollamaModal.addEventListener('click', (e) => { if (e.target === ollamaModal) closeOllamaModal(); });
-
-// ─── Ollama : OS picker + launcher generator + live status ──
-function detectDefaultOS() {
-  const ua = (navigator.userAgent || '').toLowerCase();
-  if (ua.includes('windows')) return 'windows';
-  if (ua.includes('mac')) return 'mac';
-  return 'linux';
-}
-let ollamaOS = detectDefaultOS();
-
-function setOllamaOSPick(os) {
-  ollamaOS = os;
-  document.querySelectorAll('#ollama-os-pick .ollama-os-tab').forEach(b => {
-    b.classList.toggle('active', b.dataset.os === os);
-  });
-  const hint = $('ollama-launcher-hint');
-  if (hint) {
-    hint.innerHTML = os === 'windows'
-      ? 'Une fois téléchargé, <b>double-clique</b> sur <code>autovinted-launcher.bat</code>. Windows peut afficher un avertissement de sécurité — clique sur "Plus d\'infos" puis "Exécuter quand même".'
-      : 'Une fois téléchargé, ouvre un terminal dans le dossier de téléchargement et lance : <code>bash autovinted-launcher.sh</code> (ou <code>chmod +x autovinted-launcher.sh && ./autovinted-launcher.sh</code>).';
-  }
-}
-setOllamaOSPick(ollamaOS);
-document.querySelectorAll('#ollama-os-pick .ollama-os-tab').forEach(b => {
-  b.addEventListener('click', (e) => {
-    e.preventDefault();
-    setOllamaOSPick(b.dataset.os);
-    refreshLauncherPreview();
-  });
-});
-
-const OLLAMA_DEFAULT_MODEL = 'llama3.2-vision';
-
-// Taille du modèle vision recommandé pour AutoVinted
-const MODEL_SIZES = { 'llama3.2-vision': '7.9 Go' };
-function modelSizeHint(model) { return MODEL_SIZES[model] || '? Go'; }
-
-function buildLauncherWindows(model) {
-  const size = modelSizeHint(model);
-  return `@echo off
-setlocal
-title AutoVinted - Ollama Launcher
-echo ===============================
-echo  AutoVinted x Ollama Launcher
-echo  Modele : ${model} (~${size})
-echo ===============================
-echo.
-
-where ollama >nul 2>nul
-if errorlevel 1 goto :no_ollama
-
-echo [1/4] Arret de toutes les instances Ollama...
-echo       Necessaire pour activer CORS pour cette page.
-
-REM Methode 1 : taskkill sur les noms connus (avec /T pour les processus enfants)
-taskkill /F /T /IM "ollama.exe" >nul 2>nul
-taskkill /F /T /IM "ollama app.exe" >nul 2>nul
-taskkill /F /T /IM "ollama_llama_server.exe" >nul 2>nul
-taskkill /F /T /IM "OllamaApp.exe" >nul 2>nul
-
-REM Methode 2 : filet de securite via PowerShell - tue tout processus "ollama*"
-powershell -NoProfile -Command "Get-Process -Name 'ollama*' -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue" >nul 2>nul
-
-REM Methode 3 : libere le port 11434 si encore occupe par autre chose
-for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":11434" ^| findstr "LISTENING" 2^>nul') do taskkill /F /PID %%a >nul 2>nul
-
-timeout /t 2 /nobreak >nul
-
-echo.
-echo [2/4] Verification / telechargement du modele "${model}" (~${size})
-echo       Premiere fois : peut prendre plusieurs minutes selon ta connexion.
-echo       Si deja installe, c'est instantane.
-echo.
-set OLLAMA_HOST=127.0.0.1:11434
-ollama pull ${model}
-if errorlevel 1 goto :pull_error
-
-echo.
-echo [3/4] Configuration de CORS et liberation du port...
-set OLLAMA_ORIGINS=*
-
-REM 'ollama pull' a demarre une instance d'Ollama pour telecharger.
-REM Il faut la tuer pour pouvoir relancer 'ollama serve' avec OLLAMA_ORIGINS.
-taskkill /F /T /IM "ollama.exe" >nul 2>nul
-taskkill /F /T /IM "ollama app.exe" >nul 2>nul
-taskkill /F /T /IM "ollama_llama_server.exe" >nul 2>nul
-powershell -NoProfile -Command "Get-Process -Name 'ollama*' -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue" >nul 2>nul
-for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":11434" ^| findstr "LISTENING" 2^>nul') do taskkill /F /PID %%a >nul 2>nul
-timeout /t 2 /nobreak >nul
-
-echo.
-echo [4/4] Demarrage du serveur Ollama avec CORS active...
-echo.
-echo ============================================================
-echo  Le serveur tourne maintenant ici. Tu peux utiliser AutoVinted.
-echo  GARDE CETTE FENETRE OUVERTE pendant que tu utilises l'app.
-echo  Ferme-la ou Ctrl+C pour arreter Ollama.
-echo ============================================================
-echo.
-ollama serve
-goto :server_stopped
-
-:no_ollama
-echo [X] Ollama n'est pas installe.
-echo     Telecharge-le sur https://ollama.com/download
-echo.
-pause
-exit /b 1
-
-:pull_error
-echo.
-echo [X] Echec du telechargement du modele.
-echo     - Verifie ta connexion Internet.
-echo     - Verifie que le modele existe : ouvre cmd et tape : ollama list
-echo     - Choisis un modele plus leger dans AutoVinted.
-echo.
-pause
-exit /b 1
-
-:server_stopped
-echo.
-echo ============================================================
-echo  /!\\ Ollama s'est arrete.
-echo.
-echo  Si tu vois "Only one usage of each socket address" ci-dessus :
-echo    Le port 11434 est deja utilise par Ollama Desktop.
-echo.
-echo    SOLUTION :
-echo    1. Regarde la zone de notification Windows (a cote de l'horloge,
-echo       dans la fleche ^ qui cache les icones cachees).
-echo    2. Trouve l'icone llama d'Ollama.
-echo    3. Clic droit -^> Quit Ollama.
-echo    4. Relance ce launcher.
-echo.
-echo  Autres causes :
-echo    - Antivirus / parefeu bloque ollama.exe.
-echo    - Erreur affichee plus haut dans cette fenetre.
-echo ============================================================
-echo.
-pause
-`;
-}
-
-function buildLauncherUnix(model) {
-  const size = modelSizeHint(model);
-  return `#!/usr/bin/env bash
-echo "==============================="
-echo " AutoVinted x Ollama Launcher"
-echo " Modèle : ${model} (~${size})"
-echo "==============================="
-echo
-
-if ! command -v ollama &> /dev/null; then
-  echo "[X] Ollama n'est pas installé."
-  echo "    Télécharge-le sur https://ollama.com/download"
-  echo
-  read -p "Appuie sur Entrée pour quitter..."
-  exit 1
-fi
-
-echo "[1/4] Arrêt de toutes les instances Ollama..."
-echo "      Nécessaire pour activer CORS pour cette page."
-# Tue tout processus contenant "ollama" dans son nom ou ses arguments
-pkill -9 -f "ollama" 2>/dev/null || true
-# Libère le port 11434 si encore occupé
-if command -v lsof &> /dev/null; then
-  lsof -ti :11434 2>/dev/null | xargs -r kill -9 2>/dev/null || true
-fi
-sleep 2
-
-echo
-echo "[2/4] Vérification / téléchargement du modèle \\"${model}\\" (~${size})"
-echo "      Première fois : peut prendre plusieurs minutes selon ta connexion."
-echo "      Si déjà installé, c'est instantané."
-echo
-if ! ollama pull ${model}; then
-  echo
-  echo "[X] Échec du téléchargement."
-  echo "    - Vérifie ta connexion Internet"
-  echo "    - Le modèle \\"${model}\\" existe-t-il ? (tape: ollama list)"
-  echo "    - Choisis un modèle plus léger dans AutoVinted"
-  echo
-  read -p "Appuie sur Entrée pour quitter..."
-  exit 1
-fi
-
-echo
-echo "[3/4] Configuration de CORS et libération du port..."
-export OLLAMA_ORIGINS="*"
-
-# 'ollama pull' a démarré une instance d'Ollama pour télécharger.
-# Il faut la tuer pour pouvoir relancer 'ollama serve' avec OLLAMA_ORIGINS.
-pkill -9 -f "ollama" 2>/dev/null || true
-if command -v lsof &> /dev/null; then
-  lsof -ti :11434 2>/dev/null | xargs -r kill -9 2>/dev/null || true
-fi
-sleep 2
-
-echo
-echo "[4/4] Démarrage du serveur Ollama avec CORS activé..."
-echo
-echo "============================================================"
-echo " Le serveur va tourner ici. Tu peux utiliser AutoVinted."
-echo " GARDE CE TERMINAL OUVERT pendant que tu utilises l'app."
-echo " (Ctrl+C pour arrêter Ollama)"
-echo "============================================================"
-echo
-ollama serve
-EXIT_CODE=$?
-
-# Si on arrive ici, ollama serve a quitté
-echo
-echo "============================================================"
-echo " /!\\\\ Ollama s'est arrêté (code: $EXIT_CODE)"
-echo
-echo " Causes possibles :"
-echo "   - Le port 11434 est déjà utilisé (Ollama tourne déjà)"
-echo "     -> Tue le processus existant : pkill -f ollama"
-echo "        puis relance ce launcher."
-echo "   - Erreur affichée plus haut dans ce terminal."
-echo "============================================================"
-echo
-read -p "Appuie sur Entrée pour quitter..."
-`;
-}
-
-function downloadLauncher() {
-  // Modèle verrouillé pour AutoVinted : le mieux adapté pour vision Vinted
-  const model = OLLAMA_DEFAULT_MODEL;
-  const size = modelSizeHint(model);
-  const isWin = ollamaOS === 'windows';
-  const content = isWin ? buildLauncherWindows(model) : buildLauncherUnix(model);
-  const filename = isWin ? 'autovinted-launcher.bat' : 'autovinted-launcher.sh';
-  const blob = new Blob([content], { type: isWin ? 'application/octet-stream' : 'text/x-shellscript' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-  showToast(`✓ ${filename} téléchargé (Llama 3.2 Vision, ~${size})`);
-}
-
-$('ollama-download-launcher').addEventListener('click', downloadLauncher);
-
-// Aperçu du contenu du launcher
-function getCurrentLauncherContent() {
-  // Même modèle verrouillé que pour le téléchargement
-  return ollamaOS === 'windows' ? buildLauncherWindows(OLLAMA_DEFAULT_MODEL) : buildLauncherUnix(OLLAMA_DEFAULT_MODEL);
-}
-function refreshLauncherPreview() {
-  const previewEl = $('ollama-launcher-preview');
-  if (previewEl.hidden) return; // ne mets à jour que s'il est ouvert
-  $('ollama-launcher-code').textContent = getCurrentLauncherContent();
-  $('ollama-launcher-filename').textContent = ollamaOS === 'windows' ? 'autovinted-launcher.bat' : 'autovinted-launcher.sh';
-}
-$('ollama-preview-launcher').addEventListener('click', () => {
-  const previewEl = $('ollama-launcher-preview');
-  const btn = $('ollama-preview-launcher');
-  if (previewEl.hidden) {
-    $('ollama-launcher-code').textContent = getCurrentLauncherContent();
-    $('ollama-launcher-filename').textContent = ollamaOS === 'windows' ? 'autovinted-launcher.bat' : 'autovinted-launcher.sh';
-    previewEl.hidden = false;
-    btn.textContent = '✕ Masquer';
-  } else {
-    previewEl.hidden = true;
-    btn.textContent = '👁 Voir le contenu';
-  }
-});
-$('ollama-launcher-copy').addEventListener('click', () => {
-  const txt = $('ollama-launcher-code').textContent;
-  navigator.clipboard.writeText(txt).then(() => {
-    const btn = $('ollama-launcher-copy');
-    const orig = btn.textContent;
-    btn.textContent = '✓ Copié';
-    btn.classList.add('done');
-    setTimeout(() => { btn.textContent = orig; btn.classList.remove('done'); }, 1500);
-  });
-});
-
-// Live status check while modal is open
-let ollamaStatusTimer = null;
-async function checkOllamaStatus() {
-  const statusEl = $('ollama-status');
-  if (!statusEl) return;
-  const dot = statusEl.querySelector('.ollama-status-dot');
-  const txt = statusEl.querySelector('.ollama-status-text');
-  const host = getOllamaHost();
-  try {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 1500);
-    const res = await fetch(`${host}/api/tags`, { signal: ctrl.signal });
-    clearTimeout(t);
-    if (!res.ok) throw new Error(res.status);
-    const data = await res.json();
-    const count = (data.models || []).length;
-    statusEl.className = 'ollama-status ok';
-    txt.innerHTML = count > 0
-      ? `✓ Ollama tourne et ${count} modèle${count > 1 ? 's' : ''} installé${count > 1 ? 's' : ''} — tout est prêt !`
-      : `⚠ Ollama tourne mais aucun modèle installé — le launcher va le télécharger`;
-  } catch {
-    statusEl.className = 'ollama-status off';
-    txt.textContent = `⊘ Ollama ne répond pas sur ${host} — utilise le launcher ci-dessous`;
-  }
-}
-
-function startOllamaStatusPolling() {
-  checkOllamaStatus();
-  ollamaStatusTimer = setInterval(checkOllamaStatus, 2500);
-}
-function stopOllamaStatusPolling() {
-  if (ollamaStatusTimer) { clearInterval(ollamaStatusTimer); ollamaStatusTimer = null; }
-}
-
-document.querySelectorAll('.ollama-copy').forEach(btn => {
-  btn.addEventListener('click', (e) => {
-    e.preventDefault();
-    const target = $(btn.dataset.copyTarget);
-    if (!target) return;
-    navigator.clipboard.writeText(target.textContent).then(() => {
-      const orig = btn.textContent;
-      btn.textContent = '✓ Copié';
-      btn.classList.add('done');
-      setTimeout(() => { btn.textContent = orig; btn.classList.remove('done'); }, 1500);
-    });
-  });
-});
 providerSelect.addEventListener('change', syncProviderUI);
-
-// ─── Ollama : récupérer la liste des modèles installés ─────
-$('ollama-fetch-models').addEventListener('click', async () => {
-  const btn = $('ollama-fetch-models');
-  const host = (apiKeyInput.value.trim() || DEFAULT_OLLAMA_HOST).replace(/\/$/, '');
-  btn.disabled = true;
-  btn.textContent = '… recherche en cours';
-  try {
-    const models = await fetchOllamaModels(host);
-    if (!models.length) {
-      showToast('Aucun modèle installé. Lance : ollama pull llama3.2-vision');
-    } else {
-      // Remplace la liste de modèles
-      PROVIDERS.ollama.models = models;
-      modelSelect.innerHTML = '';
-      models.forEach(m => {
-        const opt = document.createElement('option');
-        opt.value = m.id;
-        opt.textContent = m.label;
-        modelSelect.appendChild(opt);
-      });
-      modelSelect.value = getStoredModel('ollama') || models[0].id;
-      showToast(`${models.length} modèle${models.length > 1 ? 's' : ''} trouvé${models.length > 1 ? 's' : ''} ✓`);
-    }
-  } catch (e) {
-    showToast(`Connexion impossible : ${e.message}. Vérifie qu'Ollama tourne (OLLAMA_ORIGINS=*).`);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '↻ Charger les modèles installés';
-  }
-});
 
 // Save key/model on change so user doesn't lose them between providers
 modelSelect.addEventListener('change', () => {
@@ -1674,8 +1248,6 @@ $('settings-save').addEventListener('click', () => {
   if (state.model) localStorage.setItem('av-model-' + providerId, state.model);
   if (PROVIDERS[providerId].needsKey) {
     setApiKey(providerId, apiKeyInput.value.trim());
-  } else if (PROVIDERS[providerId].needsHost) {
-    setOllamaHost(apiKeyInput.value.trim() || DEFAULT_OLLAMA_HOST);
   }
   // Save feature toggles
   const newFeatures = { ...state.features };
@@ -1694,7 +1266,6 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     settingsModal.hidden = true;
     historyModal.hidden = true;
-    closeOllamaModal();
     closeTutorial();
   }
 });
@@ -1705,7 +1276,7 @@ const TUTORIAL_STEPS = [
   { target: '.mode-toggle',    emoji: '🔀', title: 'Une annonce ou en lot',     text: '<strong>Une annonce</strong> — photos d\'un seul article.<br><strong>En lot</strong> — jusqu\'à 30 photos, l\'IA détecte les articles automatiquement.', placement: 'bottom' },
   { target: '#dropzone',       emoji: '📸', title: 'Upload tes photos',         text: 'Glisse-dépose ici ou clique pour parcourir. 4 à 6 angles idéalement : face, dos, étiquette, défauts.', placement: 'bottom' },
   { target: '#context-input',  emoji: '💬', title: 'Ajoute du contexte',        text: 'Infos que l\'IA ne peut pas deviner : taille réelle, prix d\'achat, état... Optionnel mais recommandé.', placement: 'top' },
-  { target: '#settings-toggle',emoji: '⚙', title: 'Configure ton IA',          text: '<strong>Gratuit (Pollinations)</strong> — sans clé, fonctionne tout de suite.<br><strong>OpenAI / Claude / Gemini…</strong> — qualité supérieure avec ta clé API.', placement: 'bottom' },
+  { target: '#settings-toggle',emoji: '⚙', title: 'Configure ton IA',          text: 'Choisis ton fournisseur (<strong>OpenAI, Claude, Gemini, Groq, Mistral</strong>) et colle ta clé API. Tout reste stocké uniquement dans ton navigateur.', placement: 'bottom' },
   { target: '#history-toggle', emoji: '⌛', title: 'Historique',                text: 'Retrouve toutes tes annonces ici. <strong>Un exemple Clarks est déjà disponible</strong> pour voir à quoi ressemble un résultat !', placement: 'bottom' },
 ];
 

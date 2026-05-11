@@ -232,12 +232,9 @@
         <span class="field-hint" id="apikey-hint">Stockée uniquement dans ton navigateur. <a id="apikey-link" href="#" target="_blank" rel="noopener">Obtenir une clé →</a></span>
       </label>
 
-      <button type="button" class="btn-ghost" id="ollama-open-guide" hidden style="margin:0">📖 Ouvrir le guide Ollama étape par étape</button>
-
       <label class="field" id="model-field" hidden>
         <span class="field-label">Modèle</span>
         <select id="model-select"></select>
-        <button type="button" class="btn-ghost btn-sm" id="ollama-fetch-models" hidden style="margin-top:8px">↻ Charger les modèles installés</button>
       </label>
 
       <div class="field">
@@ -266,86 +263,6 @@
           <button class="btn-primary btn-sm" id="tutorial-tip-next">Suivant →</button>
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- Ollama guide modal -->
-  <div class="modal" id="ollama-modal" hidden>
-    <div class="modal-card">
-      <div class="modal-head">
-        <h2>🚀 Ollama en 2 minutes</h2>
-        <button class="icon-btn" id="ollama-modal-close">✕</button>
-      </div>
-
-      <!-- Live status -->
-      <div class="ollama-status" id="ollama-status">
-        <div class="ollama-status-dot"></div>
-        <div class="ollama-status-text">Vérification…</div>
-      </div>
-
-      <!-- Quickstart blocks -->
-      <div class="ollama-quickstart">
-        <div class="ollama-quick-step">
-          <div class="ollama-quick-num">1</div>
-          <div class="ollama-quick-content">
-            <div class="ollama-quick-title">Installe Ollama (une seule fois)</div>
-            <div class="ollama-quick-text">Télécharge l'installateur officiel et lance-le. Si tu l'as déjà, saute cette étape.</div>
-            <a class="btn-ghost btn-sm" href="https://ollama.com/download" target="_blank" rel="noopener">↗ ollama.com/download</a>
-          </div>
-        </div>
-
-        <div class="ollama-quick-step">
-          <div class="ollama-quick-num">2</div>
-          <div class="ollama-quick-content">
-            <div class="ollama-quick-title">Télécharge le launcher AutoVinted</div>
-            <div class="ollama-quick-text">Un petit script qui fait tout pour toi : télécharge le modèle vision (1ʳᵉ fois), active CORS, et démarre Ollama.</div>
-            <div class="ollama-os-pick" id="ollama-os-pick">
-              <button type="button" class="ollama-os-tab" data-os="windows">🪟 Windows</button>
-              <button type="button" class="ollama-os-tab" data-os="mac">🍎 macOS</button>
-              <button type="button" class="ollama-os-tab" data-os="linux">🐧 Linux</button>
-            </div>
-            <div class="ollama-launcher-actions">
-              <button type="button" class="btn-primary btn-sm" id="ollama-download-launcher">⬇ Télécharger le launcher</button>
-              <button type="button" class="btn-ghost btn-sm" id="ollama-preview-launcher">👁 Voir le contenu</button>
-            </div>
-            <div class="ollama-launcher-preview" id="ollama-launcher-preview" hidden>
-              <div class="ollama-launcher-preview-head">
-                <span id="ollama-launcher-filename">autovinted-launcher.bat</span>
-                <button type="button" class="ollama-copy" id="ollama-launcher-copy">Copier</button>
-              </div>
-              <pre><code id="ollama-launcher-code"></code></pre>
-            </div>
-            <div class="ollama-tip" id="ollama-launcher-hint">Une fois téléchargé, double-clique sur le fichier (Windows) ou lance <code>bash autovinted-launcher.sh</code> dans le terminal (Mac/Linux).</div>
-          </div>
-        </div>
-
-        <div class="ollama-quick-step">
-          <div class="ollama-quick-num">3</div>
-          <div class="ollama-quick-content">
-            <div class="ollama-quick-title">Lance le launcher</div>
-            <div class="ollama-quick-text">Garde la fenêtre ouverte (c'est ton serveur). Quand tu vois <code>listening on 127.0.0.1:11434</code>, le statut en haut passera au vert et tu pourras fermer ce guide.</div>
-          </div>
-        </div>
-
-        <div class="ollama-quick-step">
-          <div class="ollama-quick-num">4</div>
-          <div class="ollama-quick-content">
-            <div class="ollama-quick-title">Clique sur Enregistrer</div>
-            <div class="ollama-quick-text">Le modèle <b>Llama 3.2 Vision</b> (le mieux adapté pour AutoVinted) est sélectionné automatiquement. Voilà — tes annonces sont 100 % locales et gratuites. 🎉</div>
-          </div>
-        </div>
-      </div>
-
-      <details class="ollama-manual">
-        <summary>Préfère faire ça à la main ?</summary>
-        <div class="ollama-manual-body">
-          Si tu ne veux pas du launcher, tu peux ouvrir un terminal et lancer :
-          <div class="ollama-cmd"><code id="ollama-cmd-pull">ollama pull llama3.2-vision</code><button type="button" class="ollama-copy" data-copy-target="ollama-cmd-pull">Copier</button></div>
-          puis (pour autoriser cette page si elle est sur github.io) :
-          <div class="ollama-cmd"><code id="ollama-cmd-cors">OLLAMA_ORIGINS=* ollama serve</code><button type="button" class="ollama-copy" data-copy-target="ollama-cmd-cors">Copier</button></div>
-          <div class="ollama-tip">Sur Windows PowerShell : <code>$env:OLLAMA_ORIGINS="*"; ollama serve</code></div>
-        </div>
-      </details>
     </div>
   </div>
 
