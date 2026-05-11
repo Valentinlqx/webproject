@@ -1806,10 +1806,19 @@ function goToStep(i) {
   tutorialTipPrev.hidden = tutorialStep === 0;
   tutorialTipNext.textContent = tutorialStep === TUTORIAL_STEPS.length - 1 ? 'Commencer ✦' : 'Suivant →';
 
-  const target = document.querySelector(step.target);
+  // On desktop, the top header toggle buttons are hidden — point the
+  // tutorial at the always-visible side panels instead.
+  const isDesktop = window.matchMedia('(min-width: 1180px)').matches;
+  let selector = step.target;
+  let placement = step.placement;
+  if (isDesktop) {
+    if (selector === '#settings-toggle') { selector = '#settings-modal .modal-card'; placement = 'left'; }
+    else if (selector === '#history-toggle') { selector = '#history-modal .modal-card'; placement = 'right'; }
+  }
+  const target = document.querySelector(selector);
   if (target) {
     target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    requestAnimationFrame(() => positionTutorial(target, step.placement));
+    requestAnimationFrame(() => positionTutorial(target, placement));
   }
 }
 

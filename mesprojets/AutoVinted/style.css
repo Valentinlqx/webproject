@@ -1613,3 +1613,57 @@ footer {
   .result-actions { flex-direction: row; }
   .result-actions button { margin-top: 0; }
 }
+
+/* ── Desktop 3-column layout (history | main | settings) ── */
+@media (min-width: 1180px) {
+  .app-shell {
+    display: grid;
+    grid-template-columns: minmax(260px, 300px) minmax(0, 720px) minmax(280px, 340px);
+    gap: 24px;
+    max-width: 1420px;
+    margin: 0 auto;
+    padding: 24px 20px 8px;
+    align-items: start;
+  }
+  .app-shell main {
+    padding: 0;
+    margin: 0;
+    max-width: 100%;
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .app-shell #history-modal  { grid-column: 1; grid-row: 1; }
+  .app-shell #settings-modal { grid-column: 3; grid-row: 1; }
+
+  /* Turn the modal containers into inline sticky side panels */
+  .app-shell .modal {
+    position: sticky;
+    top: 24px;
+    inset: auto;
+    background: transparent;
+    backdrop-filter: none;
+    display: block;
+    padding: 0;
+    z-index: 1;
+    animation: none;
+    align-items: stretch;
+    justify-content: stretch;
+  }
+  .app-shell .modal[hidden] { display: block; }
+  .app-shell .modal-card {
+    width: 100%;
+    max-width: 100%;
+    border-radius: var(--radius);
+    max-height: calc(100vh - 48px);
+    padding: 20px;
+    gap: 14px;
+    animation: none;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .app-shell .modal-head .icon-btn { display: none; }
+  .app-shell .modal-head h2 { font-size: 1.05rem; }
+
+  /* Header buttons no longer needed on desktop */
+  #history-toggle, #settings-toggle { display: none; }
+}

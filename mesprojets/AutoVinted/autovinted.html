@@ -28,6 +28,19 @@
     </div>
   </header>
 
+  <div class="app-shell">
+  <!-- History panel (desktop sidebar / mobile modal) -->
+  <div class="modal" id="history-modal" hidden>
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2>Historique</h2>
+        <button class="icon-btn" id="history-close">✕</button>
+      </div>
+      <div class="history-list" id="history-list"></div>
+      <button class="btn-ghost" id="history-clear" hidden>Tout effacer</button>
+    </div>
+  </div>
+
   <main>
     <!-- Upload zone -->
     <section class="upload-section" id="upload-section">
@@ -201,7 +214,7 @@
     </section>
   </main>
 
-  <!-- Settings modal -->
+  <!-- Settings panel (desktop sidebar / mobile modal) -->
   <div class="modal" id="settings-modal" hidden>
     <div class="modal-card">
       <div class="modal-head">
@@ -236,18 +249,7 @@
       <button class="btn-primary" id="settings-save">Enregistrer</button>
     </div>
   </div>
-
-  <!-- History modal -->
-  <div class="modal" id="history-modal" hidden>
-    <div class="modal-card">
-      <div class="modal-head">
-        <h2>Historique</h2>
-        <button class="icon-btn" id="history-close">✕</button>
-      </div>
-      <div class="history-list" id="history-list"></div>
-      <button class="btn-ghost" id="history-clear" hidden>Tout effacer</button>
-    </div>
-  </div>
+  </div><!-- /.app-shell -->
 
   <!-- Spotlight Tutorial -->
   <div id="tutorial-overlay" hidden aria-hidden="true">
