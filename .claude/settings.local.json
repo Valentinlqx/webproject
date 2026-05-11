@@ -30,7 +30,9 @@
       "Bash(git add *)",
       "Bash(git commit *)",
       "Bash(git push *)",
-      "Bash(node -c c:/Users/valen/Desktop/web/mesprojets/AutoVinted/script.js)"
+      "Bash(node -c c:/Users/valen/Desktop/web/mesprojets/AutoVinted/script.js)",
+      "WebFetch(domain:walkinparis.com)",
+      "PowerShell($dest = \"mesprojets\\\\AutoVinted\\\\demo\"; New-Item -ItemType Directory -Path $dest -Force | Out-Null; 1..4 | ForEach-Object { $url = \"https://walkinparis.com/cdn/shop/files/walk-in-paris-clarks-craft-james-lo-brique-$_.jpg?width=800\"; $out = Join-Path $dest \"clarks-$_.jpg\"; Invoke-WebRequest -Uri $url -OutFile $out -UseBasicParsing }; Get-ChildItem $dest | Select-Object Name, @{N='KB';E={[math]::Round\\($_.Length/1KB,1\\)}})"
     ]
   }
 }

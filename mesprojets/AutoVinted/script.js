@@ -1976,14 +1976,32 @@ function renderHistory() {
 }
 
 // ─── Demo listing ────────────────────────────────────
-const DEMO_ID = 'demo-clarks-craftmaster-v2';
+const DEMO_ID = 'demo-clarks-craftmaster-v3';
+const DEMO_PHOTOS = [
+  'demo/clarks-1.jpg',
+  'demo/clarks-2.jpg',
+  'demo/clarks-3.jpg',
+  'demo/clarks-4.jpg',
+];
 function seedDemoListing() {
-  if (localStorage.getItem('av-demo-seeded') === DEMO_ID) return;
+  if (localStorage.getItem('av-demo-seeded') === DEMO_ID) {
+    // Make sure the existing entry has the photos backfilled
+    const existing = state.history.find(h => h.id === DEMO_ID);
+    if (existing && (!existing.photos || !existing.photos.length)) {
+      existing.photos = DEMO_PHOTOS;
+      existing.thumbnail = DEMO_PHOTOS[0];
+      try { localStorage.setItem('av-history', JSON.stringify(state.history)); } catch {}
+    }
+    return;
+  }
+  // Remove any older demo entries first so we don't end up with duplicates.
+  state.history = state.history.filter(h => !h.isDemo);
   const demo = {
     id: DEMO_ID,
     date: '2026-05-01T09:00:00.000Z',
     isDemo: true,
-    thumbnail: null,
+    thumbnail: DEMO_PHOTOS[0],
+    photos: DEMO_PHOTOS,
     listing: {
       title: 'Mocassins Clarks × Walk in Paris Craftmaster — Cuir Bordeaux',
       description: 'Superbes penny loafers en collaboration exclusive Walk in Paris × Clarks Craftmaster. Cuir pleine fleur bordeaux profond, doublure intérieure verte, semelle noire. Coupe classique intemporelle, parfaits habillés ou casual chic.\n\n#Clarks #WalkInParis #Craftmaster #PennyLoafer #Mocassins #Loafer #CuirVeritable #Bordeaux #Chaussures #MadeInEngland #ClassiqueChic #Workwear #SmartCasual #Vintage #CapsuleWardrobe',
