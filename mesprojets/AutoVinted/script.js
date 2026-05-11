@@ -4,14 +4,6 @@
 
 // ─── Providers ───────────────────────────────────────
 const PROVIDERS = {
-  pollinations: {
-    label: 'Gratuit — Pollinations (aucune clé)',
-    needsKey: false,
-    vision: true,
-    hint: "Fonctionne sans inscription, idéal pour tester. Plus lent et moins fiable que les options payantes.",
-    models: [{ id: 'openai-large', label: 'GPT-4o (gratuit, via Pollinations)' }],
-    call: callPollinations,
-  },
   openai: {
     label: 'OpenAI — ChatGPT',
     needsKey: true,
@@ -98,21 +90,6 @@ const PROVIDERS = {
       { id: 'deepseek-reasoner', label: 'DeepSeek R1 (raisonnement)' },
     ],
     call: (s) => callOpenAICompatible(s, 'https://api.deepseek.com/chat/completions', true),
-  },
-  ollama: {
-    label: 'Ollama (local, gratuit, 100% privé)',
-    needsKey: false,
-    needsHost: true,
-    vision: true,
-    keyUrl: 'https://ollama.com/download',
-    keyLabel: 'URL du serveur Ollama',
-    keyPrefix: 'http',
-    hint: "⚙️ 100% privé, gratuit, aucun token. ⚠️ Le modèle local (Llama 3.2 Vision 11B) est moins précis que GPT-4o/Claude/Gemini : il peut halluciner sur des détails (marques, livres). Pour des annonces critiques, préfère un fournisseur cloud.",
-    // Modèle unique : Llama 3.2 Vision (11B) — meilleur compromis qualité/taille pour vision Vinted
-    models: [
-      { id: 'llama3.2-vision', label: 'Llama 3.2 Vision (recommandé, 7.9 Go)' },
-    ],
-    call: callOllama,
   },
 };
 
@@ -254,11 +231,7 @@ function updateEstimate() {
   const tokenStr = `≈ ${total.toLocaleString('fr-FR')} tokens`;
 
   let costStr;
-  if (state.provider === 'pollinations') {
-    costStr = ' · gratuit';
-  } else if (state.provider === 'ollama') {
-    costStr = ' · local & gratuit';
-  } else if (cost === null) {
+  if (cost === null) {
     costStr = '';
   } else if (cost < 0.005) {
     costStr = ' · < 0,01 €';
@@ -276,8 +249,17 @@ const state = {
   conversation: [],    // [{ role, content }] — messages
   mode: 'single',      // 'single' | 'bulk'
   context: '',         // optional user-provided context for current run
-  provider: localStorage.getItem('av-provider') || 'pollinations',
-  model: localStorage.getItem('av-model-' + (localStorage.getItem('av-provider') || 'pollinations')) || '',
+  provider: (() => {
+    const stored = localStorage.getItem('av-provider');
+    // Migrate legacy providers that have been removed.
+    if (!stored || !PROVIDERS[stored]) return 'openai';
+    return stored;
+  })(),
+  model: (() => {
+    const stored = localStorage.getItem('av-provider');
+    const provider = (stored && PROVIDERS[stored]) ? stored : 'openai';
+    return localStorage.getItem('av-model-' + provider) || '';
+  })(),
   history: JSON.parse(localStorage.getItem('av-history') || '[]'),
   lastListing: null,
   features: null, // initialized below once DEFAULT_FEATURES + loadFeatures exist
@@ -1848,11 +1830,11 @@ if (!localStorage.getItem('av-tutorial-seen')) {
 function checkProvider() {
   const p = PROVIDERS[state.provider];
   if (!p) {
-    state.provider = 'pollinations';
+    state.provider = 'openai';
     return true;
   }
   if (p.needsKey && !getApiKey(state.provider)) {
-    showToast(`Ajoute ta clé ${p.keyLabel} ou choisis le mode gratuit`);
+    showToast(`Ajoute ta clé ${p.keyLabel} dans les paramètres`);
     providerSelect.value = state.provider;
     syncProviderUI();
     settingsModal.hidden = false;
@@ -1871,8 +1853,15 @@ $('history-close').addEventListener('click', () => { historyModal.hidden = true;
 historyModal.addEventListener('click', (e) => { if (e.target === historyModal) historyModal.hidden = true; });
 
 $('history-clear').addEventListener('click', () => {
-  state.history = [];
-  localStorage.setItem('av-history', '[]');
+  // Preserve the demo entry as a reference example.
+  const demoEntry = state.history.find(h => h.isDemo);
+  state.history = demoEntry ? [demoEntry] : [];
+  localStorage.setItem('av-history', JSON.stringify(state.history));
+  // If somehow the demo was missing, re-seed it.
+  if (!demoEntry) {
+    localStorage.removeItem('av-demo-seeded');
+    seedDemoListing();
+  }
   renderHistory();
   showToast('Historique effacé');
 });
@@ -1994,14 +1983,23 @@ const DEMO_PHOTOS = [
 ];
 function seedDemoListing() {
   if (localStorage.getItem('av-demo-seeded') === DEMO_ID) {
-    // Make sure the existing entry has the photos backfilled
     const existing = state.history.find(h => h.id === DEMO_ID);
-    if (existing && (!existing.photos || !existing.photos.length)) {
-      existing.photos = DEMO_PHOTOS;
-      existing.thumbnail = DEMO_PHOTOS[0];
-      try { localStorage.setItem('av-history', JSON.stringify(state.history)); } catch {}
+    if (existing) {
+      // Backfill photos/thumbnail if missing on an existing v3 entry.
+      let changed = false;
+      if (!existing.photos || !existing.photos.length) {
+        existing.photos = DEMO_PHOTOS; changed = true;
+      }
+      if (!existing.thumbnail) {
+        existing.thumbnail = DEMO_PHOTOS[0]; changed = true;
+      }
+      if (changed) {
+        try { localStorage.setItem('av-history', JSON.stringify(state.history)); } catch {}
+      }
+      return;
     }
-    return;
+    // Marked as seeded but the entry is gone (e.g. user wiped history before
+    // we started preserving it). Fall through to re-seed.
   }
   // Remove any older demo entries first so we don't end up with duplicates.
   state.history = state.history.filter(h => !h.isDemo);

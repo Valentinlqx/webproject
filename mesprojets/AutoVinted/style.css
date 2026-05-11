@@ -50,6 +50,13 @@ body.dark {
 
 html { -webkit-text-size-adjust: 100%; }
 
+/* Tell the browser which color scheme to use for native controls
+   (dropdown popups, scrollbars, date pickers...). Without this, the
+   <option> popup on Windows stays light-themed and unreadable on
+   our dark background. */
+body { color-scheme: light; }
+body.dark { color-scheme: dark; }
+
 body {
   min-height: 100vh;
   background: var(--bg);
@@ -800,6 +807,20 @@ section { margin-bottom: 24px; }
   transition: border-color 0.18s;
 }
 .field input:focus, .field select:focus { border-color: var(--border-hover); }
+
+/* Native dropdown options — readable on both themes
+   (browsers paint <option> using OS-level styles which ignore most CSS,
+   but background/color are honored on Chromium 122+, Firefox, Safari) */
+.field select option {
+  background: var(--bg-card);
+  color: var(--text);
+  padding: 8px 12px;
+}
+.field select option:checked,
+.field select option:hover {
+  background: var(--bg-soft-2);
+  color: var(--text);
+}
 .field-hint {
   font-size: 0.78rem;
   color: var(--text-2);
