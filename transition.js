@@ -6,12 +6,18 @@
       e.preventDefault();
 
       const href = this.getAttribute('href');
-      const bgImage = this.getAttribute('data-transition');
+      const bgValue = this.getAttribute('data-transition');
 
       const overlay = document.createElement('div');
       overlay.className = 'page-transition';
-      overlay.style.backgroundImage =
-        "radial-gradient(ellipse 80% 60% at 50% 20%, rgba(40, 50, 70, 0.4), transparent 70%), url('" + bgImage + "')";
+      // data-transition can be a CSS color (e.g. #FFD60A) or an image path.
+      if (bgValue && /^(#|rgb|hsl)/.test(bgValue.trim())) {
+        overlay.style.backgroundColor = bgValue;
+        overlay.style.backgroundImage = 'none';
+      } else {
+        overlay.style.backgroundImage =
+          "radial-gradient(ellipse 80% 60% at 50% 20%, rgba(40, 50, 70, 0.4), transparent 70%), url('" + bgValue + "')";
+      }
       document.body.appendChild(overlay);
 
       requestAnimationFrame(() => {
