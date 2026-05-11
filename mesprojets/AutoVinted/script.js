@@ -1132,8 +1132,22 @@ function handleAIResponse(resp) {
 }
 
 // ─── Result rendering ────────────────────────────────
-function renderListing(listing) {
+function renderListing(listing, photos = null) {
   state.lastListing = listing;
+
+  const photosEl = $('r-photos');
+  if (photosEl) {
+    if (photos && photos.length) {
+      photosEl.innerHTML = photos.map((src, i) =>
+        `<img class="result-photo" src="${src}" alt="Photo ${i + 1}" loading="lazy" />`
+      ).join('');
+      photosEl.hidden = false;
+    } else {
+      photosEl.innerHTML = '';
+      photosEl.hidden = true;
+    }
+  }
+
   $('r-title').textContent = listing.title || '';
   $('r-description').textContent = listing.description || '';
 
@@ -1196,6 +1210,20 @@ function renderListing(listing) {
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+
+// ─── Photo lightbox ──────────────────────────────────
+document.addEventListener('click', (e) => {
+  const img = e.target.closest('.result-photo');
+  if (!img) return;
+  const box = document.createElement('div');
+  box.className = 'photo-lightbox';
+  box.innerHTML = `<img src="${img.src}" alt="" />`;
+  box.addEventListener('click', () => box.remove());
+  document.addEventListener('keydown', function onEsc(ev) {
+    if (ev.key === 'Escape') { box.remove(); document.removeEventListener('keydown', onEsc); }
+  });
+  document.body.appendChild(box);
+});
 
 // ─── Copy buttons ────────────────────────────────────
 document.addEventListener('click', (e) => {
@@ -1840,7 +1868,7 @@ $('history-clear').addEventListener('click', () => {
   showToast('Historique effacé');
 });
 
-async function compressThumbnail(dataUrl, maxSize = 120, quality = 0.5) {
+async function compressImage(dataUrl, maxSize = 120, quality = 0.5) {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {
@@ -1856,14 +1884,57 @@ async function compressThumbnail(dataUrl, maxSize = 120, quality = 0.5) {
     img.src = dataUrl;
   });
 }
+// Backwards-compat alias
+const compressThumbnail = compressImage;
+
+// Max photos backed up per history entry (low-res copy for visual recall).
+const HISTORY_PHOTO_MAX = 6;
+const HISTORY_PHOTO_SIZE = 480;
+const HISTORY_PHOTO_QUALITY = 0.6;
+
+function tryPersistHistory() {
+  try {
+    localStorage.setItem('av-history', JSON.stringify(state.history));
+    return true;
+  } catch (e) {
+    // Quota likely — drop backup photos from oldest entries first, then trim entries.
+    for (let i = state.history.length - 1; i >= 0; i--) {
+      if (state.history[i].photos && state.history[i].photos.length) {
+        state.history[i].photos = [];
+        try { localStorage.setItem('av-history', JSON.stringify(state.history)); return true; }
+        catch {}
+      }
+    }
+    while (state.history.length > 1) {
+      state.history.pop();
+      try { localStorage.setItem('av-history', JSON.stringify(state.history)); return true; }
+      catch {}
+    }
+    return false;
+  }
+}
 
 async function saveToHistory(listing, photos = null) {
   let thumbnail = null;
+  let backupPhotos = [];
   const src = photos || state.photos;
-  if (src && src.length > 0) thumbnail = await compressThumbnail(src[0].dataUrl);
-  state.history.unshift({ listing, date: new Date().toISOString(), id: crypto.randomUUID(), thumbnail });
+  if (src && src.length > 0) {
+    thumbnail = await compressImage(src[0].dataUrl, 120, 0.5);
+    const toBackup = src.slice(0, HISTORY_PHOTO_MAX);
+    const results = await Promise.all(
+      toBackup.map(p => compressImage(p.dataUrl, HISTORY_PHOTO_SIZE, HISTORY_PHOTO_QUALITY))
+    );
+    backupPhotos = results.filter(Boolean);
+  }
+  state.history.unshift({
+    listing,
+    date: new Date().toISOString(),
+    id: crypto.randomUUID(),
+    thumbnail,
+    photos: backupPhotos,
+  });
   state.history = state.history.slice(0, 30);
-  localStorage.setItem('av-history', JSON.stringify(state.history));
+  tryPersistHistory();
 }
 
 function renderHistory() {
@@ -1898,7 +1969,7 @@ function renderHistory() {
       historyModal.hidden = true;
       uploadSection.style.display = 'none';
       chatSection.hidden = true;
-      renderListing(item.listing);
+      renderListing(item.listing, item.photos);
       resultSection.hidden = false;
     });
   });
