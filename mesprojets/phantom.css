@@ -72,23 +72,23 @@
   margin-bottom: 24px;
 }
 
+/* Titre display : texte noir sur jaune (cf. DESIGN.md §2.2),
+   typo Anton italique skewX(-6deg) appliqué au texte, rotation du bloc. */
 .phantom-page h1 {
   font-family: var(--font-display);
   font-size: clamp(3rem, 9vw, 6rem);
   font-weight: 900;
+  font-style: italic;
   line-height: 0.92;
   letter-spacing: -0.02em;
   color: var(--p-mask);
   text-transform: uppercase;
-  transform: rotate(-2deg) skewX(-6deg);
+  transform: rotate(-3deg) skewX(-6deg);
   text-shadow:
-    4px 4px 0 var(--p-phantom),
-    8px 8px 0 var(--p-card);
-  padding: 12px 28px;
-  background: var(--p-mask);
-  color: var(--p-note);
-  clip-path: polygon(2% 0, 100% 0, 98% 100%, 0 100%);
+    3px 3px 0 var(--p-phantom),
+    6px 6px 0 var(--p-card);
   display: inline-block;
+  margin: 12px 0;
 }
 
 /* ── Liste de liens : pile verticale, légèrement décalée ─────────────── */
@@ -171,16 +171,46 @@
   pointer-events: none;
 }
 
-/* ── Variante "featured" — Calling Card (CTA majeur) ──────────────────── */
+/* Loading — DESIGN.md §4.3 : "icône qui tourne ou pulse" */
+@keyframes phantom-loading-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
+
+.phantom-page .link-btn[data-loading="true"],
+.phantom-page .phantom-button[data-loading="true"] {
+  pointer-events: none;
+  animation: phantom-loading-pulse 700ms var(--ease-snap) infinite;
+}
+
+.phantom-page .link-btn[data-loading="true"]::before,
+.phantom-page .phantom-button[data-loading="true"]::before {
+  content: "◐";
+  animation: phantom-loading-spin 700ms linear infinite;
+  margin-right: 0.4em;
+}
+
+@keyframes phantom-loading-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Variante "featured" — Calling Card (CTA majeur)
+   DESIGN.md §4.2 : transform = rotate(-2deg) seulement.
+   Le skewX(-6deg) "italique" est appliqué au texte via font-style + une
+   transform locale sur le contenu (::before pour le picto, lettre-spacing
+   sur le label). On garde la rotation pure sur le bouton pour ne pas
+   incliner les shadows en parallèlogramme. ──────────────────────────── */
 .phantom-page .link-btn.featured,
 .phantom-page .phantom-button--calling-card {
   font-family: var(--font-display);
   font-size: clamp(18px, 3.2vw, 24px);
   font-weight: 400;
-  font-style: italic;
+  /* italique synthétisé à 6° — équivalent visuel du skewX(-6deg) du DESIGN.md */
+  font-style: oblique 6deg;
+  font-synthesis: style oblique;
   letter-spacing: 0.05em;
   padding: 16px 36px;
-  transform: rotate(-2deg) skewX(-6deg);
+  transform: rotate(-2deg);
   clip-path: polygon(2% 0, 100% 0, 98% 100%, 0 100%);
   box-shadow:
     6px 6px 0 var(--p-phantom),
@@ -189,7 +219,7 @@
 
 .phantom-page .link-btn.featured:hover,
 .phantom-page .phantom-button--calling-card:hover {
-  transform: rotate(-2deg) skewX(-6deg) translate(-3px, -3px);
+  transform: rotate(-2deg) translate(-3px, -3px);
   box-shadow:
     9px 9px 0 var(--p-phantom),
     15px 15px 0 var(--p-card);
@@ -197,7 +227,7 @@
 
 .phantom-page .link-btn.featured:active,
 .phantom-page .phantom-button--calling-card:active {
-  transform: rotate(-2deg) skewX(-6deg) translate(2px, 2px);
+  transform: rotate(-2deg) translate(2px, 2px);
   box-shadow:
     2px 2px 0 var(--p-phantom),
     6px 6px 0 var(--p-card);
@@ -219,7 +249,9 @@
   font-size: 1.4em;
 }
 
-/* ── Bouton retour : variante "ghost" ─────────────────────────────────── */
+/* ── Bouton retour : variante "ghost" ──────────────────────────────────
+   DESIGN.md §4.2 Ghost : bg transparent, border 2px, hover = bg noir +
+   texte blanc + transform rotate(-1deg) scale(1.02). Pas de shadow. */
 .phantom-page .link-btn.ghost,
 .phantom-page .phantom-button--ghost {
   background: transparent;
@@ -227,19 +259,21 @@
   border: 2px solid var(--p-mask);
   clip-path: none;
   padding: 10px 24px;
-  box-shadow: 4px 4px 0 var(--p-mask);
+  box-shadow: none;
 }
 
 .phantom-page .link-btn.ghost:hover,
 .phantom-page .phantom-button--ghost:hover {
   background: var(--p-mask);
   color: var(--p-note);
-  box-shadow: 6px 6px 0 var(--p-mask);
+  transform: rotate(-1deg) scale(1.02);
+  box-shadow: none;
 }
 
 .phantom-page .link-btn.ghost:active,
 .phantom-page .phantom-button--ghost:active {
-  box-shadow: 0 0 0 var(--p-mask);
+  transform: rotate(-1deg) scale(0.98);
+  box-shadow: none;
 }
 
 /* ── Secondary (vert) ─────────────────────────────────────────────────── */
