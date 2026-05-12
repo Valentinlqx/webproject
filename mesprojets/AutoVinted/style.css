@@ -6,6 +6,9 @@
    accent stays vivid, exactly like the Vinted Android dark theme.
    ────────────────────────────────────────────────────────────────────────── */
 
+/* Logo font — Pacifico (fontsource / Google Fonts mirror) */
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+
 :root {
   /* ── Vinted brand ─────────────────────────────────────── */
   --color-primary:       #09B1BA;
@@ -156,22 +159,25 @@ header {
 .icon-btn:active { transform: scale(0.94); }
 body.dark .icon-btn:hover { color: var(--color-primary); }
 
-/* Hero — Vinted-style headline, h1 in 700, gentle subtext */
+/* Hero — Pacifico wordmark logo in Vinted teal */
 .hero {
   max-width: 720px;
   margin: 0 auto;
   text-align: center;
-  padding: var(--space-xs) var(--space-xxs);
+  padding: var(--space-s) var(--space-xxs) var(--space-xs);
 }
 .hero h1 {
-  font-size: clamp(1.75rem, 4.5vw, 2.25rem);   /* Vinted h1 ≈ 32px */
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  margin-bottom: var(--space-xs);
-  color: var(--text);
+  font-family: "Pacifico", cursive;
+  font-size: clamp(3rem, 9vw, 5rem);          /* logo lockup, bigger */
+  font-weight: 400;                            /* Pacifico ships single weight */
+  letter-spacing: 0;
+  line-height: 1.05;
+  margin-bottom: var(--space-s);
+  color: var(--color-primary);
+  text-shadow: 0 1px 0 rgba(0, 119, 130, 0.08);
+  user-select: none;
 }
-.hero h1::first-letter,
-.hero h1 { color: var(--text); }
+body.dark .hero h1 { color: var(--accent); }
 .hero-sub {
   color: var(--text-2);
   font-size: 1rem;
@@ -1315,7 +1321,7 @@ footer {
 /* ── Responsive ─────────────────────────────────────────────────────── */
 @media (max-width: 480px) {
   header { padding: 14px 16px 24px; }
-  .hero h1 { font-size: 1.75rem; }
+  .hero h1 { font-size: 2.75rem; }
   main { padding: 20px 14px; }
   .dropzone { padding: 32px 16px; }
   .price-grid { grid-template-columns: 1fr; }
