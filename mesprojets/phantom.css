@@ -4,7 +4,7 @@
    Spec  : ../DESIGN.md
    ────────────────────────────────────────────────────────────────────────── */
 
-@import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;700;900&family=Space+Mono:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;700;900&family=Pacifico&family=Space+Mono:wght@700&display=swap');
 
 .phantom-page {
   /* Fond principal */
@@ -247,6 +247,26 @@
 .phantom-page .link-btn.featured[data-picto]::before,
 .phantom-page .phantom-button--calling-card[data-picto]::before {
   font-size: 1.4em;
+}
+
+/* ── Wordmark AutoVinted : logo Pacifico blanc sur Calling Card noire
+   Override la typo Anton/oblique du calling card pour rendre la marque
+   AutoVinted reconnaissable depuis la page projets. ────────────────── */
+.phantom-page .link-btn.av-wordmark {
+  font-family: "Pacifico", cursive;
+  font-style: normal;
+  font-weight: 400;
+  font-synthesis: none;
+  font-size: clamp(2rem, 5.5vw, 3rem);
+  letter-spacing: 0;
+  color: var(--p-note);              /* blanc cassé */
+  padding: 14px 36px;
+}
+
+/* Le clip-path parallélogramme rognerait les jambages cursifs de Pacifico,
+   on l'enlève sur ce bouton spécifique. */
+.phantom-page .link-btn.av-wordmark {
+  clip-path: none;
 }
 
 /* ── Bouton retour : variante "ghost" ──────────────────────────────────
