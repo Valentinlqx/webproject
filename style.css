@@ -84,6 +84,17 @@ body {
   min-width: 240px;
 }
 
+/* Fond — photo */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url('res/1.jpg');
+  background-size: cover;
+  background-position: center;
+  z-index: -1;
+}
+
 /* ── Transition de page ── */
 
 .page-transition {
