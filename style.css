@@ -194,6 +194,66 @@ h1 {
 }
 
 
+/* ── Hero — typographic hierarchy ── */
+
+/* margins on an 8px scale drive the vertical rhythm, so drop the body gap */
+body.home {
+  gap: 0;
+}
+
+/* the one big typographic jump: title → everything else.
+   weight stays light — the hierarchy comes from size, not boldness */
+.home h1 {
+  font-size: clamp(3rem, 8vw, 4.5rem);
+  font-weight: 400;
+  line-height: 1;
+  margin-bottom: 0;
+}
+
+.home .links {
+  gap: 1.5rem;          /* 24px between buttons */
+  margin-top: 3.5rem;   /* 56px — title → first button */
+}
+
+.home .link-btn {
+  font-size: 1.25rem;   /* 20px */
+  font-weight: 500;
+  transition: opacity 0.18s;
+}
+
+/* subtle hover — no flashy transition */
+.home .link-btn:hover {
+  opacity: 0.65;
+}
+
+.home .socials {
+  gap: 1rem;            /* 16px */
+  margin-top: 2.5rem;   /* 40px — button group → icon row */
+  line-height: 1;
+}
+
+/* 44px touch target around a 24px icon — the extra padding is invisible */
+.home .social-btn {
+  width: 44px;
+  height: 44px;
+  transition: opacity 0.18s;
+}
+
+.home .social-btn:hover {
+  opacity: 0.65;
+  transform: none;
+}
+
+/* 24px: optically a touch larger than the 20px button text to offset the
+   lighter visual weight of outline icons — not a mathematical ratio */
+.home .social-btn svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  display: block;
+  stroke-width: 2;
+}
+
+
 /* ── Services Grid ── */
 
 .services-grid {
