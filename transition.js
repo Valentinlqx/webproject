@@ -16,7 +16,7 @@
         overlay.style.backgroundImage = 'none';
       } else {
         overlay.style.backgroundImage =
-          "radial-gradient(ellipse 80% 60% at 50% 20%, rgba(40, 50, 70, 0.4), transparent 70%), url('" + bgValue + "')";
+          "radial-gradient(ellipse 80% 60% at 50% 20%, rgba(91, 126, 60, 0.4), transparent 70%), url('" + bgValue + "')";
       }
       document.body.appendChild(overlay);
 
