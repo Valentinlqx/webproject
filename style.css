@@ -209,11 +209,10 @@ h2, h3, .editorial-display {
   color: var(--ink);
 }
 
-.social-btn svg {
-  width: 36px;
-  height: 36px;
-  display: block;
-  stroke-width: 1.85;
+/* Phosphor Icons — variante regular */
+.social-btn i {
+  font-size: 36px;
+  line-height: 1;
 }
 
 /* ── Hero (home) ── */
