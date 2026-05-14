@@ -249,6 +249,20 @@ h1 {
 /* ── Responsive ── */
 
 @media (max-width: 480px) {
+  /* the left-quarter column only makes sense on desktop —
+     on phones, fall back to a clean full-width centered column */
+  body {
+    align-items: center;
+    padding: 32px 16px;
+  }
+
+  .profile,
+  .links,
+  .socials {
+    width: 100%;
+    min-width: 0;
+  }
+
   .services-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
