@@ -41,12 +41,21 @@ body {
   color: var(--text);
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   gap: 24px;
-  padding: 32px 16px;
+  /* text column lives in the left quarter of the viewport */
+  padding: 32px 0 32px 6vw;
   position: relative;
   overflow: hidden;
+}
+
+/* keep the text content within the left 25% of the page */
+.profile,
+.links,
+.socials {
+  width: 25vw;
+  min-width: 240px;
 }
 
 body::before {
@@ -114,8 +123,8 @@ body::before {
 .profile {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
 }
 
 h1 {
@@ -133,7 +142,7 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .link-btn {
@@ -154,7 +163,8 @@ h1 {
 
 .socials {
   display: flex;
-  justify-content: center;
+  flex-wrap: wrap;
+  justify-content: flex-start;
   align-items: center;
   gap: 16px;
 }
