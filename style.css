@@ -203,20 +203,21 @@ body.home {
 
 /* the one big typographic jump: title → everything else.
    weight stays light — the hierarchy comes from size, not boldness */
+/* whole hero scaled 1.5x */
 .home h1 {
-  font-size: clamp(3rem, 8vw, 4.5rem);
+  font-size: clamp(4.5rem, 12vw, 6.75rem);
   font-weight: 400;
   line-height: 1;
   margin-bottom: 0;
 }
 
 .home .links {
-  gap: 1.5rem;          /* 24px between buttons */
-  margin-top: 3.5rem;   /* 56px — title → first button */
+  gap: 2.25rem;          /* 36px between buttons */
+  margin-top: 5.25rem;   /* 84px — title → first button */
 }
 
 .home .link-btn {
-  font-size: 1.25rem;   /* 20px */
+  font-size: 1.875rem;   /* 30px */
   font-weight: 500;
   transition: opacity 0.18s;
 }
@@ -227,15 +228,15 @@ body.home {
 }
 
 .home .socials {
-  gap: 1rem;            /* 16px */
-  margin-top: 2.5rem;   /* 40px — button group → icon row */
+  gap: 1.5rem;           /* 24px */
+  margin-top: 3.75rem;   /* 60px — button group → icon row */
   line-height: 1;
 }
 
-/* 44px touch target around a 24px icon — the extra padding is invisible */
+/* 66px touch target around a 36px icon — the extra padding is invisible */
 .home .social-btn {
-  width: 44px;
-  height: 44px;
+  width: 66px;
+  height: 66px;
   transition: opacity 0.18s;
 }
 
@@ -244,11 +245,11 @@ body.home {
   transform: none;
 }
 
-/* 24px: optically a touch larger than the 20px button text to offset the
+/* 36px: optically a touch larger than the 30px button text to offset the
    lighter visual weight of outline icons — not a mathematical ratio */
 .home .social-btn svg {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 2.25rem;
+  height: 2.25rem;
   display: block;
   stroke-width: 2;
 }
