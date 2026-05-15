@@ -196,18 +196,6 @@ header {
   opacity: 0.22;
 }
 
-.btn-corner {
-  position: absolute;
-  top: 3px;
-  left: 5px;
-  font-family: 'Basteleur', serif;
-  font-weight: 700;
-  font-size: 13px;
-  line-height: 1;
-  opacity: 0.72;
-  pointer-events: none;
-}
-
 .back-btn .btn-icon {
   width: 22px;
   height: 22px;
@@ -237,7 +225,6 @@ header {
     var(--pixel) var(--pixel) 0 var(--border-dark),
     calc(var(--pixel) * 2) calc(var(--pixel) * 2) 0 var(--gold);
 }
-.back-btn .btn-corner { color: var(--cream); }
 
 /* ── Lang: gold tarot card, slight right tilt ── */
 .lang-toggle {
@@ -249,7 +236,6 @@ header {
     var(--pixel) var(--pixel) 0 var(--border-dark),
     calc(var(--pixel) * 2) calc(var(--pixel) * 2) 0 var(--mult);
 }
-.lang-toggle .btn-corner { color: var(--border-dark); }
 
 @media (hover: hover) and (pointer: fine) {
   .back-btn:hover {
@@ -472,20 +458,6 @@ main {
   gap: 10px;
   width: 100%;
 }
-/* Balatro score line: blue chip × red mult */
-.results-count::before {
-  content: '♣';
-  color: var(--chip);
-  font-size: 18px;
-  text-shadow: 1px 1px 0 var(--border-dark);
-}
-.results-count::after {
-  content: '♥';
-  color: var(--mult);
-  font-size: 18px;
-  text-shadow: 1px 1px 0 var(--border-dark);
-}
-
 /* ── Grid ── */
 
 .grid {
@@ -516,23 +488,6 @@ main {
   overflow: hidden;
 }
 
-/* Playing-card corner pips: ♠ top-left + mirrored bottom-right */
-.card::before,
-.card::after {
-  content: '♠';
-  position: absolute;
-  font-family: 'Basteleur', serif;
-  font-weight: 700;
-  font-size: 16px;
-  line-height: 1;
-  color: var(--border-dark);
-  opacity: 0.32;
-  pointer-events: none;
-  z-index: 0;
-}
-.card::before { top: 10px;    left: 13px; }
-.card::after  { bottom: 10px; right: 13px; transform: rotate(180deg); }
-
 @media (hover: hover) and (pointer: fine) {
   .card:hover {
     transform: translate(-4px, -4px) rotate(-1deg);
@@ -543,9 +498,6 @@ main {
       0 0 0 2px rgba(243, 197, 60, 0.35),
       0 12px 32px var(--shadow-hover);
   }
-
-  .card:hover::before,
-  .card:hover::after { opacity: 0.5; color: var(--mult); }
 
   .card:hover .card-emoji  { transform: rotate(-6deg) scale(1.1); }
   .card:hover .card-visit  { transform: translateX(4px); color: var(--border-dark); }
@@ -832,7 +784,6 @@ footer {
   .back-btn, .lang-toggle { width: 44px; height: 54px; }
   .back-btn .btn-icon { width: 20px; height: 20px; }
   .lang-toggle .lang-label { font-size: 13px; }
-  .btn-corner { font-size: 7px; }
 
   .card        { padding: var(--s-4); }
   .card-emoji  { width: 48px; height: 48px; }
