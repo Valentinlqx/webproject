@@ -158,13 +158,6 @@ header {
   z-index: 3;
 }
 
-.back-btn {
-  position: absolute;
-  top: var(--s-4);
-  left: var(--s-4);
-  z-index: 3;
-}
-
 .back-btn,
 .lang-toggle {
   position: relative;
@@ -229,6 +222,10 @@ header {
 
 /* ── Back: Joker-red card, slight left tilt ── */
 .back-btn {
+  position: absolute;
+  top: var(--s-4);
+  left: var(--s-4);
+  z-index: 3;
   background: var(--mult);
   color: var(--cream);
   transform: rotate(-2deg);
