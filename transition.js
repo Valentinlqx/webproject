@@ -1,11 +1,18 @@
 (function () {
   const links = document.querySelectorAll('a[data-transition]');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   links.forEach(link => {
     link.addEventListener('click', function (e) {
       e.preventDefault();
 
       const href = this.getAttribute('href');
+
+      if (reduceMotion) {
+        window.location.href = href;
+        return;
+      }
+
       const bgValue = this.getAttribute('data-transition');
 
       const overlay = document.createElement('div');

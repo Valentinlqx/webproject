@@ -62,7 +62,7 @@
 }
 
 body {
-  min-height: 100vh;
+  min-height: 100dvh;
   background-color: var(--bg);
   font-family: 'Fraunces', Georgia, serif;
   font-size: var(--t-base);
@@ -88,16 +88,26 @@ body {
   min-width: 240px;
 }
 
-/* Fond — photo */
+/* Fond — photo + lueur ambiante (glow forêt) */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   background-color: var(--bg);
-  background-image: url('res/1.jpg');
+  background-image:
+    radial-gradient(ellipse 70% 55% at 28% 35%, var(--glow), transparent 70%),
+    url('res/1.jpg');
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
   z-index: -1;
+}
+
+/* Page Prestations — même photo, glow déplacé pour rythmer le parcours */
+body.prestations::before {
+  background-image:
+    radial-gradient(ellipse 90% 50% at 70% 80%, var(--glow), transparent 70%),
+    url('res/1.jpg');
 }
 
 /* ── Transition de page ── */
@@ -195,6 +205,12 @@ h2, h3, .editorial-display {
   transform: scale(0.97);
 }
 
+.link-btn:focus-visible {
+  outline: 2px solid var(--sage);
+  outline-offset: 6px;
+  border-radius: 2px;
+}
+
 /* ── Réseaux sociaux ── */
 
 .socials {
@@ -229,6 +245,12 @@ h2, h3, .editorial-display {
 
 .social-btn:active {
   transform: scale(0.92);
+}
+
+.social-btn:focus-visible {
+  outline: 2px solid var(--sage);
+  outline-offset: 4px;
+  border-radius: 6px;
 }
 
 /* Phosphor Icons — variante regular */
@@ -369,6 +391,11 @@ body.home {
   transform: scale(0.97);
 }
 
+.btn-primary:focus-visible {
+  outline: 2px solid var(--cream);
+  outline-offset: 3px;
+}
+
 /* ── Carte ── */
 
 .card {
@@ -378,66 +405,129 @@ body.home {
   border-radius: 4px;            /* coins légers, pas ronds */
 }
 
-/* ── Grille de services ── */
+/* ── Prestations — header aligné gauche, registre éditorial ── */
 
-.services-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--s-5);
-  width: 100%;
-  max-width: 800px;
-  margin: var(--s-6) 0;
+body.prestations .profile {
+  align-items: flex-start;
+  text-align: left;
+  width: min(560px, 60vw);
 }
 
-.service-card {
+body.prestations .profile h1 {
+  font-size: clamp(3rem, 7vw, 5rem);
+  font-weight: 600;
+  line-height: 1;
+}
+
+body.prestations .links {
+  width: min(560px, 60vw);
+  align-items: flex-start;
+  margin-top: var(--s-4);
+}
+
+/* ── Liste de services — éditoriale, numérotée ── */
+
+.services-list {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--s-4);
-  padding: var(--s-6) var(--s-5);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 4px;
+  width: min(560px, 60vw);
+  margin: var(--s-5) 0 0;
+  border-top: 1px solid var(--line);
+}
+
+.service-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  gap: var(--s-5);
+  padding: var(--s-5) 0;
+  border-bottom: 1px solid var(--line);
   text-decoration: none;
   color: var(--ink);
-  transition: background 250ms var(--ease-out),
-              border-color 250ms var(--ease-out),
-              transform 250ms var(--ease-out);
-  min-height: 220px;
+  position: relative;
+  transition: color 220ms var(--ease-out),
+              border-color 220ms var(--ease-out);
+}
+
+.service-num {
+  font-family: 'Fraunces', Georgia, serif;
+  font-variation-settings: "opsz" 12, "wght" 500;
+  font-size: var(--t-xs);
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+.service-item h2 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-variation-settings: "opsz" 96, "SOFT" 80, "wght" 500;
+  font-size: var(--t-xl);
+  letter-spacing: -0.005em;
+  line-height: 1.1;
+  margin: 0;
+  color: var(--ink);
+  transition: transform 280ms var(--ease-out),
+              color 220ms var(--ease-out);
+  transform-origin: left center;
+}
+
+.service-arrow {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: var(--t-lg);
+  color: var(--ink-quiet);
+  transition: transform 280ms var(--ease-out),
+              color 220ms var(--ease-out);
+  line-height: 1;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .service-card:hover {
-    background: var(--elevated);
-    border-color: var(--line-strong);
-    transform: translateY(-4px);
+  .service-item:hover {
+    border-bottom-color: var(--line-strong);
   }
 
-  .service-card:hover .service-icon {
-    opacity: 1;
+  .service-item:hover h2 {
+    color: var(--sage);
+    transform: translateX(6px);
+  }
+
+  .service-item:hover .service-arrow {
+    color: var(--terracotta);
+    transform: translateX(6px);
+  }
+
+  .service-item:hover .service-num {
+    color: var(--ink-2);
   }
 }
 
-.service-card:active {
-  transform: scale(0.98);
-  transition-duration: 120ms;
+.service-item:active h2,
+.service-item:active .service-arrow {
+  transform: translateX(3px) scale(0.99);
 }
 
-.service-icon {
-  font-size: 3rem;
-  color: var(--sage);
-  opacity: 0.85;
-  transition: opacity 250ms var(--ease-out);
+.service-item:focus-visible {
+  outline: 2px solid var(--sage);
+  outline-offset: 6px;
+  border-radius: 2px;
 }
 
-.service-card h2 {
-  font-family: 'Fraunces', Georgia, serif;
-  font-variation-settings: "opsz" 144, "SOFT" 100, "wght" 600;
-  font-size: var(--t-lg);
-  text-align: center;
-  margin: 0;
+/* Entrée — léger stagger éditorial */
+@keyframes serviceRise {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
+
+.services-list .service-item {
+  opacity: 0;
+  animation: serviceRise 480ms var(--ease-out) forwards;
+}
+
+.services-list .service-item:nth-child(1) { animation-delay:  80ms; }
+.services-list .service-item:nth-child(2) { animation-delay: 130ms; }
+.services-list .service-item:nth-child(3) { animation-delay: 180ms; }
+.services-list .service-item:nth-child(4) { animation-delay: 230ms; }
+.services-list .service-item:nth-child(5) { animation-delay: 280ms; }
+.services-list .service-item:nth-child(6) { animation-delay: 330ms; }
 
 /* ── Responsive ── */
 
@@ -456,25 +546,19 @@ body.home {
     min-width: 0;
   }
 
-  .services-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--s-3);
-    max-width: 100%;
-    margin: var(--s-5) 0;
+  .services-list {
+    width: 100%;
+    margin-top: var(--s-4);
   }
 
-  .service-card {
-    padding: var(--s-4) var(--s-3);
-    min-height: 140px;
-    gap: var(--s-2);
+  .service-item {
+    grid-template-columns: auto 1fr auto;
+    gap: var(--s-4);
+    padding: var(--s-4) 0;
   }
 
-  .service-icon {
-    font-size: 2rem;
-  }
-
-  .service-card h2 {
-    font-size: var(--t-sm);
+  .service-item h2 {
+    font-size: var(--t-lg);
   }
 }
 
@@ -491,7 +575,8 @@ body.home {
 
   .home .profile,
   .home .links > *,
-  .home .socials > * {
+  .home .socials > *,
+  .services-list .service-item {
     opacity: 1;
     transform: none;
   }

@@ -7,53 +7,51 @@
   <meta name="description" content="Mes prestations - Valentin L." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>" />
   <link rel="preload" as="image" href="res/1.jpg">
-  <link rel="preload" as="image" href="res/3.jpg">
   <link rel="stylesheet" href="style.css" />
-  <style>
-    body::before {
-      background-image:
-        radial-gradient(ellipse 80% 60% at 50% 20%, var(--glow), transparent 70%),
-        url('res/3.jpg') !important;
-    }
-  </style>
 </head>
-<body>
+<body class="prestations">
 
   <div class="profile">
     <h1>Mes prestations</h1>
   </div>
 
-  <div class="services-grid">
-    <a href="#" class="service-card" title="Logos">
-      <div class="service-icon">✦</div>
-      <h2>Mes logos</h2>
+  <nav class="services-list" aria-label="Prestations">
+    <a href="#" class="service-item">
+      <span class="service-num">01</span>
+      <h2>Logos</h2>
+      <span class="service-arrow" aria-hidden="true">→</span>
     </a>
 
-    <a href="#" class="service-card" title="Direction artistique">
-      <div class="service-icon">◈</div>
+    <a href="#" class="service-item">
+      <span class="service-num">02</span>
       <h2>Direction artistique</h2>
+      <span class="service-arrow" aria-hidden="true">→</span>
     </a>
 
-    <a href="#" class="service-card" title="Illustrations">
-      <div class="service-icon">◆</div>
+    <a href="#" class="service-item">
+      <span class="service-num">03</span>
       <h2>Illustrations</h2>
+      <span class="service-arrow" aria-hidden="true">→</span>
     </a>
 
-    <a href="#" class="service-card" title="Identité visuelle">
-      <div class="service-icon">◉</div>
+    <a href="#" class="service-item">
+      <span class="service-num">04</span>
       <h2>Identité visuelle</h2>
+      <span class="service-arrow" aria-hidden="true">→</span>
     </a>
 
-    <a href="#" class="service-card" title="Mise en page">
-      <div class="service-icon">▦</div>
+    <a href="#" class="service-item">
+      <span class="service-num">05</span>
       <h2>Mise en page</h2>
+      <span class="service-arrow" aria-hidden="true">→</span>
     </a>
 
-    <a href="#" class="service-card" title="Branding">
-      <div class="service-icon">◎</div>
+    <a href="#" class="service-item">
+      <span class="service-num">06</span>
       <h2>Branding</h2>
+      <span class="service-arrow" aria-hidden="true">→</span>
     </a>
-  </div>
+  </nav>
 
   <div class="links">
     <a href="index.html" class="link-btn" data-transition="res/1.jpg">Retour</a>
