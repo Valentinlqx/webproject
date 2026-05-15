@@ -82,21 +82,115 @@
           </div>
           <div class="tip">
             <strong>📏 Mesures précises (en cm)</strong>
-            <p>
-              <span class="tip-mini">Hauts : largeur épaules • longueur dos • largeur poitrine (sous bras) • longueur manches</span>
-              <span class="tip-mini">Pantalons : tour de taille • longueur jambes (entrejambe) • largeur cuisse • largeur ourlet</span>
-              <span class="tip-mini">Robes : épaules • longueur totale • poitrine • tour de taille</span>
-              <span class="tip-mini">Chaussures : longueur intérieure de la semelle</span>
-            </p>
+            <div class="measure-grid">
+              <div class="measure-card">
+                <svg viewBox="0 0 100 100" class="garment-svg" aria-hidden="true">
+                  <path d="M30 14 L14 26 L22 42 L30 38 L30 86 L70 86 L70 38 L78 42 L86 26 L70 14 Q50 26 30 14 Z"
+                        fill="var(--accent-light)" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                  <line x1="22" y1="9" x2="78" y2="9" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 2"/>
+                  <line x1="30" y1="46" x2="70" y2="46" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 2"/>
+                </svg>
+                <div class="measure-card-body">
+                  <h4>Hauts</h4>
+                  <ul>
+                    <li>largeur épaules</li>
+                    <li>longueur dos</li>
+                    <li>poitrine (sous bras)</li>
+                    <li>longueur manches</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="measure-card">
+                <svg viewBox="0 0 100 100" class="garment-svg" aria-hidden="true">
+                  <path d="M28 14 L72 14 L78 86 L58 86 L52 40 L48 40 L42 86 L22 86 Z"
+                        fill="var(--accent-light)" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                  <line x1="28" y1="22" x2="72" y2="22" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 2"/>
+                  <line x1="50" y1="40" x2="50" y2="86" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 2"/>
+                </svg>
+                <div class="measure-card-body">
+                  <h4>Pantalons</h4>
+                  <ul>
+                    <li>tour de taille</li>
+                    <li>entrejambe</li>
+                    <li>largeur cuisse</li>
+                    <li>largeur ourlet</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="measure-card">
+                <svg viewBox="0 0 100 100" class="garment-svg" aria-hidden="true">
+                  <path d="M30 14 L16 26 L24 40 L32 36 L22 88 L78 88 L68 36 L76 40 L84 26 L70 14 Q50 26 30 14 Z"
+                        fill="var(--accent-light)" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                  <line x1="34" y1="42" x2="66" y2="42" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 2"/>
+                  <line x1="33" y1="54" x2="67" y2="54" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 2"/>
+                </svg>
+                <div class="measure-card-body">
+                  <h4>Robes</h4>
+                  <ul>
+                    <li>épaules</li>
+                    <li>longueur totale</li>
+                    <li>poitrine</li>
+                    <li>tour de taille</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="measure-card">
+                <svg viewBox="0 0 100 100" class="garment-svg" aria-hidden="true">
+                  <path d="M12 64 Q12 48 28 46 L62 46 Q80 46 84 60 L88 72 Q88 80 80 80 L16 80 Q12 80 12 76 Z"
+                        fill="var(--accent-light)" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                  <line x1="18" y1="66" x2="82" y2="66" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 2"/>
+                  <circle cx="18" cy="66" r="1.6" fill="var(--accent)"/>
+                  <circle cx="82" cy="66" r="1.6" fill="var(--accent)"/>
+                </svg>
+                <div class="measure-card-body">
+                  <h4>Chaussures</h4>
+                  <ul>
+                    <li>longueur intérieure de la semelle</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="tip">
             <strong>🌍 Guide des tailles internationales</strong>
             <p>Si la taille est étrangère, donne la correspondance pour rassurer :</p>
-            <p>
-              <span class="tip-mini">Femme : XS=34 • S=36 • M=38 • L=40 • XL=42</span>
-              <span class="tip-mini">Homme : S=44/46 • M=48 • L=50/52 • XL=54</span>
-              <span class="tip-mini">Tailles UK/US : 6=34, 8=36, 10=38, 12=40, 14=42</span>
-            </p>
+            <div class="size-table" role="table" aria-label="Conversion de tailles">
+              <div class="size-row size-row-head" role="row">
+                <span class="size-label" role="columnheader"></span>
+                <span role="columnheader">XS</span>
+                <span role="columnheader">S</span>
+                <span role="columnheader">M</span>
+                <span role="columnheader">L</span>
+                <span role="columnheader">XL</span>
+              </div>
+              <div class="size-row" role="row">
+                <span class="size-label" role="rowheader">FR Femme</span>
+                <span class="size-pill" role="cell">34</span>
+                <span class="size-pill" role="cell">36</span>
+                <span class="size-pill" role="cell">38</span>
+                <span class="size-pill" role="cell">40</span>
+                <span class="size-pill" role="cell">42</span>
+              </div>
+              <div class="size-row" role="row">
+                <span class="size-label" role="rowheader">FR Homme</span>
+                <span class="size-pill dash" role="cell">—</span>
+                <span class="size-pill" role="cell">44/46</span>
+                <span class="size-pill" role="cell">48</span>
+                <span class="size-pill" role="cell">50/52</span>
+                <span class="size-pill" role="cell">54</span>
+              </div>
+              <div class="size-row" role="row">
+                <span class="size-label" role="rowheader">UK</span>
+                <span class="size-pill dash" role="cell">—</span>
+                <span class="size-pill" role="cell">8</span>
+                <span class="size-pill" role="cell">10</span>
+                <span class="size-pill" role="cell">12</span>
+                <span class="size-pill" role="cell">14</span>
+              </div>
+            </div>
           </div>
           <div class="tip">
             <strong>🔍 Défauts honnêtes</strong>
