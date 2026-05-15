@@ -144,7 +144,8 @@ header, main, footer { position: relative; z-index: 1; }
 
 header {
   position: relative;
-  padding: var(--s-12) var(--s-16);
+  /* top padding reserves room for the corner button cards (~80px tall) */
+  padding: clamp(96px, 11vw, 132px) var(--s-12) var(--s-12);
   text-align: center;
 }
 
@@ -304,12 +305,14 @@ header {
 .hero h1 {
   font-family: 'Basteleur', serif;
   font-weight: 700;
-  font-size: clamp(56px, 9vw, 96px);
-  line-height: 1;
+  font-size: clamp(44px, 7.5vw, 84px);
+  line-height: 1.02;
   letter-spacing: 0;
   color: var(--gold);
   margin-bottom: var(--s-5);
-  white-space: nowrap;
+  /* wraps naturally when the viewport is too narrow */
+  word-break: normal;
+  overflow-wrap: balance;
 }
 
 .hero-sub {
@@ -733,11 +736,11 @@ footer {
 
 @media (max-width: 900px) {
   main   { padding: var(--s-8) var(--s-5) var(--s-12); }
-  header { padding: var(--s-10) var(--s-12); }
+  header { padding: 96px var(--s-8) var(--s-10); }
 }
 
 @media (max-width: 600px) {
-  header { padding: var(--s-10) var(--s-10); }
+  header { padding: 88px var(--s-5) var(--s-10); }
   main   { padding: var(--s-6) var(--s-3) var(--s-12); }
   footer { padding: var(--s-5) var(--s-4); margin: var(--s-5) var(--s-3) 0; }
 
