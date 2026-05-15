@@ -312,13 +312,23 @@ main {
 }
 
 .cat-count {
+  display: inline-block;
   font-size: 9px;
   padding: 3px 5px;
   margin-left: 2px;
+  min-width: 22px;          /* reserve room for two digits so pills don't reflow */
   background: var(--chip);
   color: var(--cream);
   border: 2px solid var(--border-dark);
   line-height: 1;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* When a filter zeroes a category, the badge stays in place but goes invisible —
+   no more stray empty blue squares on dimmed pills. */
+.cat-count:empty {
+  visibility: hidden;
 }
 
 .cat-btn.active .cat-count { background: var(--gold); color: var(--border-dark); }
