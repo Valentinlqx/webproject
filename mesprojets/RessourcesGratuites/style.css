@@ -79,7 +79,7 @@
 html, body { image-rendering: pixelated; }
 
 body {
-  min-height: 100vh;
+  min-height: 100dvh;
   background: #100204;
   font-family: 'Coconat', Georgia, serif;
   color: var(--cream);

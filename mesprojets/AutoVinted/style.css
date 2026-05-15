@@ -106,7 +106,7 @@ body { color-scheme: light; }
 body.dark { color-scheme: dark; }
 
 body {
-  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
@@ -141,8 +141,8 @@ header {
 
 /* Icon buttons — neutral pill style, Vinted iconography spirit */
 .icon-btn {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--radius-pill);
   border: none;
   background: var(--bg-soft);
@@ -1307,9 +1307,11 @@ footer {
 
 /* ── Accessibility — focus rings & reduced motion ───────────────────── */
 *:focus-visible {
-  outline: 3px solid var(--accent-light);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+  border-radius: 4px;
 }
+body.dark *:focus-visible { outline-color: var(--accent); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
