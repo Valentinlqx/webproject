@@ -109,6 +109,11 @@ const RESOURCES_DATA = {
       "id": "opensource",
       "label": "🌱 Open Source",
       "color": "#27ae60"
+    },
+    {
+      "id": "ai-skills",
+      "label": "🧠 Skills IA",
+      "color": "#a064c9"
     }
   ],
   "resources": [
@@ -4036,6 +4041,44 @@ const RESOURCES_DATA = {
       "status": "free",
       "noaccount": true,
       "opensource": true
+    },
+    {
+      "name": "Emil Design Engineering",
+      "desc": "Skill Claude Code basé sur la philosophie d'Emil Kowalski : animation, polish, et les détails invisibles qui rendent un logiciel exceptionnel.",
+      "url": "https://animations.dev/",
+      "cats": [
+        "ai-skills",
+        "design",
+        "tutos"
+      ],
+      "emoji": "✨",
+      "status": "free",
+      "noaccount": true
+    },
+    {
+      "name": "Impeccable",
+      "desc": "Skill Claude Code pour interfaces frontend de niveau production : sens du registre (brand vs product), refus des défauts AI génériques, vrai code livrable.",
+      "url": "https://github.com/anthropics/claude-code",
+      "cats": [
+        "ai-skills",
+        "design",
+        "web"
+      ],
+      "emoji": "💎",
+      "status": "free",
+      "noaccount": true
+    },
+    {
+      "name": "Design Taste",
+      "desc": "Skill UI/UX engineering : règles métriques strictes, layouts anti-slop, motion hardware-accelerated, discipline typo et palette premium.",
+      "url": "https://github.com/anthropics/claude-code",
+      "cats": [
+        "ai-skills",
+        "design"
+      ],
+      "emoji": "🎯",
+      "status": "free",
+      "noaccount": true
     }
   ]
 };

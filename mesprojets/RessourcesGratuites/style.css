@@ -1,19 +1,16 @@
 /* ─────────────────────────────────────────────
    BALATRO-INSPIRED THEME
-   Type system:
-     Display  → Basteleur (Bold / Moonlight)
-     Body     → Coconat
-     Chrome   → Press Start 2P (pixel UI)
+   Type system (two fonts only):
+     Display + chrome → Basteleur (Bold for labels, Moonlight for atmospheric display)
+     Body             → Coconat
 
    Scale (16px base, ~1.25 ratio):
-     10px / 12px — chrome
+     12px / 14px — chrome / micro labels
      14px / 16px — body
      20px / 24px — sub-display
      32px / 40px — display
-     56–96px      — hero
+     56–96px     — hero
    ───────────────────────────────────────────── */
-
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
 
 @font-face {
   font-family: 'Basteleur';
@@ -169,40 +166,130 @@ header {
 
 .back-btn,
 .lang-toggle {
+  position: relative;
   background: var(--bg-card);
   border: var(--pixel) solid var(--border-dark);
   border-radius: var(--radius);
   color: var(--text);
-  font-family: 'Press Start 2P', monospace;
+  font-family: 'Basteleur', serif;
   font-weight: 400;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 60px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
   line-height: 1;
-  overflow: hidden;
   text-decoration: none;
-  font-size: 24px;
-  transition: transform 0.06s, background 0.15s;
+  transition:
+    transform 0.1s steps(2),
+    box-shadow 0.1s steps(2),
+    background 0.12s;
 }
 
-.back-btn  { background: var(--mult); color: var(--cream); font-size: 28px; line-height: 0.6; }
-.lang-toggle { background: var(--gold); font-size: 24px; }
+/* Inner frame — like the resource cards */
+.back-btn::before,
+.lang-toggle::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 2px solid var(--border-dark);
+  pointer-events: none;
+  opacity: 0.22;
+}
+
+.btn-corner {
+  position: absolute;
+  top: 3px;
+  left: 5px;
+  font-family: 'Basteleur', serif;
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1;
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+.back-btn .btn-icon {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+  display: block;
+}
+
+.lang-toggle .lang-label {
+  font-family: 'Basteleur', serif;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+/* ── Back: Joker-red card, slight left tilt ── */
+.back-btn {
+  background: var(--mult);
+  color: var(--cream);
+  transform: rotate(-2deg);
+  box-shadow:
+    inset 0 -4px 0 rgba(0, 0, 0, 0.22),
+    var(--pixel) var(--pixel) 0 var(--border-dark),
+    calc(var(--pixel) * 2) calc(var(--pixel) * 2) 0 var(--gold);
+}
+.back-btn .btn-corner { color: var(--cream); }
+
+/* ── Lang: gold tarot card, slight right tilt ── */
+.lang-toggle {
+  background: var(--gold);
+  color: var(--border-dark);
+  transform: rotate(2deg);
+  box-shadow:
+    inset 0 -4px 0 rgba(0, 0, 0, 0.2),
+    var(--pixel) var(--pixel) 0 var(--border-dark),
+    calc(var(--pixel) * 2) calc(var(--pixel) * 2) 0 var(--mult);
+}
+.lang-toggle .btn-corner { color: var(--border-dark); }
 
 @media (hover: hover) and (pointer: fine) {
-  .back-btn:hover,
-  .lang-toggle:hover { transform: translate(0, -1px); }
+  .back-btn:hover {
+    transform: rotate(-3deg) translate(-2px, -2px);
+    box-shadow:
+      inset 0 -4px 0 rgba(0, 0, 0, 0.22),
+      calc(var(--pixel) + 2px) calc(var(--pixel) + 2px) 0 var(--border-dark),
+      calc(var(--pixel) * 2 + 2px) calc(var(--pixel) * 2 + 2px) 0 var(--gold),
+      0 0 18px var(--shadow-hover);
+  }
+  .lang-toggle:hover {
+    transform: rotate(3deg) translate(-2px, -2px);
+    box-shadow:
+      inset 0 -4px 0 rgba(0, 0, 0, 0.2),
+      calc(var(--pixel) + 2px) calc(var(--pixel) + 2px) 0 var(--border-dark),
+      calc(var(--pixel) * 2 + 2px) calc(var(--pixel) * 2 + 2px) 0 var(--mult),
+      0 0 18px var(--shadow-hover);
+  }
 }
-.back-btn:active,
-.lang-toggle:active { transform: translate(0, 1px); }
+
+.back-btn:active {
+  transform: rotate(-2deg) translate(var(--pixel), var(--pixel));
+  box-shadow:
+    inset 0 -3px 0 rgba(0, 0, 0, 0.22),
+    0 0 0 var(--border-dark),
+    0 0 0 var(--gold);
+  transition-duration: 60ms;
+}
+.lang-toggle:active {
+  transform: rotate(2deg) translate(var(--pixel), var(--pixel));
+  box-shadow:
+    inset 0 -3px 0 rgba(0, 0, 0, 0.2),
+    0 0 0 var(--border-dark),
+    0 0 0 var(--mult);
+  transition-duration: 60ms;
+}
 
 .back-btn:focus-visible,
 .lang-toggle:focus-visible {
   outline: 3px solid var(--gold);
-  outline-offset: 3px;
+  outline-offset: 4px;
 }
 
 /* ── Hero ── */
@@ -256,16 +343,17 @@ main {
   display: inline-flex;
   align-items: center;
   gap: var(--s-2);
-  padding: 10px 14px;
+  padding: 10px 16px;
   border-radius: var(--radius);
   border: var(--pixel) solid var(--border-dark);
   background: var(--bg-card);
   color: var(--text);
-  font-family: 'Press Start 2P', monospace;
-  font-size: 11px;
-  line-height: 1.4;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
+  font-family: 'Basteleur', serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.1;
+  letter-spacing: 0;
+  text-transform: none;
   white-space: nowrap;
   cursor: pointer;
   box-shadow:
@@ -313,10 +401,12 @@ main {
 
 .cat-count {
   display: inline-block;
-  font-size: 9px;
-  padding: 3px 5px;
+  font-family: 'Basteleur', serif;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 3px 6px;
   margin-left: 2px;
-  min-width: 22px;          /* reserve room for two digits so pills don't reflow */
+  min-width: 24px;          /* reserve room for two digits so pills don't reflow */
   background: var(--chip);
   color: var(--cream);
   border: 2px solid var(--border-dark);
@@ -342,10 +432,11 @@ main {
 /* ── Results count ── */
 
 .results-count {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 10px;
+  font-family: 'Basteleur', serif;
+  font-weight: 700;
+  font-size: 14px;
   line-height: 1.4;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
   color: var(--gold);
   text-align: center;
@@ -521,10 +612,11 @@ main {
 }
 
 .card-visit {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 10px;
-  line-height: 1.4;
-  letter-spacing: 1px;
+  font-family: 'Basteleur', serif;
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.2;
+  letter-spacing: 0.4px;
   text-transform: uppercase;
   color: var(--mult);
   white-space: nowrap;
@@ -653,8 +745,10 @@ footer {
 
   .header-controls { top: var(--s-3); right: var(--s-3); gap: var(--s-1); }
   .back-btn        { top: var(--s-3); left:  var(--s-3); }
-  .back-btn, .lang-toggle { width: 40px; height: 40px; font-size: 22px; }
-  .back-btn       { font-size: 26px; }
+  .back-btn, .lang-toggle { width: 44px; height: 54px; }
+  .back-btn .btn-icon { width: 20px; height: 20px; }
+  .lang-toggle .lang-label { font-size: 13px; }
+  .btn-corner { font-size: 7px; }
 
   .card        { padding: var(--s-4); }
   .card-emoji  { width: 48px; height: 48px; }

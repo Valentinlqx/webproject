@@ -59,7 +59,7 @@ const i18n = {
       mockups: 'Mockups', jeux: 'Jeux Vidéos', web: 'Web', video: 'Vidéo',
       textures: 'Textures', brushes: 'Brushes', png: 'PNG', ia: 'Outils IA',
       outils: 'Outils', tutos: 'Tutos', inspi: 'Inspiration', motion: 'Motion Design',
-      '3d': '3D Assets', opensource: 'Open Source',
+      '3d': '3D Assets', opensource: 'Open Source', 'ai-skills': 'Skills IA',
     },
   },
   en: {
@@ -79,7 +79,7 @@ const i18n = {
       mockups: 'Mockups', jeux: 'Video Games', web: 'Web', video: 'Video',
       textures: 'Textures', brushes: 'Brushes', png: 'PNG', ia: 'AI Tools',
       outils: 'Tools', tutos: 'Tutorials', inspi: 'Inspiration', motion: 'Motion Design',
-      '3d': '3D Assets', opensource: 'Open Source',
+      '3d': '3D Assets', opensource: 'Open Source', 'ai-skills': 'AI Skills',
     },
   },
 };
@@ -101,7 +101,13 @@ function applyLang() {
     const key = el.dataset.i18n;
     if (t[key]) el.textContent = t[key];
   });
-  document.getElementById('lang-toggle').textContent = lang === 'fr' ? '🇬🇧' : '🇫🇷';
+  setLangLabel();
+}
+
+// The label on the button = the language you'll SWITCH TO when clicked
+function setLangLabel() {
+  const lbl = document.querySelector('#lang-toggle .lang-label');
+  if (lbl) lbl.textContent = lang === 'fr' ? 'EN' : 'FR';
 }
 
 // ── URL hash state ──
@@ -255,12 +261,6 @@ document.getElementById('lang-toggle').addEventListener('click', () => {
   renderCategories();
   render();
 });
-
-// Flag shown ON the button = the language you'll SWITCH TO
-function updateLangFlag() {
-  const btn = document.getElementById('lang-toggle');
-  btn.textContent = lang === 'fr' ? '🇬🇧' : '🇫🇷';
-}
 
 // ── Init ──
 categories = RESOURCES_DATA.categories;
