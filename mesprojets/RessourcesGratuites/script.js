@@ -104,10 +104,31 @@ function applyLang() {
   setLangLabel();
 }
 
-// The label on the button = the language you'll SWITCH TO when clicked
+// Flag SVGs — pixel-crisp to match back-btn icon. The flag shown is the
+// language you'll SWITCH TO when clicked.
+const FLAG_GB = '<svg viewBox="0 0 24 16" shape-rendering="crispEdges" aria-hidden="true">'
+  + '<rect width="24" height="16" fill="#012169"/>'
+  + '<rect x="0" y="6" width="24" height="4" fill="#ffffff"/>'
+  + '<rect x="10" y="0" width="4" height="16" fill="#ffffff"/>'
+  + '<rect x="0" y="7" width="24" height="2" fill="#C8102E"/>'
+  + '<rect x="11" y="0" width="2" height="16" fill="#C8102E"/>'
+  + '</svg>';
+const FLAG_FR = '<svg viewBox="0 0 24 16" shape-rendering="crispEdges" aria-hidden="true">'
+  + '<rect x="0"  y="0" width="8" height="16" fill="#0055A4"/>'
+  + '<rect x="8"  y="0" width="8" height="16" fill="#F5F5F5"/>'
+  + '<rect x="16" y="0" width="8" height="16" fill="#EF4135"/>'
+  + '</svg>';
+
 function setLangLabel() {
-  const lbl = document.querySelector('#lang-toggle .lang-label');
-  if (lbl) lbl.textContent = lang === 'fr' ? 'EN' : 'FR';
+  const slot = document.getElementById('lang-flag');
+  if (!slot) return;
+  slot.innerHTML = lang === 'fr' ? FLAG_GB : FLAG_FR;
+  const btn = document.getElementById('lang-toggle');
+  if (btn) {
+    const switchTo = lang === 'fr' ? 'English' : 'Français';
+    btn.title = `Switch to ${switchTo}`;
+    btn.setAttribute('aria-label', `Switch to ${switchTo}`);
+  }
 }
 
 // ── URL hash state ──
