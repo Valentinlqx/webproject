@@ -156,17 +156,6 @@ function renderCategories() {
   const container = document.getElementById('categories');
   container.innerHTML = '';
 
-  const allBtn = document.createElement('button');
-  allBtn.className = 'cat-btn' + (selectedCats.size === 0 ? ' active' : '');
-  allBtn.dataset.cat = 'all';
-  allBtn.innerHTML = `${i18n[lang].all} <span class="cat-count"></span>`;
-  allBtn.addEventListener('click', () => {
-    selectedCats.clear();
-    renderCategories();
-    render();
-  });
-  container.appendChild(allBtn);
-
   categories.forEach(cat => {
     const btn = document.createElement('button');
     btn.className = 'cat-btn' + (selectedCats.has(cat.id) ? ' active' : '');
