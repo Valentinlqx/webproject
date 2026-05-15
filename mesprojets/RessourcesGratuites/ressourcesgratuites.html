@@ -10,28 +10,25 @@
   <meta property="og:type" content="website" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>" />
   <link rel="stylesheet" href="style.css" />
+  <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
 </head>
 <body>
-<script>if(localStorage.getItem('theme')!=='light')document.body.classList.add('dark');</script>
+
+  <div class="page-panel">
 
   <header>
+    <a href="../" class="back-btn" title="Retour">←</a>
     <div class="header-controls">
-      <a href="../" class="back-btn" title="Retour">←</a>
-      <button class="lang-toggle" id="lang-toggle" title="Switch language">EN</button>
-      <button class="theme-toggle" id="theme-toggle" title="Changer le thème">☀️</button>
+      <button class="lang-toggle" id="lang-toggle" title="Switch language">🇬🇧</button>
     </div>
     <div class="hero">
-      <h1 data-i18n="h1">✦ Ressources Gratuites</h1>
+      <h1 data-i18n="h1">Ressources Gratuites</h1>
       <p class="hero-sub" data-i18n="heroSub">Une encyclopédie d'outils et ressources pour designers & créateurs</p>
-      <div class="search-wrap">
-        <input type="text" id="search" placeholder="Rechercher une ressource..." autocomplete="off" />
-      </div>
     </div>
   </header>
 
   <main>
     <div class="categories" id="categories"></div>
-    <div class="results-count" id="count"></div>
     <div class="grid" id="grid"></div>
     <div class="empty-state" id="empty" style="display:none">
       <span>🔍</span>
@@ -39,7 +36,23 @@
     </div>
   </main>
 
-  <footer data-i18n="footer">© 2026 Valentin L. — Ressources mises à jour régulièrement</footer>
+  <footer>
+    <span class="footer-name">Valentin</span>
+    <div class="socials">
+      <a href="https://www.instagram.com/valentinlqxx/" class="social-btn" title="Instagram" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
+        <i class="ph ph-instagram-logo" aria-hidden="true"></i>
+      </a>
+      <a href="https://www.behance.net/valentinlqxx" class="social-btn" title="Behance" aria-label="Behance" target="_blank" rel="noopener noreferrer">
+        <i class="ph ph-behance-logo" aria-hidden="true"></i>
+      </a>
+      <a href="https://www.flickr.com/people/valentinlqxx" class="social-btn" title="Flickr" aria-label="Flickr" target="_blank" rel="noopener noreferrer">
+        <i class="ph ph-camera" aria-hidden="true"></i>
+      </a>
+      <a href="https://www.cosmos.so/vlqxx" class="social-btn" title="Cosmos" aria-label="Cosmos" target="_blank" rel="noopener noreferrer">
+        <i class="ph ph-planet" aria-hidden="true"></i>
+      </a>
+    </div>
+  </footer>
 
   <script src="resources.js"></script>
   <script src="script.js"></script>

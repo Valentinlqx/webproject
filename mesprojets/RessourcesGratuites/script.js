@@ -1,6 +1,40 @@
 let categories = [];
 let resources = [];
 
+// ── OpenMoji sprite URLs ──
+// Convert an emoji to its codepoint sequence (joined by "-", uppercase, 4-pad)
+// then build a jsDelivr URL to the OpenMoji SVG for that codepoint.
+// Some glyphs aren't in OpenMoji — map them to a close cousin that is
+const OPENMOJI_FALLBACKS = {
+  '✦': '✨',  // four-pointed star → sparkles
+};
+function normalizeEmoji(emoji) {
+  return OPENMOJI_FALLBACKS[emoji] || emoji;
+}
+
+function emojiToCodepoint(emoji) {
+  return [...normalizeEmoji(emoji)]
+    .map(c => c.codePointAt(0))
+    .filter(cp => cp !== 0xFE0F)            // strip VS-16; OpenMoji files don't include it
+    .map(cp => cp.toString(16).toUpperCase().padStart(4, '0'))
+    .join('-');
+}
+function openmojiUrl(emoji) {
+  return `https://cdn.jsdelivr.net/npm/openmoji@latest/color/svg/${emojiToCodepoint(emoji)}.svg`;
+}
+
+// "🖼️ Images" → ["🖼️", "Images"]
+function splitLeadingEmoji(label) {
+  const m = label.match(/^([^\p{L}\p{N}\s]+)\s+(.*)$/u);
+  if (m) return [m[1].trim(), m[2].trim()];
+  return ['', label];
+}
+
+function inlineEmojiImg(emoji, cls) {
+  if (!emoji) return '';
+  return `<img class="${cls || 'pixel-emoji-inline'}" src="${openmojiUrl(emoji)}" alt="" aria-hidden="true" onerror="this.replaceWith(document.createTextNode('${emoji.replace(/'/g, "\\'")}'))" />`;
+}
+
 // ── State ──
 let selectedCats = new Set();
 let searchQuery = '';
@@ -10,29 +44,54 @@ let lang = localStorage.getItem('lang') || 'fr';
 const i18n = {
   fr: {
     title:       'Ressources Gratuites — Design & Création',
-    h1:          '✦ Ressources Gratuites',
+    h1:          'Ressources Gratuites',
     heroSub:     'Une encyclopédie d\'outils et ressources pour designers & créateurs',
-    placeholder: 'Rechercher une ressource...',
+    placeholder: '',
     footer:      '© 2026 Valentin L. — Ressources mises à jour régulièrement',
     empty:       'Aucune ressource trouvée',
     all:         'Tout',
     results:     n => `${n} ressource${n > 1 ? 's' : ''}`,
     visit:       'Visiter →',
     freemium:    'Peut contenir des ressources payantes',
+    cats: {
+      images: 'Images', polices: 'Polices', icones: 'Icônes', illustrations: 'Illustrations',
+      couleurs: 'Couleurs', design: 'Design', sons: 'Sons', musiques: 'Musiques',
+      mockups: 'Mockups', jeux: 'Jeux Vidéos', web: 'Web', video: 'Vidéo',
+      textures: 'Textures', brushes: 'Brushes', png: 'PNG', ia: 'Outils IA',
+      outils: 'Outils', tutos: 'Tutos', inspi: 'Inspiration', motion: 'Motion Design',
+      '3d': '3D Assets', opensource: 'Open Source',
+    },
   },
   en: {
     title:       'Free Resources — Design & Creation',
-    h1:          '✦ Free Resources',
+    h1:          'Free Resources',
     heroSub:     'An encyclopedia of tools and resources for designers & creators',
-    placeholder: 'Search a resource...',
+    placeholder: '',
     footer:      '© 2026 Valentin L. — Resources updated regularly',
     empty:       'No resource found',
     all:         'All',
     results:     n => `${n} resource${n > 1 ? 's' : ''}`,
     visit:       'Visit →',
     freemium:    'May contain paid resources',
+    cats: {
+      images: 'Images', polices: 'Fonts', icones: 'Icons', illustrations: 'Illustrations',
+      couleurs: 'Colors', design: 'Design', sons: 'Sounds', musiques: 'Music',
+      mockups: 'Mockups', jeux: 'Video Games', web: 'Web', video: 'Video',
+      textures: 'Textures', brushes: 'Brushes', png: 'PNG', ia: 'AI Tools',
+      outils: 'Tools', tutos: 'Tutorials', inspi: 'Inspiration', motion: 'Motion Design',
+      '3d': '3D Assets', opensource: 'Open Source',
+    },
   },
 };
+
+function catLabel(catId) {
+  const cat = categories.find(c => c.id === catId);
+  if (!cat) return '';
+  const tr = i18n[lang].cats && i18n[lang].cats[catId];
+  if (tr) return tr;
+  const [, txt] = splitLeadingEmoji(cat.label);
+  return txt || cat.label;
+}
 
 function applyLang() {
   const t = i18n[lang];
@@ -42,8 +101,7 @@ function applyLang() {
     const key = el.dataset.i18n;
     if (t[key]) el.textContent = t[key];
   });
-  document.getElementById('search').placeholder = t.placeholder;
-  document.getElementById('lang-toggle').textContent = lang === 'fr' ? 'EN' : 'FR';
+  document.getElementById('lang-toggle').textContent = lang === 'fr' ? '🇬🇧' : '🇫🇷';
 }
 
 // ── URL hash state ──
@@ -83,7 +141,6 @@ function getFiltered() {
   });
 }
 
-// Count results if this cat is added to current selection
 function getCatCount(catId) {
   const q = searchQuery.toLowerCase();
   const testCats = new Set([...selectedCats, catId]);
@@ -114,7 +171,8 @@ function renderCategories() {
     const btn = document.createElement('button');
     btn.className = 'cat-btn' + (selectedCats.has(cat.id) ? ' active' : '');
     btn.dataset.cat = cat.id;
-    btn.innerHTML = `${cat.label} <span class="cat-count"></span>`;
+    const [emoji, text] = splitLeadingEmoji(cat.label);
+    btn.innerHTML = `${inlineEmojiImg(emoji)}<span>${catLabel(cat.id)}</span> <span class="cat-count"></span>`;
     btn.addEventListener('click', () => toggleCategory(cat.id));
     container.appendChild(btn);
   });
@@ -144,7 +202,6 @@ function render() {
   const filtered = getFiltered();
   const grid = document.getElementById('grid');
   const empty = document.getElementById('empty');
-  const count = document.getElementById('count');
 
   grid.innerHTML = '';
   updateCatCounts();
@@ -152,12 +209,10 @@ function render() {
 
   if (filtered.length === 0) {
     empty.style.display = 'block';
-    count.textContent = '';
     return;
   }
 
   empty.style.display = 'none';
-  count.textContent = i18n[lang].results(filtered.length);
 
   filtered.forEach((r, i) => {
     const card = document.createElement('a');
@@ -165,17 +220,23 @@ function render() {
     card.target = '_blank';
     card.rel = 'noopener noreferrer';
     card.className = 'card';
-    card.style.animationDelay = `${i * 20}ms`;
+    // Cap stagger so a 50-card grid doesn't make the last cards wait a full second.
+    card.style.animationDelay = `${Math.min(i, 8) * 20}ms`;
 
     const tagsHTML = r.cats.map(catId => {
       const cat = categories.find(c => c.id === catId);
       if (!cat) return '';
-      return `<span class="card-tag" style="color:${cat.color};background:${cat.color}1a">${cat.label}</span>`;
+      const [, text] = splitLeadingEmoji(cat.label);
+      return `<span class="card-tag" style="background:${cat.color};border-color:#1a0307">${catLabel(catId)}</span>`;
     }).join('');
+
+    const emojiUrl = openmojiUrl(r.emoji);
+    const safeEmoji = (r.emoji || '').replace(/'/g, "\\'");
 
     card.innerHTML = `
       <div class="card-top">
-        <span class="card-emoji">${r.emoji}</span>
+        <img class="card-emoji" src="${emojiUrl}" alt="" aria-hidden="true"
+             onerror="this.outerHTML='<span class=&quot;card-emoji card-emoji-fallback&quot;>${safeEmoji}</span>'" />
         <div class="card-tags">${tagsHTML}</div>
       </div>
       <div class="card-name">${r.name}</div>
@@ -191,25 +252,10 @@ function render() {
 }
 
 // ── Events ──
-document.getElementById('search').addEventListener('input', e => {
-  searchQuery = e.target.value.trim();
-  render();
-});
+// (search removed)
 
 document.addEventListener('keydown', e => {
-  const searchEl = document.getElementById('search');
-  if (e.key === '/' && document.activeElement !== searchEl) {
-    e.preventDefault();
-    searchEl.focus();
-  }
-  if (e.key === 'Escape') {
-    if (searchQuery) {
-      searchQuery = '';
-      searchEl.value = '';
-      render();
-    }
-    searchEl.blur();
-  }
+  // no-op
 });
 
 // ── Language toggle ──
@@ -221,17 +267,11 @@ document.getElementById('lang-toggle').addEventListener('click', () => {
   render();
 });
 
-// ── Dark mode ──
-const themeToggle = document.getElementById('theme-toggle');
-
-themeToggle.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
-
-themeToggle.addEventListener('click', () => {
-  document.body.classList.toggle('dark');
-  const isDark = document.body.classList.contains('dark');
-  themeToggle.textContent = isDark ? '☀️' : '🌙';
-  localStorage.setItem('theme', isDark ? 'dark' : 'light');
-});
+// Flag shown ON the button = the language you'll SWITCH TO
+function updateLangFlag() {
+  const btn = document.getElementById('lang-toggle');
+  btn.textContent = lang === 'fr' ? '🇬🇧' : '🇫🇷';
+}
 
 // ── Init ──
 categories = RESOURCES_DATA.categories;
@@ -239,5 +279,4 @@ resources = RESOURCES_DATA.resources;
 readURLState();
 applyLang();
 renderCategories();
-document.getElementById('search').value = searchQuery;
 render();
