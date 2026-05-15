@@ -2978,7 +2978,7 @@ const RESOURCES_DATA = {
     {
       "name": "True Grit Texture Supply",
       "desc": "Textures, brushes et overlays grunge/rétro pour Photoshop et Procreate avec freebies.",
-      "url": "https://www.truegrit.co",
+      "url": "https://www.truegrittexturesupply.com",
       "cats": [
         "brushes",
         "textures"
