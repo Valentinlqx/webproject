@@ -88,26 +88,28 @@ body {
   min-width: 240px;
 }
 
-/* Fond — photo + lueur ambiante (glow forêt) */
+/* Fond — gradient noir riche + lueur ambiante (glow forêt) */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background-color: var(--bg);
-  background-image:
-    radial-gradient(ellipse 70% 55% at 28% 35%, var(--glow), transparent 70%),
-    url('res/1.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background: linear-gradient(135deg, #0a0d09 0%, #0e1410 50%, #0c0f0b 100%);
+  background-attachment: fixed;
   z-index: -1;
 }
 
-/* Page Prestations — même photo, glow déplacé pour rythmer le parcours */
-body.prestations::before {
-  background-image:
-    radial-gradient(ellipse 90% 50% at 70% 80%, var(--glow), transparent 70%),
-    url('res/1.jpg');
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(ellipse 70% 55% at 28% 35%, var(--glow), transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Page Prestations — glow déplacé pour rythmer le parcours */
+body.prestations::after {
+  background-image: radial-gradient(ellipse 90% 50% at 70% 80%, var(--glow), transparent 70%);
 }
 
 /* ── Transition de page ── */
