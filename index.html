@@ -2,42 +2,82 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light dark" />
   <title>Valentin L.</title>
-  <meta name="description" content="Graphiste freelance." />
+  <meta name="description" content="Valentin L. — graphiste freelance. Projets et création visuelle." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>" />
-  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
   <link rel="stylesheet" href="style.css" />
 </head>
-<body class="home">
+<body>
+  <main class="wrap">
 
-  <div class="profile">
-    <h1>Valentin</h1>
-  </div>
+    <header class="masthead">
+      <div class="eyebrow">
+        <span>Valentin L.</span>
+        <span>Graphiste — Freelance</span>
+      </div>
+      <h1>Valentin</h1>
+      <p class="lede">
+        Graphiste freelance.
+        <span class="muted">Identité, création visuelle et petits outils web.</span>
+      </p>
+    </header>
 
-  <div class="links">
-    <a href="mes-projets.html" class="link-btn featured" data-transition="#FFD60A">Mes projets</a>
-    <a href="mes-prestations.html" class="link-btn featured" data-transition="#5B7E3C">Mes prestations</a>
-  </div>
+    <section class="section">
+      <div class="sec-no">01</div>
+      <div class="sec-body">
+        <h2>Projets</h2>
+        <ul class="projects">
+          <li>
+            <a class="project" href="projects/RessourcesGratuites/ressourcesgratuites.html">
+              <span>
+                <span class="p-name">Ressources Gratuites</span>
+                <span class="p-desc">Design &amp; création — une sélection de ressources libres.</span>
+              </span>
+              <span class="p-go" aria-hidden="true">→</span>
+            </a>
+          </li>
+          <li>
+            <a class="project" href="projects/AutoVinted/autovinted.html">
+              <span>
+                <span class="p-name">AutoVinted</span>
+                <span class="p-desc">Génère ton annonce Vinted en un clic.</span>
+              </span>
+              <span class="p-go" aria-hidden="true">→</span>
+            </a>
+          </li>
+          <li>
+            <a class="project" href="projects/ambience-forge/index.html">
+              <span>
+                <span class="p-name">Ambience Forge</span>
+                <span class="p-desc">Compose des boucles d’ambiance sonore avec des nœuds.</span>
+              </span>
+              <span class="p-go" aria-hidden="true">→</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </section>
 
-  <div class="socials">
-    <a href="https://www.instagram.com/valentinlqxx/" class="social-btn" title="Instagram" aria-label="Instagram">
-      <i class="ph ph-instagram-logo" aria-hidden="true"></i>
-    </a>
+    <section class="section">
+      <div class="sec-no">02</div>
+      <div class="sec-body">
+        <h2>Ailleurs</h2>
+        <nav class="socials">
+          <a href="https://www.instagram.com/valentinlqxx/">Instagram</a>
+          <a href="https://www.behance.net/valentinlqxx">Behance</a>
+          <a href="https://www.flickr.com/people/valentinlqxx">Flickr</a>
+          <a href="https://www.cosmos.so/vlqxx">Cosmos</a>
+        </nav>
+      </div>
+    </section>
 
-    <a href="https://www.behance.net/valentinlqxx" class="social-btn" title="Behance" aria-label="Behance">
-      <i class="ph ph-behance-logo" aria-hidden="true"></i>
-    </a>
+    <footer class="footer">
+      <span>Valentin L.</span>
+      <span>© 2026</span>
+    </footer>
 
-    <a href="https://www.flickr.com/people/valentinlqxx" class="social-btn" title="Flickr" aria-label="Flickr">
-      <i class="ph ph-camera" aria-hidden="true"></i>
-    </a>
-
-    <a href="https://www.cosmos.so/vlqxx" class="social-btn" title="Cosmos" aria-label="Cosmos">
-      <i class="ph ph-planet" aria-hidden="true"></i>
-    </a>
-  </div>
-
-  <script src="transition.js"></script>
+  </main>
 </body>
 </html>

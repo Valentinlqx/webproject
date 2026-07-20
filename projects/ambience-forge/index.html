@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ambience Forge — build ambience loops with nodes</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header>
+  <div class="logo">ambience<span>forge</span></div>
+  <nav class="add">
+    <button data-add="sound" class="b-sound">+ sound</button>
+    <button data-add="reverb">+ reverb</button>
+    <button data-add="filter">+ filter</button>
+    <button data-add="delay">+ delay</button>
+    <button data-add="pitch">+ pitch</button>
+  </nav>
+  <div id="templates"></div>
+  <div class="spacer"></div>
+  <button id="playBtn" class="primary">▸ play</button>
+  <div class="exp">
+    <input id="expDur" type="number" min="5" max="300" step="5" value="60"><span>s</span>
+    <button id="exportBtn">export wav</button>
+  </div>
+  <button id="shareBtn">copy link</button>
+  <input id="pasteCode" placeholder="paste a code…">
+  <span id="status"></span>
+</header>
+
+<div id="canvas">
+  <div id="hint"></div>
+</div>
+
+<script src="js/graph.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/editor.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
