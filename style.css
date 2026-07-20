@@ -86,19 +86,7 @@ body {
 /* ── Header / hero ── */
 
 .masthead {
-  border-top: 2px solid var(--line-strong);
   padding-top: var(--s-4);
-}
-
-.masthead .eyebrow {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  font-size: var(--t-12);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-2);
-  margin-bottom: var(--s-6);
 }
 
 .masthead h1 {
@@ -108,47 +96,11 @@ body {
   letter-spacing: -0.03em;
 }
 
-.masthead .lede {
-  font-size: var(--t-24);
-  font-weight: 400;
-  color: var(--ink);
-  max-width: var(--measure);
-  margin-top: var(--s-4);
-  line-height: 1.35;
-}
-
-.masthead .lede .muted { color: var(--ink-2); }
-
-/* ── Section scaffolding — oversized number top-left ── */
-
-.section {
-  display: grid;
-  grid-template-columns: 3.5rem 1fr;
-  column-gap: var(--s-4);
-  border-top: 1px solid var(--line);
-  padding-top: var(--s-4);
-}
-
-.section > .sec-no {
-  font-size: var(--t-24);
-  font-weight: 700;
-  color: var(--accent);
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-}
+/* ── Section ── */
 
 .section > .sec-body { min-width: 0; }
 
-.section h2 {
-  font-size: var(--t-12);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-2);
-  margin-bottom: var(--s-5);
-}
-
-/* ── Projects — tabular list, baseline aligned ── */
+/* ── Projects — bare list, no rules ── */
 
 .projects { list-style: none; }
 
@@ -158,12 +110,9 @@ body {
   align-items: baseline;
   gap: var(--s-4);
   padding: var(--s-4) 0;
-  border-bottom: 1px solid var(--line);
   text-decoration: none;
   color: var(--ink);
 }
-
-.projects .project:first-child { border-top: 1px solid var(--line); }
 
 .project .p-name {
   font-size: var(--t-32);
@@ -197,64 +146,10 @@ body {
   outline-offset: 4px;
 }
 
-/* ── Socials — bare labels, one accent underline on hover ── */
-
-.socials {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--s-2) var(--s-5);
-}
-
-.socials a {
-  font-size: var(--t-16);
-  color: var(--ink);
-  text-decoration: none;
-  padding-bottom: 2px;
-  border-bottom: 1px solid transparent;
-  transition: border-color 120ms linear, color 120ms linear;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .socials a:hover { color: var(--accent); border-bottom-color: var(--accent); }
-}
-
-.socials a:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 4px;
-}
-
-/* ── Footer — hairline, matter-of-fact ── */
-
-.footer {
-  border-top: 2px solid var(--line-strong);
-  padding-top: var(--s-3);
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--s-2);
-  font-size: var(--t-12);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--ink-2);
-}
-
 /* ── Responsive ── */
 
 @media (max-width: 560px) {
   .wrap { gap: var(--s-7); }
-
-  .section {
-    grid-template-columns: 1fr;
-    row-gap: var(--s-3);
-  }
-  .section > .sec-no { font-size: var(--t-16); }
-
-  .masthead .eyebrow {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--s-1);
-    margin-bottom: var(--s-5);
-  }
 
   .project { grid-template-columns: 1fr; }
   .project .p-go { display: none; }
