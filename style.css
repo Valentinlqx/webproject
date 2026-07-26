@@ -1,52 +1,22 @@
 /* ─────────────────────────────────────────────────────────────
-   Valentin L. — Swiss / typographic minimalist system
-   Ink + ground + one accent. Radius 0. No shadows. Grid-driven.
-   Light + dark auto (prefers-color-scheme).
+   Valentin L. — Goya, Los Caprichos n°43
+   The etching fills the viewport, anchored bottom-left so the
+   desk (and its inscription) is always on screen. The menu sits
+   on the four handwritten lines of the desk face, scaled with
+   the image via container-query units.
    ───────────────────────────────────────────────────────────── */
 
-:root {
-  /* Ground / ink — light default */
-  --ground:      #ffffff;
-  --ink:         #111111;
-  --ink-2:       #6b6b6b;   /* secondary — cool gray */
-  --line:        #dcdcdc;   /* hairline rules / gutters */
-  --line-strong: #111111;
-
-  /* Single accent — one, never two */
-  --accent:      #e2231a;
-
-  /* Type scale — Swiss ladder 72/48/32/24/16/12 */
-  --t-72: clamp(3.25rem, 9vw, 4.5rem);  /* hero name */
-  --t-48: clamp(2.25rem, 5vw, 3rem);
-  --t-32: 2rem;
-  --t-24: 1.5rem;
-  --t-16: 1rem;
-  --t-12: 0.75rem;
-
-  /* 8px baseline grid */
-  --s-1: 4px;
-  --s-2: 8px;
-  --s-3: 16px;
-  --s-4: 24px;
-  --s-5: 32px;
-  --s-6: 48px;
-  --s-7: 64px;
-  --s-8: 96px;
-  --s-9: 128px;
-
-  --measure: 62ch;
-  --sans: 'Helvetica Neue', Helvetica, Arial, 'Segoe UI', Roboto, sans-serif;
+@font-face {
+  font-family: 'La Belle Aurore';
+  src: url('assets/fonts/LaBelleAurore.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ground:      #0c0c0c;
-    --ink:         #f2f2f2;
-    --ink-2:       #8a8a8a;
-    --line:        #262626;
-    --line-strong: #f2f2f2;
-    --accent:      #ff4438;  /* slightly hotter red for dark ground */
-  }
+:root {
+  --ink:       #241a12;   /* etched sepia-black, like the plate's line work */
+  --ink-hover: #7a2c1c;   /* oxide red — old ink, still clearly interactive */
 }
 
 *, *::before, *::after {
@@ -55,109 +25,80 @@
   box-sizing: border-box;
 }
 
-html { -webkit-text-size-adjust: 100%; }
-
 body {
-  min-height: 100dvh;
-  background: var(--ground);
-  color: var(--ink);
-  font-family: var(--sans);
-  font-size: var(--t-16);
-  line-height: 1.5;
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  font-feature-settings: "kern" 1, "tnum" 1;
-  overflow-x: hidden;
+  height: 100dvh;
+  overflow: hidden;
+  background: #131009;
+  font-family: 'La Belle Aurore', cursive;
 }
 
-/* ── Grid frame — content lives in a left measure, not centered ── */
-
-.wrap {
-  max-width: 1080px;
-  margin: 0 auto;
-  padding: clamp(var(--s-6), 8vw, var(--s-9)) clamp(var(--s-4), 6vw, var(--s-7));
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-8);
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
-/* ── Header / hero ── */
+/* ── The plate ──
+   Sized like `background-size: cover` anchored left-bottom, but as a
+   real element so the menu can be pinned to image coordinates. */
 
-.masthead {
-  padding-top: var(--s-4);
+.plate {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: max(100vw, calc(100dvh * 0.66125)); /* 2645 / 4000 */
+  aspect-ratio: 2645 / 4000;
+  container-type: inline-size;
 }
 
-.masthead h1 {
-  font-size: var(--t-72);
-  font-weight: 700;
-  line-height: 0.98;
-  letter-spacing: -0.03em;
-}
-
-/* ── Section ── */
-
-.section > .sec-body { min-width: 0; }
-
-/* ── Projects — bare list, no rules ── */
-
-.projects { list-style: none; }
-
-.project {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: baseline;
-  gap: var(--s-4);
-  padding: var(--s-4) 0;
-  text-decoration: none;
-  color: var(--ink);
-}
-
-.project .p-name {
-  font-size: var(--t-32);
-  font-weight: 500;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-}
-
-.project .p-desc {
+.plate-img {
   display: block;
-  font-size: var(--t-16);
-  color: var(--ink-2);
-  margin-top: var(--s-1);
-  max-width: var(--measure);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.project .p-go {
-  font-size: var(--t-24);
-  color: var(--ink-2);
-  line-height: 1;
-  transition: transform 120ms linear, color 120ms linear;
+/* ── Desk inscription menu ──
+   Each line is pinned over one line of the etched caption
+   (measured on the scan): left in cqw, top in % of plate height. */
+
+.desk-menu {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 }
+
+.line {
+  position: absolute;
+  pointer-events: auto;
+  display: inline-block;
+  color: var(--ink);
+  text-decoration: none;
+  line-height: 1;
+  white-space: nowrap;
+  letter-spacing: 0.08cqw;
+  transition: color 140ms linear;
+}
+
+/* Sizes vary per line, like a real hand: the long project name is
+   squeezed, the short ones written larger — all fit the desk face (~33cqw) */
+.l2 { left: 3.4cqw; top: 76.8%; font-size: 3.6cqw; transform: rotate(-0.4deg); }
+.l3 { left: 8.0cqw; top: 83.2%; font-size: 4.6cqw; transform: rotate(-1deg); }
+.l4 { left: 5.5cqw; top: 89.4%; font-size: 4.2cqw; transform: rotate(-0.7deg); }
 
 @media (hover: hover) and (pointer: fine) {
-  .project:hover .p-name { color: var(--accent); }
-  .project:hover .p-go   { color: var(--accent); transform: translateX(6px); }
+  a.line:hover { color: var(--ink-hover); }
 }
 
-.project:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 4px;
+a.line:focus-visible {
+  outline: 2px dashed rgba(36, 26, 18, 0.7);
+  outline-offset: 6px;
 }
 
-/* ── Responsive ── */
-
-@media (max-width: 560px) {
-  .wrap { gap: var(--s-7); }
-
-  .project { grid-template-columns: 1fr; }
-  .project .p-go { display: none; }
-  .project .p-name { font-size: var(--t-24); }
-  .project .p-desc { max-width: none; }
-}
-
-/* ── Motion accessibility — Swiss is near-static anyway ── */
+/* ── Motion accessibility ── */
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

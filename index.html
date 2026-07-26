@@ -3,53 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="color-scheme" content="light dark" />
   <title>Valentin L.</title>
   <meta name="description" content="Valentin L. — graphiste freelance. Projets et création visuelle." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>" />
+  <link rel="preload" href="assets/fonts/LaBelleAurore.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="assets/goya-caprichos-43.jpg" as="image" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main class="wrap">
+  <h1 class="sr-only">Valentin</h1>
 
-    <header class="masthead">
-      <h1>Valentin</h1>
-    </header>
-
-    <section class="section">
-      <div class="sec-body">
-        <ul class="projects">
-          <li>
-            <a class="project" href="projects/RessourcesGratuites/ressourcesgratuites.html">
-              <span>
-                <span class="p-name">Ressources Gratuites</span>
-                <span class="p-desc">Design &amp; création — une sélection de ressources libres.</span>
-              </span>
-              <span class="p-go" aria-hidden="true">→</span>
-            </a>
-          </li>
-          <li>
-            <a class="project" href="projects/AutoVinted/autovinted.html">
-              <span>
-                <span class="p-name">AutoVinted</span>
-                <span class="p-desc">Génère ton annonce Vinted en un clic.</span>
-              </span>
-              <span class="p-go" aria-hidden="true">→</span>
-            </a>
-          </li>
-          <li>
-            <a class="project" href="projects/ambience-forge/index.html">
-              <span>
-                <span class="p-name">Ambience Forge</span>
-                <span class="p-desc">Compose des boucles d’ambiance sonore avec des nœuds.</span>
-              </span>
-              <span class="p-go" aria-hidden="true">→</span>
-            </a>
-          </li>
-        </ul>
-      </div>
-    </section>
-
-  </main>
+  <div class="plate">
+    <img class="plate-img" src="assets/goya-caprichos-43.jpg"
+         alt="Francisco de Goya — Le sommeil de la raison produit des monstres (Los Caprichos, n°43)" />
+    <nav class="desk-menu" aria-label="Projets">
+      <a class="line l2" href="projects/RessourcesGratuites/ressourcesgratuites.html">Ressources Gratuites</a>
+      <a class="line l3" href="projects/AutoVinted/autovinted.html">AutoVinted</a>
+      <a class="line l4" href="projects/ambience-forge/index.html">Ambience Forge</a>
+    </nav>
+  </div>
 </body>
 </html>

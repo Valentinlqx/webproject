@@ -125,6 +125,40 @@ body::after {
   opacity: 0.85;
 }
 
+/* ── Card-suit lattice (casino damask) ── */
+html::after {
+  content: '';
+  position: fixed;
+  --tile: 180px;
+  /* oversized up/left by more than the one-tile drift below, so the
+     blurred layer edge never enters the viewport and the loop reset
+     (exactly one tile, i.e. onto itself) is invisible */
+  inset: calc(var(--tile) * -1.5) 0 0 calc(var(--tile) * -1.5);
+  pointer-events: none;
+  /* same z-index as the swirl/grain but later in tree order,
+     so it paints above them and below the z-index:1 content */
+  z-index: 0;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'><defs><g id='c'><circle cx='20' cy='11.5' r='7'/><circle cx='12' cy='23' r='7'/><circle cx='28' cy='23' r='7'/><path d='M18.5 24 C18.8 29.2 17.4 32.7 15.2 34.8 L24.8 34.8 C22.6 32.7 21.2 29.2 21.5 24 Z'/></g></defs><g fill='%23e8506a' fill-opacity='0.17'><path transform='translate(24,24) scale(0.8)' d='M20 4 C14 10 7 15 7 21.5 C7 26 10.2 29 13.8 29 C16.2 29 18 27.8 19.1 26 C18.8 29.6 17.4 32.6 15.2 34.6 L24.8 34.6 C22.6 32.6 21.2 29.6 20.9 26 C22 27.8 23.8 29 26.2 29 C29.8 29 33 26 33 21.5 C33 15 26 10 20 4 Z'/><path transform='translate(104,24) scale(0.8)' d='M20 34 C14 29 6 23 6 14.5 C6 9 10 5.5 14.2 5.5 C16.8 5.5 19 7 20 9.2 C21 7 23.2 5.5 25.8 5.5 C30 5.5 34 9 34 14.5 C34 23 26 29 20 34 Z'/><path transform='translate(64,104) scale(0.8)' d='M20 4 L31 20 L20 36 L9 20 Z'/><use href='%23c' transform='translate(-16,104) scale(0.8)'/><use href='%23c' transform='translate(144,104) scale(0.8)'/></g></svg>");
+  background-size: var(--tile) var(--tile);
+  /* the drift is ~6px/s, so it must glide sub-pixel: undo the page's
+     inherited `pixelated` (whole-pixel snapping) and keep the animation
+     on the compositor instead of repainting the blurred layer each frame */
+  image-rendering: auto;
+  will-change: transform;
+  filter: blur(2px);
+  animation: suit-drift-180 30s linear infinite;
+}
+
+/* Literal px (must match --tile): var() inside @keyframes is not reliably
+   resolved on pseudo-elements in Chromium, which leaves the animation inert */
+@keyframes suit-drift-180 {
+  to { transform: translate(180px, 180px); }
+}
+@keyframes suit-drift-140 {
+  to { transform: translate(140px, 140px); }
+}
+
 header, main, footer { position: relative; z-index: 1; }
 
 /* ── Page panel ── */
@@ -783,6 +817,7 @@ footer {
 }
 
 @media (max-width: 600px) {
+  html::after { --tile: 140px; animation-name: suit-drift-140; animation-duration: 24s; }
   header { padding: 88px var(--s-5) var(--s-10); }
   main   { padding: var(--s-6) var(--s-3) var(--s-12); }
   footer { padding: var(--s-5) var(--s-4); margin: var(--s-5) var(--s-3) 0; }
