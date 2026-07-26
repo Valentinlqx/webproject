@@ -822,6 +822,13 @@ footer {
   main   { padding: var(--s-6) var(--s-3) var(--s-12); }
   footer { padding: var(--s-5) var(--s-4); margin: var(--s-5) var(--s-3) 0; }
 
+  .categories {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    justify-content: stretch;
+  }
+  .cat-btn { width: 100%; justify-content: center; }
+
   .grid { grid-template-columns: 1fr; gap: var(--s-4); }
 
   .header-controls { top: var(--s-3); right: var(--s-3); gap: var(--s-1); }
