@@ -14,42 +14,40 @@
 
   <header>
     <div class="header-controls">
-      <a href="../../index.html" class="icon-btn" id="back-btn" title="Retour">←</a>
+      <a href="../../index.html" class="icon-btn" id="back-btn" title="Retour" aria-label="Retour">←</a>
       <div class="header-actions">
-        <button class="icon-btn" id="tutorial-toggle" title="Aide / Tutoriel">?</button>
-        <button class="icon-btn" id="history-toggle" title="Historique">⌛</button>
-        <button class="icon-btn" id="settings-toggle" title="Paramètres">⚙</button>
-        <button class="icon-btn" id="theme-toggle" title="Thème">☀️</button>
+        <button class="icon-btn" id="tutorial-toggle" type="button" title="Aide / Tutoriel" aria-label="Aide">?</button>
+        <button class="icon-btn" id="history-toggle" type="button" title="Historique" aria-label="Historique">⌛</button>
+        <button class="icon-btn" id="settings-toggle" type="button" title="Paramètres" aria-label="Paramètres">⚙</button>
+        <button class="icon-btn" id="theme-toggle" type="button" title="Thème clair / sombre" aria-label="Changer de thème">☀️</button>
       </div>
     </div>
     <div class="hero">
-      <h1 id="site-title" style="cursor:pointer">AutoVinted</h1>
+      <h1 id="site-title">AutoVinted</h1>
       <p class="hero-sub">Upload tes photos, l'IA rédige ton annonce Vinted optimisée.</p>
     </div>
   </header>
 
   <div class="app-shell">
-  <!-- History panel (desktop sidebar / mobile modal) -->
   <div class="modal" id="history-modal" hidden>
     <div class="modal-card">
       <div class="modal-head">
         <h2>Historique</h2>
-        <button class="icon-btn" id="history-close">✕</button>
+        <button class="icon-btn" id="history-close" type="button" aria-label="Fermer">✕</button>
       </div>
       <div class="history-list" id="history-list"></div>
-      <button class="btn-ghost" id="history-clear" hidden>Tout effacer</button>
+      <button class="btn-ghost" id="history-clear" type="button" hidden>Tout effacer</button>
     </div>
   </div>
 
   <main>
-    <!-- Upload zone -->
     <section class="upload-section" id="upload-section">
-      <div class="mode-toggle" role="tablist">
-        <button class="mode-btn active" data-mode="single" type="button">Une annonce</button>
-        <button class="mode-btn" data-mode="bulk" type="button">En lot</button>
+      <div class="mode-toggle" role="group" aria-label="Mode">
+        <button class="mode-btn active" data-mode="single" type="button" aria-pressed="true">Une annonce</button>
+        <button class="mode-btn" data-mode="bulk" type="button" aria-pressed="false">En lot</button>
       </div>
 
-      <label for="file-input" class="dropzone" id="dropzone">
+      <label for="file-input" class="dropzone" id="dropzone" tabindex="0">
         <div class="dropzone-icon">📸</div>
         <p class="dropzone-title" id="dropzone-title">Glisse tes photos ici</p>
         <p class="dropzone-sub" id="dropzone-sub">ou clique pour parcourir — jusqu'à 8 photos</p>
@@ -227,7 +225,6 @@
       </button>
     </section>
 
-    <!-- Conversation (questions IA) -->
     <section class="chat-section" id="chat-section" hidden>
       <div class="chat-header">
         <div class="chat-avatar">✦</div>
@@ -238,13 +235,12 @@
       </div>
       <div class="chat-messages" id="chat-messages"></div>
       <form class="chat-input" id="chat-form">
-        <input type="text" id="chat-text" placeholder="Ta réponse..." autocomplete="off" />
-        <button type="submit" class="chat-send" title="Envoyer">→</button>
+        <input type="text" id="chat-text" placeholder="Ta réponse..." autocomplete="off" aria-label="Ta réponse" />
+        <button type="submit" class="chat-send" title="Envoyer" aria-label="Envoyer">→</button>
       </form>
-      <button class="btn-ghost" id="generate-btn" hidden>Générer l'annonce maintenant</button>
+      <button class="btn-ghost" id="generate-btn" type="button" hidden>Générer l'annonce maintenant</button>
     </section>
 
-    <!-- Résultat lot -->
     <section class="bulk-section" id="bulk-section" hidden>
       <div class="bulk-progress" id="bulk-progress" hidden>
         <div class="bulk-progress-text" id="bulk-progress-text"></div>
@@ -252,12 +248,11 @@
       </div>
       <div class="bulk-results" id="bulk-results"></div>
       <div class="result-actions" id="bulk-actions" hidden>
-        <button class="btn-primary" id="bulk-copy-all-btn">Copier toutes les annonces</button>
-        <button class="btn-ghost" id="bulk-restart-btn">Recommencer</button>
+        <button class="btn-primary" id="bulk-copy-all-btn" type="button">Copier toutes les annonces</button>
+        <button class="btn-ghost" id="bulk-restart-btn" type="button">Recommencer</button>
       </div>
     </section>
 
-    <!-- Résultat -->
     <section class="result-section" id="result-section" hidden>
       <div class="result-card">
         <div class="result-warnings" id="r-warnings" hidden></div>
@@ -267,7 +262,7 @@
         <div class="result-block">
           <div class="result-block-head">
             <span class="result-label">Titre</span>
-            <button class="copy-btn" data-copy="title">Copier</button>
+            <button class="copy-btn" type="button" data-copy="title">Copier</button>
           </div>
           <p class="result-title" id="r-title"></p>
         </div>
@@ -275,7 +270,7 @@
         <div class="result-block">
           <div class="result-block-head">
             <span class="result-label">Description</span>
-            <button class="copy-btn" data-copy="description">Copier</button>
+            <button class="copy-btn" type="button" data-copy="description">Copier</button>
           </div>
           <p class="result-description" id="r-description"></p>
         </div>
@@ -302,34 +297,30 @@
       </div>
 
       <div class="result-actions">
-        <button class="btn-primary" id="copy-all-btn">Copier toute l'annonce</button>
-        <button class="btn-ghost" id="restart-btn">Nouvelle annonce</button>
+        <button class="btn-primary" id="copy-all-btn" type="button">Copier toute l'annonce</button>
+        <button class="btn-ghost" id="restart-btn" type="button">Nouvelle annonce</button>
       </div>
     </section>
   </main>
 
-  <!-- Settings panel (desktop sidebar / mobile modal) -->
   <div class="modal" id="settings-modal" hidden>
     <div class="modal-card">
       <div class="modal-head">
         <h2>Paramètres</h2>
-        <button class="icon-btn" id="settings-close">✕</button>
+        <button class="icon-btn" id="settings-close" type="button" aria-label="Fermer">✕</button>
       </div>
       <label class="field">
-        <span class="field-label">Fournisseur IA</span>
-        <select id="provider-select"></select>
-        <span class="field-hint" id="provider-hint"></span>
-      </label>
-      <label class="field" id="apikey-field" hidden>
-        <span class="field-label" id="apikey-label">Clé API</span>
-        <input type="password" id="api-key" placeholder="..." />
-        <span class="field-hint" id="apikey-hint">Stockée uniquement dans ton navigateur. <a id="apikey-link" href="#" target="_blank" rel="noopener">Obtenir une clé →</a></span>
+        <span class="field-label">Clé API</span>
+        <input type="password" id="api-key" placeholder="Colle ta clé ici" autocomplete="off" spellcheck="false" />
+        <span class="field-hint key-status" id="key-status" aria-live="polite"></span>
       </label>
 
-      <label class="field" id="model-field" hidden>
-        <span class="field-label">Modèle</span>
-        <select id="model-select"></select>
-      </label>
+      <details class="field model-picker" id="model-picker" hidden>
+        <summary class="field-label">Choisir le modèle</summary>
+        <select id="model-select" aria-label="Modèle"></select>
+      </details>
+
+      <p class="field-hint">Stockée uniquement dans ton navigateur. Obtenir une clé : <span id="key-links"></span></p>
 
       <div class="field">
         <span class="field-label">Personnalisation</span>
@@ -337,32 +328,31 @@
         <div class="features-list" id="features-list"></div>
       </div>
 
-      <button class="btn-primary" id="settings-save">Enregistrer</button>
+      <button class="btn-primary" id="settings-save" type="button">Enregistrer</button>
     </div>
   </div>
-  </div><!-- /.app-shell -->
+  </div>
 
-  <!-- Spotlight Tutorial -->
   <div id="tutorial-overlay" hidden aria-hidden="true">
     <div id="tutorial-spotlight"></div>
     <div id="tutorial-tooltip">
-      <button class="tutorial-tip-close" id="tutorial-tip-close" title="Fermer">✕</button>
+      <button class="tutorial-tip-close" id="tutorial-tip-close" type="button" title="Fermer" aria-label="Fermer le tutoriel">✕</button>
       <div class="tutorial-tip-emoji" id="tutorial-tip-emoji"></div>
       <h3 id="tutorial-tip-title"></h3>
       <p id="tutorial-tip-text"></p>
       <div class="tutorial-tip-footer">
         <div class="tutorial-tip-dots" id="tutorial-tip-dots"></div>
         <div class="tutorial-tip-btns">
-          <button class="btn-ghost btn-sm" id="tutorial-tip-prev">←</button>
-          <button class="btn-primary btn-sm" id="tutorial-tip-next">Suivant →</button>
+          <button class="btn-ghost btn-sm" id="tutorial-tip-prev" type="button" aria-label="Étape précédente">←</button>
+          <button class="btn-primary btn-sm" id="tutorial-tip-next" type="button">Suivant →</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Toast -->
-  <div class="toast" id="toast" hidden></div>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
+  <script src="autovinted-core.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

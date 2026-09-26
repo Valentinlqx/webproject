@@ -1,213 +1,62 @@
-/* ── AutoVinted — script.js ──
-   Client-side webapp: upload photos → GPT-4o vision → annonce Vinted optimisée
-*/
+// AutoVinted : des photos à l'annonce Vinted. Tout tourne dans le navigateur,
+// la clé API de l'utilisateur ne quitte jamais sa machine (sauf vers son fournisseur).
+// La partie « API » est dans autovinted-core.js.
 
-// ─── Providers ───────────────────────────────────────
-const PROVIDERS = {
-  openai: {
-    label: 'OpenAI — ChatGPT',
-    needsKey: true,
-    vision: true,
-    keyUrl: 'https://platform.openai.com/api-keys',
-    keyLabel: 'Clé API OpenAI',
-    keyPrefix: 'sk-',
-    hint: "Meilleure qualité de vision. Compte ~0.01€ par annonce avec GPT-4o.",
-    models: [
-      { id: 'gpt-4o', label: 'GPT-4o (recommandé)' },
-      { id: 'gpt-4o-mini', label: 'GPT-4o mini (économique)' },
-    ],
-    call: (s) => callOpenAICompatible(s, 'https://api.openai.com/v1/chat/completions', true),
-  },
-  anthropic: {
-    label: 'Anthropic — Claude',
-    needsKey: true,
-    vision: true,
-    keyUrl: 'https://console.anthropic.com/settings/keys',
-    keyLabel: 'Clé API Anthropic',
-    keyPrefix: 'sk-ant-',
-    hint: "Excellent pour les descriptions naturelles. Vision native Claude.",
-    models: [
-      { id: 'claude-opus-4-7', label: 'Claude Opus 4.7 (max qualité)' },
-      { id: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6 (recommandé)' },
-      { id: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5 (rapide)' },
-      { id: 'claude-sonnet-4-5-20250929', label: 'Claude Sonnet 4.5' },
-      { id: 'claude-3-5-sonnet-20241022', label: 'Claude Sonnet 3.5' },
-    ],
-    call: callAnthropic,
-  },
-  gemini: {
-    label: 'Google — Gemini',
-    needsKey: true,
-    vision: true,
-    keyUrl: 'https://aistudio.google.com/app/apikey',
-    keyLabel: 'Clé API Google AI Studio',
-    keyPrefix: 'AIza',
-    hint: "Quota gratuit généreux sur Google AI Studio.",
-    models: [
-      { id: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash (rapide)' },
-      { id: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro' },
-    ],
-    call: callGemini,
-  },
-  groq: {
-    label: 'Groq — Llama Vision (rapide)',
-    needsKey: true,
-    vision: true,
-    keyUrl: 'https://console.groq.com/keys',
-    keyLabel: 'Clé API Groq',
-    keyPrefix: 'gsk_',
-    hint: "Très rapide. Quota gratuit sur Groq Cloud.",
-    models: [
-      { id: 'llama-3.2-90b-vision-preview', label: 'Llama 3.2 90B Vision' },
-      { id: 'llama-3.2-11b-vision-preview', label: 'Llama 3.2 11B Vision' },
-    ],
-    call: (s) => callOpenAICompatible(s, 'https://api.groq.com/openai/v1/chat/completions', false),
-  },
-  mistral: {
-    label: 'Mistral — Pixtral',
-    needsKey: true,
-    vision: true,
-    keyUrl: 'https://console.mistral.ai/api-keys/',
-    keyLabel: 'Clé API Mistral',
-    keyPrefix: '',
-    hint: "Modèle Pixtral spécialisé vision, made in France.",
-    models: [
-      { id: 'pixtral-large-latest', label: 'Pixtral Large' },
-      { id: 'pixtral-12b-2409', label: 'Pixtral 12B' },
-    ],
-    call: (s) => callOpenAICompatible(s, 'https://api.mistral.ai/v1/chat/completions', false),
-  },
-};
+const {
+  PROVIDERS, detectProvider, resolveModel, estimateCost,
+  parseJSON, buildRequest, extractText, apiErrorMessage, migrateLegacyKey,
+} = window.AutoVintedCore;
 
-// ─── Pricing & token estimation ─────────────────────
-// Prix indicatifs en USD (≈ EUR) par 1M tokens [input, output]
-// Source : pages tarifaires officielles, novembre 2025
-const PRICING = {
-  // OpenAI
-  'gpt-4o':                      { in: 2.50, out: 10.00 },
-  'gpt-4o-mini':                 { in: 0.15, out: 0.60 },
-  // Anthropic
-  'claude-opus-4-7':             { in: 15.00, out: 75.00 },
-  'claude-sonnet-4-6':           { in: 3.00, out: 15.00 },
-  'claude-sonnet-4-5-20250929':  { in: 3.00, out: 15.00 },
-  'claude-3-5-sonnet-20241022':  { in: 3.00, out: 15.00 },
-  'claude-haiku-4-5-20251001':   { in: 1.00, out: 5.00 },
-  // Google
-  'gemini-2.0-flash':            { in: 0.10, out: 0.40 },
-  'gemini-1.5-pro':              { in: 1.25, out: 5.00 },
-  // Groq
-  'llama-3.2-90b-vision-preview':{ in: 0.90, out: 0.90 },
-  'llama-3.2-11b-vision-preview':{ in: 0.18, out: 0.18 },
-  // Mistral
-  'pixtral-large-latest':        { in: 2.00, out: 6.00 },
-  'pixtral-12b-2409':            { in: 0.15, out: 0.15 },
-};
-
-// Tokens approximatifs par image selon le provider
-const IMAGE_TOKENS_PER_PROVIDER = {
-  openai:       425,
-  anthropic:    1300,  // Claude ~1568 max, ~1300 moyenne pour 1024
-  gemini:       258,   // forfait par image
-  groq:         1200,
-  mistral:      1000,
-};
-
-const USD_TO_EUR = 0.93;
-
-function estimateUsage() {
-  const isBulk = state.mode === 'bulk';
-  const sys = isBulk ? buildBulkSystemPrompt() : buildSystemPrompt();
-  const ctx = state.context || $('context-input')?.value || '';
-  // ~4 chars / token (français)
-  const userTextChars = ctx.length + 200; // intro + numérotation photos
-  const textTokens = Math.ceil((sys.length + userTextChars) / 4);
-
-  const imgPer = IMAGE_TOKENS_PER_PROVIDER[state.provider] ?? 425;
-  const imgTokens = state.photos.length * imgPer;
-
-  const numListings = isBulk ? Math.max(1, Math.ceil(state.photos.length / 2.5)) : 1;
-  const outputTokens = numListings * 350; // ~350 tokens / annonce JSON
-
-  const inTokens = textTokens + imgTokens;
-
-  const price = PRICING[state.model];
-  let cost = null; // EUR
-  if (price) {
-    const usd = (inTokens * price.in + outputTokens * price.out) / 1_000_000;
-    cost = usd * USD_TO_EUR;
-  }
-
-  return { inTokens, outputTokens, cost };
-}
-
-function updateEstimate() {
-  const el = $('estimate');
-  if (!el) return;
-  if (state.photos.length === 0) {
-    el.textContent = '';
-    el.hidden = true;
-    return;
-  }
-  el.hidden = false;
-  const { inTokens, outputTokens, cost } = estimateUsage();
-  const total = inTokens + outputTokens;
-  const tokenStr = `≈ ${total.toLocaleString('fr-FR')} tokens`;
-
-  let costStr;
-  if (cost === null) {
-    costStr = '';
-  } else if (cost < 0.005) {
-    costStr = ' · < 0,01 €';
-  } else if (cost < 1) {
-    costStr = ` · ≈ ${cost.toFixed(3).replace('.', ',')} €`;
-  } else {
-    costStr = ` · ≈ ${cost.toFixed(2).replace('.', ',')} €`;
-  }
-  el.textContent = tokenStr + costStr;
-}
-
-// ─── State ───────────────────────────────────────────
-const state = {
-  photos: [],          // [{ id, file, dataUrl }]
-  conversation: [],    // [{ role, content }] — messages
-  mode: 'single',      // 'single' | 'bulk'
-  context: '',         // optional user-provided context for current run
-  provider: (() => {
-    const stored = localStorage.getItem('av-provider');
-    // Migrate legacy providers that have been removed.
-    if (!stored || !PROVIDERS[stored]) return 'openai';
-    return stored;
-  })(),
-  model: (() => {
-    const stored = localStorage.getItem('av-provider');
-    const provider = (stored && PROVIDERS[stored]) ? stored : 'openai';
-    return localStorage.getItem('av-model-' + provider) || '';
-  })(),
-  history: JSON.parse(localStorage.getItem('av-history') || '[]'),
-  lastListing: null,
-  features: null, // initialized below once DEFAULT_FEATURES + loadFeatures exist
-};
-
-function getApiKey(providerId) {
-  return localStorage.getItem('av-key-' + providerId) || '';
-}
-function setApiKey(providerId, key) {
-  localStorage.setItem('av-key-' + providerId, key);
-}
-function getStoredModel(providerId) {
-  const stored = localStorage.getItem('av-model-' + providerId);
-  const valid = PROVIDERS[providerId].models.find(m => m.id === stored);
-  return valid ? stored : PROVIDERS[providerId].models[0].id;
-}
+// Les modèles récents réfléchissent avant de répondre, et cette réflexion compte
+// dans la limite : une limite trop basse donne une réponse coupée.
+const MAX_OUTPUT_TOKENS = 16000;
 
 const MAX_PHOTOS_SINGLE = 8;
 const MAX_PHOTOS_BULK = 30;
-const MAX_PHOTO_SIZE = 1024; // px (downscale before sending — saves tokens & bandwidth)
-const JPEG_QUALITY = 0.80;
+const MAX_PHOTO_SIZE = 1024; // px, on réduit avant l'envoi : moins cher et plus rapide
+const JPEG_QUALITY = 0.8;
+
+const $ = (id) => document.getElementById(id);
+
+function readJSON(key, fallback) {
+  try {
+    const value = JSON.parse(localStorage.getItem(key));
+    return value ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+migrateLegacyKey(localStorage);
+
+const state = {
+  photos: [],        // [{ id, dataUrl }]
+  conversation: [],  // format « chat » OpenAI, converti par le core pour chaque fournisseur
+  mode: 'single',    // 'single' | 'bulk'
+  context: '',
+  history: Array.isArray(readJSON('av-history', [])) ? readJSON('av-history', []) : [],
+  lastListing: null,
+  features: null,
+  busy: false,
+};
+
 const maxPhotos = () => state.mode === 'bulk' ? MAX_PHOTOS_BULK : MAX_PHOTOS_SINGLE;
 
-// ─── System prompts (compacts pour économiser les tokens) ─────
-// Règles Vinted (résumé des CGU/CGV vinted.fr) injectées dans les prompts
+// Retourne { providerId, key, model } ou null si aucune clé valable n'est enregistrée.
+function currentSetup() {
+  const key = (localStorage.getItem('av-key') || '').trim();
+  const detected = detectProvider(key);
+  if (!detected.ok) return null;
+  return { providerId: detected.id, key, model: resolveModel(detected.id, localStorage.getItem('av-model')) };
+}
+
+function formatEuro(eur) {
+  if (eur < 0.005) return '< 0,01 €';
+  return `≈ ${eur.toFixed(eur < 1 ? 3 : 2).replace('.', ',')} €`;
+}
+
+// Prompts
+
 const VINTED_POLICY = `RÈGLES VINTED (détecte si visible et signale dans "warnings"):
 - Contrefaçons / répliques / faux (sacs, sneakers, montres de luxe, parfums)
 - Produits sans marque vendus comme luxe ; logos non authentiques
@@ -223,25 +72,25 @@ const VINTED_POLICY = `RÈGLES VINTED (détecte si visible et signale dans "warn
 - Textiles avec gros défauts non visibles sur photo
 Signale aussi si la photo n'est clairement pas de toi (image stock, fond pro évident).`;
 
-// Personnalisation : chaque feature désactivée allège le prompt et la réponse
+// Chaque option désactivée raccourcit le prompt et la réponse, donc coûte moins cher.
 const DEFAULT_FEATURES = {
-  warnings: true,   // détection règles Vinted
-  hashtags: true,   // hashtags en fin de description
-  details:  true,   // marque/taille/état/couleur/catégorie/matière/isbn
-  prices:   true,   // 3 niveaux de prix conseillés
-  tips:     true,   // conseils vendeur
+  warnings: true,
+  hashtags: true,
+  details: true,
+  prices: true,
+  tips: true,
 };
 const FEATURE_LABELS = {
-  warnings: { label: 'Vérifier règles Vinted',     hint: 'Détecte les risques de retrait (contrefaçon, interdits…)' },
-  hashtags: { label: 'Hashtags dans description',  hint: '6-10 #hashtags ajoutés à la fin' },
-  details:  { label: 'Détails (marque, taille…)',  hint: 'Marque, taille, état, couleur, catégorie, matière' },
-  prices:   { label: 'Prix conseillés',            hint: '3 niveaux : idéal / vente rapide / minimum' },
-  tips:     { label: 'Conseils vendeur',           hint: 'Astuces pour vendre plus vite' },
+  warnings: { label: 'Vérifier règles Vinted',    hint: 'Détecte les risques de retrait (contrefaçon, interdits…)' },
+  hashtags: { label: 'Hashtags dans description', hint: '6-10 #hashtags ajoutés à la fin' },
+  details:  { label: 'Détails (marque, taille…)', hint: 'Marque, taille, état, couleur, catégorie, matière' },
+  prices:   { label: 'Prix conseillés',           hint: '3 niveaux : idéal / vente rapide / minimum' },
+  tips:     { label: 'Conseils vendeur',          hint: 'Astuces pour vendre plus vite' },
 };
 
 function loadFeatures() {
-  try { return { ...DEFAULT_FEATURES, ...JSON.parse(localStorage.getItem('av-features') || '{}') }; }
-  catch { return { ...DEFAULT_FEATURES }; }
+  const saved = readJSON('av-features', {});
+  return { ...DEFAULT_FEATURES, ...(saved && typeof saved === 'object' ? saved : {}) };
 }
 function saveFeatures(f) { localStorage.setItem('av-features', JSON.stringify(f)); }
 state.features = loadFeatures();
@@ -278,11 +127,10 @@ INTERDIT ABSOLU :
     parts.push('"warnings" = strings courtes signalant uniquement des risques RÉELS détectés. [] si rien.');
   }
 
-  // Schema dynamique
   const fields = ['"title":"max 60 chars"', '"description":"courte, vendeuse"'];
   if (f.details) fields.push('"details":{"marque":"","taille":"","etat":"Neuf avec étiquette|Neuf sans étiquette|Très bon état|Bon état|Satisfaisant","couleur":"","categorie":"","matiere":"","isbn":"(livres uniquement, sinon vide)"}');
-  if (f.prices)  fields.push('"prices":{"ideal":"15€","rapide":"10€","minimum":"8€"}');
-  if (f.tips)    fields.push('"tips":["conseils pour le vendeur"]');
+  if (f.prices) fields.push('"prices":{"ideal":"15€","rapide":"10€","minimum":"8€"}');
+  if (f.tips) fields.push('"tips":["conseils pour le vendeur"]');
   if (f.warnings) fields.push('"warnings":["risques ou []"]');
 
   parts.push(`RÉPONDS UNIQUEMENT EN JSON VALIDE, sans texte/markdown autour:\n{"action":"ask"|"generate","message":"...","listing":null|{${fields.join(',')}}}`);
@@ -317,8 +165,8 @@ Si tu n'es vraiment pas sûr du type d'objet, mets categorie="Inconnu" et donne 
 
   const fields = ['"photo_indices":[0,1]', '"title":"max 60 chars"', '"description":"..."'];
   if (f.details) fields.push('"details":{"marque":"","taille":"","etat":"Neuf|Neuf sans étiquette|Très bon état|Bon état|Satisfaisant","couleur":"","categorie":"","matiere":"","isbn":"(livres uniquement, sinon vide)"}');
-  if (f.prices)  fields.push('"prices":{"ideal":"15€","rapide":"10€","minimum":"8€"}');
-  if (f.tips)    fields.push('"tips":[]');
+  if (f.prices) fields.push('"prices":{"ideal":"15€","rapide":"10€","minimum":"8€"}');
+  if (f.tips) fields.push('"tips":[]');
   if (f.warnings) fields.push('"warnings":[]');
 
   parts.push(`JSON UNIQUEMENT, sans texte/markdown autour:\n{"listings":[{${fields.join(',')}}]}`);
@@ -326,8 +174,62 @@ Si tu n'es vraiment pas sûr du type d'objet, mets categorie="Inconnu" et donne 
   return parts.join('\n\n');
 }
 
-// ─── DOM ─────────────────────────────────────────────
-const $ = (id) => document.getElementById(id);
+// Appel à l'IA
+
+// Ajoute la réponse à `conversation` (pour pouvoir continuer le dialogue) et renvoie le JSON.
+async function callAI(conversation) {
+  const setup = currentSetup();
+  const { url, init } = buildRequest({ ...setup, conversation, maxTokens: MAX_OUTPUT_TOKENS });
+
+  let res;
+  try {
+    res = await fetch(url, init);
+  } catch {
+    throw new Error('Impossible de joindre le fournisseur. Vérifie ta connexion.');
+  }
+  const data = await res.json().catch(() => null);
+  if (!res.ok) throw new Error(apiErrorMessage(res.status, data));
+
+  const text = extractText(setup.providerId, data || {});
+  conversation.push({ role: 'assistant', content: text });
+  try {
+    return parseJSON(text);
+  } catch (err) {
+    console.error('[AutoVinted] réponse brute :\n', text);
+    throw err;
+  }
+}
+
+function estimateUsage() {
+  const setup = currentSetup();
+  if (!setup) return null;
+  const isBulk = state.mode === 'bulk';
+  const prompt = isBulk ? buildBulkSystemPrompt() : buildSystemPrompt();
+  const context = $('context-input').value;
+  return estimateCost({
+    providerId: setup.providerId,
+    modelId: setup.model,
+    photos: state.photos.length,
+    textChars: prompt.length + context.length + 200,
+    listings: isBulk ? Math.max(1, Math.ceil(state.photos.length / 2.5)) : 1,
+  });
+}
+
+function updateEstimate() {
+  const el = $('estimate');
+  const usage = state.photos.length ? estimateUsage() : null;
+  if (!usage) {
+    el.textContent = '';
+    el.hidden = true;
+    return;
+  }
+  const tokens = `≈ ${(usage.inTokens + usage.outTokens).toLocaleString('fr-FR')} tokens`;
+  el.textContent = usage.eur === null ? tokens : `${tokens} · ${formatEuro(usage.eur)}`;
+  el.hidden = false;
+}
+
+// DOM
+
 const dropzone = $('dropzone');
 const fileInput = $('file-input');
 const previews = $('previews');
@@ -341,7 +243,6 @@ const generateBtn = $('generate-btn');
 const resultSection = $('result-section');
 const toast = $('toast');
 
-// ─── Theme ───────────────────────────────────────────
 $('theme-toggle').addEventListener('click', () => {
   const isDark = document.body.classList.toggle('dark');
   localStorage.setItem('av-theme', isDark ? 'dark' : 'light');
@@ -349,17 +250,44 @@ $('theme-toggle').addEventListener('click', () => {
 });
 $('theme-toggle').textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
 
-// ─── Toast ───────────────────────────────────────────
 let toastTimer;
 function showToast(msg) {
   toast.textContent = msg;
   toast.hidden = false;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { toast.hidden = true; }, 2200);
+  toastTimer = setTimeout(() => { toast.hidden = true; }, 3200);
 }
 
-// ─── Upload ──────────────────────────────────────────
-dropzone.addEventListener('click', () => fileInput.click());
+function setBtnLoading(btn, loading, label) {
+  btn.disabled = loading;
+  btn.querySelector('.btn-label').textContent = label;
+  btn.querySelector('.btn-spinner').hidden = !loading;
+}
+
+function copyText(text) {
+  return navigator.clipboard.writeText(text).catch(() => {
+    showToast('Copie impossible : sélectionne le texte à la main.');
+    throw new Error('clipboard');
+  });
+}
+
+function flashCopied(btn) {
+  const original = btn.textContent;
+  btn.textContent = '✓ Copié';
+  btn.classList.add('done');
+  setTimeout(() => { btn.textContent = original; btn.classList.remove('done'); }, 1500);
+}
+
+// Photos
+
+// La dropzone est un <label> relié au champ fichier : le clic ouvre déjà le sélecteur.
+// Il reste le clavier à gérer.
+dropzone.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    fileInput.click();
+  }
+});
 
 ['dragenter', 'dragover'].forEach(evt =>
   dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.add('drag'); })
@@ -368,38 +296,47 @@ dropzone.addEventListener('click', () => fileInput.click());
   dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.remove('drag'); })
 );
 dropzone.addEventListener('drop', (e) => {
-  const files = [...e.dataTransfer.files].filter(f => f.type.startsWith('image/'));
-  addPhotos(files);
+  addPhotos([...e.dataTransfer.files].filter(f => f.type.startsWith('image/')));
 });
 
-fileInput.addEventListener('change', (e) => addPhotos([...e.target.files]));
+fileInput.addEventListener('change', async () => {
+  await addPhotos([...fileInput.files]);
+  fileInput.value = ''; // sinon re-choisir la même photo ne déclenche rien
+});
 
 async function addPhotos(files) {
   const room = maxPhotos() - state.photos.length;
-  const accepted = files.slice(0, room);
   if (files.length > room) showToast(`Maximum ${maxPhotos()} photos`);
 
-  for (const file of accepted) {
+  let unreadable = 0;
+  for (const file of files.slice(0, room)) {
     const dataUrl = await downscaleImage(file, MAX_PHOTO_SIZE);
-    state.photos.push({ id: crypto.randomUUID(), file, dataUrl });
+    if (dataUrl) state.photos.push({ id: crypto.randomUUID(), dataUrl });
+    else unreadable++;
   }
+  if (unreadable) showToast(`${unreadable} photo${unreadable > 1 ? 's' : ''} illisible${unreadable > 1 ? 's' : ''} (format non pris en charge ?)`);
   renderPreviews();
 }
 
+// Renvoie null si le navigateur ne sait pas lire l'image (HEIC sur certains navigateurs, fichier abîmé…).
 function downscaleImage(file, maxSide) {
   return new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
     const img = new Image();
     img.onload = () => {
       const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
-      const w = Math.round(img.width * scale);
-      const h = Math.round(img.height * scale);
       const canvas = document.createElement('canvas');
-      canvas.width = w; canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, w, h);
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(url);
       resolve(canvas.toDataURL('image/jpeg', JPEG_QUALITY));
     };
-    img.src = URL.createObjectURL(file);
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(null);
+    };
+    img.src = url;
   });
 }
 
@@ -410,7 +347,7 @@ function renderPreviews() {
     el.className = 'preview';
     el.innerHTML = `
       <img src="${p.dataUrl}" alt="" />
-      <button class="preview-remove" aria-label="Supprimer">✕</button>
+      <button class="preview-remove" type="button" aria-label="Retirer cette photo">✕</button>
     `;
     el.querySelector('.preview-remove').addEventListener('click', () => {
       state.photos = state.photos.filter(x => x.id !== p.id);
@@ -419,12 +356,21 @@ function renderPreviews() {
     previews.appendChild(el);
   });
   analyzeBtn.disabled = state.photos.length === 0;
+  updateAnalyzeBtnLabel();
+  updateEstimate();
 }
 
-// ─── Analyse (1er appel) ─────────────────────────────
+// Analyse d'un seul article
+
+function requireSetup() {
+  if (currentSetup()) return true;
+  showToast('Ajoute ta clé API dans les paramètres');
+  openSettings();
+  return false;
+}
+
 analyzeBtn.addEventListener('click', async () => {
-  if (!checkProvider()) return;
-  if (state.photos.length === 0) return;
+  if (state.photos.length === 0 || !requireSetup()) return;
 
   if (state.mode === 'bulk') {
     await runBulk();
@@ -434,30 +380,29 @@ analyzeBtn.addEventListener('click', async () => {
   setBtnLoading(analyzeBtn, true, 'Analyse...');
   state.context = $('context-input').value.trim();
 
-  // Build initial message with all images
   const ctxLine = state.context ? `\n\nContexte donné par le vendeur : "${state.context}"` : '';
-  const userContent = [
-    { type: 'text', text: `Voici ${state.photos.length} photo(s) du produit. Analyse-les et soit pose-moi des questions sur les infos manquantes, soit génère directement l'annonce si tu as toutes les infos.${ctxLine}` },
-    ...state.photos.map(p => ({ type: 'image_url', image_url: { url: p.dataUrl } }))
-  ];
-
   state.conversation = [
     { role: 'system', content: buildSystemPrompt() },
-    { role: 'user', content: userContent }
+    {
+      role: 'user',
+      content: [
+        { type: 'text', text: `Voici ${state.photos.length} photo(s) du produit. Analyse-les et soit pose-moi des questions sur les infos manquantes, soit génère directement l'annonce si tu as toutes les infos.${ctxLine}` },
+        ...state.photos.map(p => ({ type: 'image_url', image_url: { url: p.dataUrl } })),
+      ],
+    },
   ];
 
   try {
-    const response = await callAI();
-    handleAIResponse(response);
+    handleAIResponse(await callAI(state.conversation));
   } catch (err) {
     showToast('Erreur : ' + err.message);
     setBtnLoading(analyzeBtn, false, 'Analyser mes photos');
   }
 });
 
-// ─── Mode toggle ─────────────────────────────────────
+// Mode une annonce / en lot
+
 const modeBtns = document.querySelectorAll('.mode-btn');
-const dropzoneTitle = $('dropzone-title');
 const dropzoneSub = $('dropzone-sub');
 
 modeBtns.forEach(btn => {
@@ -465,7 +410,10 @@ modeBtns.forEach(btn => {
     const mode = btn.dataset.mode;
     if (mode === state.mode) return;
     state.mode = mode;
-    modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+    modeBtns.forEach(b => {
+      b.classList.toggle('active', b.dataset.mode === mode);
+      b.setAttribute('aria-pressed', String(b.dataset.mode === mode));
+    });
     if (mode === 'bulk') {
       dropzoneSub.textContent = `Plusieurs articles à la fois — l'IA détecte chaque article (jusqu'à ${MAX_PHOTOS_BULK} photos)`;
       $('context-hint').textContent = 'Info qui s\'applique à tous les articles, pour éviter que l\'IA pose des questions.';
@@ -474,52 +422,44 @@ modeBtns.forEach(btn => {
       dropzoneSub.textContent = `ou clique pour parcourir — jusqu'à ${MAX_PHOTOS_SINGLE} photos`;
       $('context-hint').textContent = 'Toute info utile que l\'IA ne peut pas deviner (taille, état réel, prix d\'achat...).';
       $('context-input').placeholder = 'Ex : porté 3 fois, prix d\'achat 80€, je veux vendre vite';
+      // On repasse à 8 photos max : on garde les 8 premières.
+      if (state.photos.length > MAX_PHOTOS_SINGLE) {
+        state.photos = state.photos.slice(0, MAX_PHOTOS_SINGLE);
+        showToast(`Seules les ${MAX_PHOTOS_SINGLE} premières photos sont gardées`);
+        renderPreviews();
+      }
     }
     updateAnalyzeBtnLabel();
+    updateEstimate();
   });
 });
 
 function updateAnalyzeBtnLabel() {
   const label = analyzeBtn.querySelector('.btn-label');
+  const n = state.photos.length;
   if (state.mode === 'bulk') {
-    label.textContent = state.photos.length > 0
-      ? `Détecter & générer (${state.photos.length} photo${state.photos.length > 1 ? 's' : ''})`
-      : 'Générer les annonces';
+    label.textContent = n > 0 ? `Détecter & générer (${n} photo${n > 1 ? 's' : ''})` : 'Générer les annonces';
   } else {
     label.textContent = 'Analyser mes photos';
   }
 }
 
-// Hook into renderPreviews to refresh button label + estimate
-const _origRenderPreviews = renderPreviews;
-renderPreviews = function () {
-  _origRenderPreviews();
-  updateAnalyzeBtnLabel();
-  updateEstimate();
-};
-
-// Refresh estimate when context changes
 $('context-input').addEventListener('input', updateEstimate);
 
-// Refresh estimate when mode changes
-modeBtns.forEach(b => b.addEventListener('click', () => {
-  // state.mode is updated by the earlier handler — defer one tick
-  setTimeout(updateEstimate, 0);
-}));
+// Mode lot
 
-// ─── Bulk run ────────────────────────────────────────
 const bulkSection = $('bulk-section');
 const bulkResults = $('bulk-results');
 const bulkActions = $('bulk-actions');
 const bulkProgress = $('bulk-progress');
 const bulkProgressText = $('bulk-progress-text');
 const bulkProgressFill = $('bulk-progress-fill');
+const bulkListings = new WeakMap(); // carte affichée → annonce, pour « copier toutes les annonces »
 
 async function runBulk() {
   state.context = $('context-input').value.trim();
   const total = state.photos.length;
 
-  // Switch UI
   uploadSection.style.display = 'none';
   bulkSection.hidden = false;
   bulkResults.innerHTML = '';
@@ -528,7 +468,6 @@ async function runBulk() {
   bulkProgressText.textContent = `L'IA analyse ${total} photo${total > 1 ? 's' : ''} et regroupe les articles…`;
   bulkProgressFill.style.width = '15%';
 
-  // Build single multi-image request with photo numbering
   const ctxLine = state.context ? `\n\nContexte donné par le vendeur (s'applique à tous les articles) : "${state.context}"` : '';
   const intro = `Voici ${total} photos. Plusieurs photos peuvent montrer le MÊME article (sous différents angles, étiquettes, défauts...). Identifie chaque article distinct, regroupe les photos qui appartiennent au même article, et génère UNE annonce Vinted par article détecté.${ctxLine}`;
 
@@ -537,31 +476,20 @@ async function runBulk() {
     userContent.push({ type: 'text', text: `\nPhoto ${i} :` });
     userContent.push({ type: 'image_url', image_url: { url: p.dataUrl } });
   });
-
-  const conv = [
+  const conversation = [
     { role: 'system', content: buildBulkSystemPrompt() },
     { role: 'user', content: userContent },
   ];
 
   bulkProgressFill.style.width = '40%';
 
-  const tmpState = { ...state, conversation: conv };
-  const provider = PROVIDERS[state.provider];
-  if (!provider.models.find(m => m.id === state.model)) {
-    state.model = getStoredModel(state.provider);
-    tmpState.model = state.model;
-  }
-
   try {
-    const resp = await provider.call(tmpState);
+    const resp = await callAI(conversation);
     bulkProgressFill.style.width = '100%';
 
     const listings = Array.isArray(resp.listings) ? resp.listings : [];
-    if (listings.length === 0) {
-      throw new Error(resp.message || 'Aucun article détecté dans les photos');
-    }
+    if (listings.length === 0) throw new Error(resp.message || 'Aucun article détecté dans les photos');
 
-    // Render each detected article
     for (let i = 0; i < listings.length; i++) {
       const listing = listings[i];
       const indices = Array.isArray(listing.photo_indices) ? listing.photo_indices : [i];
@@ -569,6 +497,7 @@ async function runBulk() {
       const card = createBulkCard(photos, i);
       bulkResults.appendChild(card.el);
       card.fillListing(listing);
+      bulkListings.set(card.el, listing);
       await saveToHistory(listing, photos);
     }
 
@@ -584,19 +513,17 @@ async function runBulk() {
 }
 
 function createBulkCard(photos, index) {
-  const photoArr = Array.isArray(photos) ? photos : [photos];
-  const mainPhoto = photoArr[0];
   const el = document.createElement('div');
   el.className = 'bulk-item';
   el.innerHTML = `
     <div class="bulk-item-head">
-      <img class="bulk-item-thumb" src="${mainPhoto?.dataUrl || ''}" alt="" />
+      <img class="bulk-item-thumb" src="${photos[0]?.dataUrl || ''}" alt="" />
       <div class="bulk-item-info">
         <div class="bulk-item-title">Article ${index + 1}</div>
-        <div class="bulk-item-meta">${photoArr.length} photo${photoArr.length > 1 ? 's' : ''}</div>
+        <div class="bulk-item-meta">${photos.length} photo${photos.length > 1 ? 's' : ''}</div>
       </div>
       <span class="bulk-item-status"><span class="spinner-sm"></span></span>
-      <button class="bulk-item-delete" title="Supprimer cet article">✕</button>
+      <button class="bulk-item-delete" type="button" title="Supprimer cet article" aria-label="Supprimer cet article">✕</button>
     </div>
     <div class="bulk-item-body"></div>
   `;
@@ -605,9 +532,8 @@ function createBulkCard(photos, index) {
   const metaEl = el.querySelector('.bulk-item-meta');
   const statusEl = el.querySelector('.bulk-item-status');
   const bodyEl = el.querySelector('.bulk-item-body');
-  const deleteBtn = el.querySelector('.bulk-item-delete');
 
-  deleteBtn.addEventListener('click', (e) => {
+  el.querySelector('.bulk-item-delete').addEventListener('click', (e) => {
     e.stopPropagation();
     el.remove();
   });
@@ -622,36 +548,31 @@ function createBulkCard(photos, index) {
       const hasWarn = Array.isArray(l.warnings) && l.warnings.filter(Boolean).length > 0;
       const warnBadge = hasWarn ? '<span class="bulk-item-warn" title="Risque règles Vinted">⚠</span>' : '';
       titleEl.innerHTML = `<span class="bulk-item-num">#${index + 1}</span> ${warnBadge} ${escapeHtml(l.title || `Article ${index + 1}`)}`;
-      const priceTxt = l.prices?.ideal || '—';
-      const etatTxt = l.details?.etat || '—';
-      metaEl.textContent = `${priceTxt} • ${etatTxt} • ${photoArr.length} photo${photoArr.length > 1 ? 's' : ''}`;
+      metaEl.textContent = `${l.prices?.ideal || '—'} • ${l.details?.etat || '—'} • ${photos.length} photo${photos.length > 1 ? 's' : ''}`;
       statusEl.className = 'bulk-item-status done' + (hasWarn ? ' has-warn' : '');
       statusEl.innerHTML = (hasWarn ? '⚠ ' : '✓ ') + '<span class="bulk-chevron">▾</span>';
-      bodyEl.innerHTML = renderBulkBody(l, index, photoArr);
+      bodyEl.innerHTML = renderBulkBody(l, photos);
       bindBulkBodyActions(bodyEl, l);
-    },
-    setError(msg) {
-      titleEl.innerHTML = `<span class="bulk-item-num">#${index + 1}</span> Article ${index + 1}`;
-      metaEl.textContent = msg.length > 60 ? msg.slice(0, 60) + '…' : msg;
-      statusEl.className = 'bulk-item-status error';
-      statusEl.textContent = '⚠ Erreur';
     },
   };
 }
 
-function renderBulkBody(l, index, photoArr) {
-  const f = state.features || DEFAULT_FEATURES;
+const DETAIL_LABELS = {
+  marque: 'Marque', taille: 'Taille', etat: 'État', couleur: 'Couleur',
+  categorie: 'Catégorie', matiere: 'Matière', isbn: 'ISBN',
+};
+
+function renderBulkBody(l, photos) {
+  const f = state.features;
   const d = l.details || {};
   const p = l.prices || {};
-  const tipsRaw = (f.tips ? (l.tips || []) : []);
-  const tips = tipsRaw.map(t => `<li>${escapeHtml(t)}</li>`).join('');
-  const detailLabels = { marque: 'Marque', taille: 'Taille', etat: 'État', couleur: 'Couleur', categorie: 'Catégorie', matiere: 'Matière', isbn: 'ISBN' };
-  const details = f.details ? Object.entries(detailLabels)
+  const tips = f.tips ? (l.tips || []).map(t => `<li>${escapeHtml(t)}</li>`).join('') : '';
+  const details = f.details ? Object.entries(DETAIL_LABELS)
     .filter(([k]) => d[k])
     .map(([k, label]) => `<li><strong>${label}</strong>${escapeHtml(d[k])}</li>`).join('') : '';
 
-  const thumbs = (photoArr && photoArr.length > 1)
-    ? `<div class="bulk-item-thumbs">${photoArr.map(p => `<img src="${p.dataUrl}" alt="">`).join('')}</div>`
+  const thumbs = photos.length > 1
+    ? `<div class="bulk-item-thumbs">${photos.map(ph => `<img src="${ph.dataUrl}" alt="">`).join('')}</div>`
     : '';
 
   const warnings = (f.warnings && Array.isArray(l.warnings)) ? l.warnings.filter(Boolean) : [];
@@ -669,14 +590,14 @@ function renderBulkBody(l, index, photoArr) {
     <div class="result-block">
       <div class="result-block-head">
         <span class="result-label">Titre</span>
-        <button class="copy-btn" data-bcopy="title">Copier</button>
+        <button class="copy-btn" type="button" data-bcopy="title">Copier</button>
       </div>
       <p class="result-title">${escapeHtml(l.title || '')}</p>
     </div>
     <div class="result-block">
       <div class="result-block-head">
         <span class="result-label">Description</span>
-        <button class="copy-btn" data-bcopy="description">Copier</button>
+        <button class="copy-btn" type="button" data-bcopy="description">Copier</button>
       </div>
       <p class="result-description">${escapeHtml(l.description || '')}</p>
     </div>
@@ -690,7 +611,7 @@ function renderBulkBody(l, index, photoArr) {
       </div>
     </div>` : ''}
     ${tips ? `<div class="result-block"><span class="result-label">Conseils</span><ul class="result-tips">${tips}</ul></div>` : ''}
-    <div class="result-actions"><button class="btn-ghost" data-bcopy="all">Copier toute l'annonce</button></div>
+    <div class="result-actions"><button class="btn-ghost" type="button" data-bcopy="all">Copier toute l'annonce</button></div>
   `;
 }
 
@@ -702,48 +623,30 @@ function bindBulkBodyActions(bodyEl, listing) {
       const text = what === 'all' ? formatFullListing(listing)
         : what === 'title' ? listing.title
         : listing.description;
-      navigator.clipboard.writeText(text).then(() => {
-        const orig = btn.textContent;
-        btn.textContent = '✓ Copié';
-        btn.classList.add('done');
-        setTimeout(() => { btn.textContent = orig; btn.classList.remove('done'); }, 1500);
-      });
+      copyText(text || '').then(() => flashCopied(btn), () => {});
     });
   });
 }
 
 function formatFullListing(l) {
-  const f = state.features || DEFAULT_FEATURES;
+  const f = state.features;
   const d = l.details || {};
-  const p = l.prices || {};
-  let out = `${l.title}\n\n${l.description}`;
+  let out = `${l.title || ''}\n\n${l.description || ''}`;
   if (f.details) {
-    const lines = [];
-    if (d.marque)    lines.push(`— Marque : ${d.marque}`);
-    if (d.taille)    lines.push(`— Taille : ${d.taille}`);
-    if (d.etat)      lines.push(`— État : ${d.etat}`);
-    if (d.couleur)   lines.push(`— Couleur : ${d.couleur}`);
-    if (d.categorie) lines.push(`— Catégorie : ${d.categorie}`);
-    if (d.matiere)   lines.push(`— Matière : ${d.matiere}`);
-    if (d.isbn)      lines.push(`— ISBN : ${d.isbn}`);
+    const lines = Object.entries(DETAIL_LABELS).filter(([k]) => d[k]).map(([k, label]) => `— ${label} : ${d[k]}`);
     if (lines.length) out += '\n\n' + lines.join('\n');
   }
-  if (f.prices && p.ideal) out += `\n\nPrix : ${p.ideal}`;
+  if (f.prices && l.prices?.ideal) out += `\n\nPrix : ${l.prices.ideal}`;
   return out;
 }
 
 $('bulk-copy-all-btn').addEventListener('click', () => {
-  const items = bulkResults.querySelectorAll('.bulk-item');
-  const texts = [];
-  items.forEach((el, i) => {
-    const titleEl = el.querySelector('.bulk-item-title');
-    const descEl = el.querySelector('.result-description');
-    if (titleEl && descEl) {
-      texts.push(`━━━ Article ${i + 1} ━━━\n${titleEl.textContent}\n\n${descEl.textContent}`);
-    }
-  });
+  const texts = [...bulkResults.querySelectorAll('.bulk-item')]
+    .map(el => bulkListings.get(el))
+    .filter(Boolean)
+    .map((l, i) => `━━━ Article ${i + 1} ━━━\n${l.title || ''}\n\n${l.description || ''}`);
   if (texts.length === 0) { showToast('Aucune annonce à copier'); return; }
-  navigator.clipboard.writeText(texts.join('\n\n\n')).then(() => showToast(`${texts.length} annonces copiées ✓`));
+  copyText(texts.join('\n\n\n')).then(() => showToast(`${texts.length} annonces copiées ✓`), () => {});
 });
 
 function doRestart() {
@@ -761,6 +664,9 @@ function doRestart() {
   bulkSection.hidden = true;
   bulkActions.hidden = true;
   uploadSection.style.display = '';
+  setBtnLoading(analyzeBtn, false, 'Analyser mes photos');
+  updateAnalyzeBtnLabel();
+  analyzeBtn.disabled = true;
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -768,6 +674,7 @@ function isOnUploadView() {
   return uploadSection.style.display !== 'none';
 }
 
+// Hors de l'écran d'accueil, « retour » ramène au début au lieu de quitter l'app.
 $('back-btn').addEventListener('click', (e) => {
   if (!isOnUploadView()) {
     e.preventDefault();
@@ -781,31 +688,38 @@ $('site-title').addEventListener('click', () => {
 
 $('bulk-restart-btn').addEventListener('click', doRestart);
 
-// ─── Chat ────────────────────────────────────────────
+// Dialogue avec l'IA quand il lui manque des infos
+
 chatForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const text = chatText.value.trim();
-  if (!text) return;
+  if (!text || state.busy) return;
   chatText.value = '';
   await sendUserMessage(text);
 });
 
 generateBtn.addEventListener('click', async () => {
+  if (state.busy) return;
   await sendUserMessage("Génère l'annonce maintenant avec ce que tu as.");
 });
 
 async function sendUserMessage(text) {
+  state.busy = true;
   addBubble('user', text);
   state.conversation.push({ role: 'user', content: text });
 
   const thinking = addBubble('thinking');
   try {
-    const response = await callAI();
+    const response = await callAI(state.conversation);
     thinking.remove();
     handleAIResponse(response);
   } catch (err) {
     thinking.remove();
+    // Le message n'a pas eu de réponse : on le retire pour que l'utilisateur puisse le renvoyer.
+    state.conversation.pop();
     addBubble('ai', 'Erreur : ' + err.message);
+  } finally {
+    state.busy = false;
   }
 }
 
@@ -822,248 +736,46 @@ function addBubble(type, text = '') {
   return el;
 }
 
-// ─── AI call (dispatch on provider) ──────────────────
-async function callAI() {
-  const provider = PROVIDERS[state.provider];
-  if (!provider) throw new Error('Fournisseur inconnu');
-  // Make sure model belongs to current provider
-  if (!provider.models.find(m => m.id === state.model)) {
-    state.model = getStoredModel(state.provider);
-  }
-  return provider.call(state);
-}
-
-// Pollinations.ai — gratuit, sans clé
-async function callPollinations() {
-  const res = await fetch('https://text.pollinations.ai/openai', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'openai-large',
-      messages: state.conversation,
-      temperature: 0.7,
-      max_tokens: state.mode === 'bulk' ? 6000 : 2000,
-      referrer: 'autovinted',
-    }),
-  });
-  if (!res.ok) {
-    throw new Error(`Service gratuit indisponible (${res.status}). Réessaie ou passe à un autre fournisseur.`);
-  }
-  const data = await res.json();
-  const content = data.choices?.[0]?.message?.content || '';
-  state.conversation.push({ role: 'assistant', content });
-  return parseJSON(content);
-}
-
-// OpenAI-compatible (OpenAI, Groq, Mistral, DeepSeek)
-async function callOpenAICompatible(s, endpoint, supportsJsonMode) {
-  const key = getApiKey(s.provider);
-  const provider = PROVIDERS[s.provider];
-
-  // Strip image parts for text-only providers (e.g. DeepSeek)
-  const messages = provider.vision ? s.conversation : s.conversation.map(m => {
-    if (typeof m.content === 'string') return m;
-    const text = m.content.filter(p => p.type === 'text').map(p => p.text).join('\n');
-    return { role: m.role, content: text || "(L'utilisateur a joint des photos. Demande-lui de les décrire en texte.)" };
-  });
-
-  const body = {
-    model: s.model,
-    messages,
-    temperature: 0.7,
-    max_tokens: state.mode === 'bulk' ? 6000 : 2000,
-  };
-  if (supportsJsonMode) body.response_format = { type: 'json_object' };
-
-  const res = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${key}`,
-    },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error?.message || err.message || `HTTP ${res.status}`);
-  }
-  const data = await res.json();
-  const content = data.choices[0].message.content;
-  s.conversation.push({ role: 'assistant', content });
-  return parseJSON(content);
-}
-
-// Anthropic Claude — different API shape
-async function callAnthropic(s) {
-  const key = getApiKey(s.provider);
-  // Convert OpenAI-style messages → Anthropic format
-  const system = s.conversation.find(m => m.role === 'system')?.content || '';
-  const messages = s.conversation
-    .filter(m => m.role !== 'system')
-    .map(m => {
-      if (typeof m.content === 'string') return { role: m.role, content: m.content };
-      // OpenAI vision format → Anthropic format
-      const content = m.content.map(part => {
-        if (part.type === 'text') return { type: 'text', text: part.text };
-        if (part.type === 'image_url') {
-          const url = part.image_url.url;
-          const match = url.match(/^data:(image\/[a-z]+);base64,(.+)$/);
-          if (!match) return { type: 'text', text: '[image]' };
-          return {
-            type: 'image',
-            source: { type: 'base64', media_type: match[1], data: match[2] }
-          };
-        }
-        return part;
-      });
-      return { role: m.role, content };
-    });
-
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': key,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
-    },
-    body: JSON.stringify({
-      model: s.model,
-      max_tokens: state.mode === 'bulk' ? 6000 : 2000,
-      system,
-      messages,
-    }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error?.message || `HTTP ${res.status}`);
-  }
-  const data = await res.json();
-  const content = data.content?.[0]?.text || '';
-  s.conversation.push({ role: 'assistant', content });
-  return parseJSON(content);
-}
-
-// Google Gemini — different API shape
-async function callGemini(s) {
-  const key = getApiKey(s.provider);
-  const system = s.conversation.find(m => m.role === 'system')?.content || '';
-  const contents = s.conversation
-    .filter(m => m.role !== 'system')
-    .map(m => {
-      const role = m.role === 'assistant' ? 'model' : 'user';
-      if (typeof m.content === 'string') return { role, parts: [{ text: m.content }] };
-      const parts = m.content.map(part => {
-        if (part.type === 'text') return { text: part.text };
-        if (part.type === 'image_url') {
-          const url = part.image_url.url;
-          const match = url.match(/^data:(image\/[a-z]+);base64,(.+)$/);
-          if (!match) return { text: '[image]' };
-          return { inline_data: { mime_type: match[1], data: match[2] } };
-        }
-        return { text: '' };
-      });
-      return { role, parts };
-    });
-
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${s.model}:generateContent?key=${encodeURIComponent(key)}`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: system }] },
-      contents,
-      generationConfig: { temperature: 0.7, maxOutputTokens: state.mode === 'bulk' ? 6000 : 2000, responseMimeType: 'application/json' },
-    }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error?.message || `HTTP ${res.status}`);
-  }
-  const data = await res.json();
-  const content = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  s.conversation.push({ role: 'assistant', content });
-  return parseJSON(content);
-}
-
-// Parse JSON tolerantly — providers may wrap in markdown code blocks
-function parseJSON(text) {
-  const raw = text || '';
-  try { return JSON.parse(raw); } catch {}
-
-  // strip ```json ... ``` fences
-  const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
-  if (fenced) {
-    try { return JSON.parse(fenced[1].trim()); } catch {}
-  }
-
-  // grab first balanced {...} block
-  const braced = raw.match(/\{[\s\S]*\}/);
-  if (braced) {
-    try { return JSON.parse(braced[0]); } catch {}
-  }
-
-  // Diagnostic info for the user + console
-  console.error('[AutoVinted] Raw AI response that failed to parse:\n', raw);
-  const trimmed = raw.trim();
-  if (!trimmed) {
-    throw new Error("L'IA a renvoyé une réponse vide. Vérifie ta clé API et réessaie.");
-  }
-  // Show beginning of the response so user/dev can see what's wrong
-  const snippet = trimmed.length > 220 ? trimmed.slice(0, 220) + '…' : trimmed;
-  throw new Error(`Réponse IA non-JSON (extrait) : « ${snippet} » — Détails complets dans la console (F12).`);
-}
-
-// ─── Handle AI response ──────────────────────────────
 function handleAIResponse(resp) {
-  // Move from upload to chat view on first response
-  if (uploadSection.style.display !== 'none') {
+  if (isOnUploadView()) {
     uploadSection.style.display = 'none';
     chatSection.hidden = false;
     setBtnLoading(analyzeBtn, false, 'Analyser mes photos');
   }
 
-  if (resp.action === 'ask') {
-    addBubble('ai', resp.message);
-    generateBtn.hidden = false;
-  } else if (resp.action === 'generate' && resp.listing) {
-    renderListing(resp.listing);
+  if (resp.action === 'generate' && resp.listing) {
+    renderListing(resp.listing, state.photos.map(p => p.dataUrl));
     chatSection.hidden = true;
     resultSection.hidden = false;
     saveToHistory(resp.listing).catch(() => {});
   } else {
-    addBubble('ai', resp.message || 'Réponse inattendue.');
+    addBubble('ai', resp.message || 'Réponse inattendue, réessaie.');
+    generateBtn.hidden = resp.action !== 'ask';
   }
 }
 
-// ─── Result rendering ────────────────────────────────
+// Résultat
+
 function renderListing(listing, photos = null) {
   state.lastListing = listing;
 
   const photosEl = $('r-photos');
-  if (photosEl) {
-    if (photos && photos.length) {
-      photosEl.innerHTML = photos.map((src, i) =>
-        `<img class="result-photo" src="${src}" alt="Photo ${i + 1}" loading="lazy" />`
-      ).join('');
-      photosEl.hidden = false;
-    } else {
-      photosEl.innerHTML = '';
-      photosEl.hidden = true;
-    }
+  if (photos && photos.length) {
+    photosEl.innerHTML = photos.map((src, i) =>
+      `<img class="result-photo" src="${escapeHtml(src)}" alt="Photo ${i + 1}" loading="lazy" />`
+    ).join('');
+    photosEl.hidden = false;
+  } else {
+    photosEl.innerHTML = '';
+    photosEl.hidden = true;
   }
 
   $('r-title').textContent = listing.title || '';
   $('r-description').textContent = listing.description || '';
 
-  const f = state.features || DEFAULT_FEATURES;
+  const f = state.features;
   const details = listing.details || {};
-  const detailLabels = {
-    marque: 'Marque', taille: 'Taille', etat: 'État',
-    couleur: 'Couleur', categorie: 'Catégorie', matiere: 'Matière',
-    isbn: 'ISBN'
-  };
-  const detailsHtml = Object.entries(detailLabels)
+  const detailsHtml = Object.entries(DETAIL_LABELS)
     .filter(([k]) => details[k])
     .map(([k, label]) => `<li><strong>${label}</strong>${escapeHtml(details[k])}</li>`)
     .join('');
@@ -1071,21 +783,16 @@ function renderListing(listing, photos = null) {
   $('r-details-block').hidden = !f.details || !detailsHtml;
 
   const prices = listing.prices || {};
-  const hasPrices = f.prices && (prices.ideal || prices.rapide || prices.minimum);
   $('r-prices').innerHTML = `
     <div class="price-cell"><span class="price-cell-label">Idéal</span><span class="price-cell-value">${escapeHtml(prices.ideal || '—')}</span></div>
     <div class="price-cell"><span class="price-cell-label">Vente rapide</span><span class="price-cell-value">${escapeHtml(prices.rapide || '—')}</span></div>
     <div class="price-cell"><span class="price-cell-label">Minimum</span><span class="price-cell-value">${escapeHtml(prices.minimum || '—')}</span></div>
   `;
-  $('r-prices-block').hidden = !hasPrices;
+  $('r-prices-block').hidden = !(f.prices && (prices.ideal || prices.rapide || prices.minimum));
 
-  const tips = listing.tips || [];
-  if (f.tips && tips.length) {
-    $('r-tips').innerHTML = tips.map(t => `<li>${escapeHtml(t)}</li>`).join('');
-    $('r-tips-block').hidden = false;
-  } else {
-    $('r-tips-block').hidden = true;
-  }
+  const tips = Array.isArray(listing.tips) ? listing.tips : [];
+  $('r-tips').innerHTML = tips.map(t => `<li>${escapeHtml(t)}</li>`).join('');
+  $('r-tips-block').hidden = !(f.tips && tips.length);
 
   const warnings = (f.warnings && Array.isArray(listing.warnings)) ? listing.warnings.filter(Boolean) : [];
   const warnEl = $('r-warnings');
@@ -1095,15 +802,13 @@ function renderListing(listing, photos = null) {
       <ul>${warnings.map(w => `<li>${escapeHtml(w)}</li>`).join('')}</ul>
       <div class="result-warnings-foot">Ton annonce risque d'être retirée par Vinted. Vérifie avant de publier.</div>
     `;
-    warnEl.hidden = false;
-  } else {
-    warnEl.hidden = true;
   }
+  warnEl.hidden = !warnings.length;
 
+  // Seule l'annonce d'exemple a un lien source (photos d'un site marchand).
   const srcBlock = $('r-source-block');
-  const srcLink  = $('r-source-link');
   if (listing.sourceLink) {
-    srcLink.href = listing.sourceLink;
+    $('r-source-link').href = listing.sourceLink;
     srcBlock.hidden = false;
   } else {
     srcBlock.hidden = true;
@@ -1113,112 +818,97 @@ function renderListing(listing, photos = null) {
 }
 
 function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
-// ─── Photo lightbox ──────────────────────────────────
 document.addEventListener('click', (e) => {
   const img = e.target.closest('.result-photo');
   if (!img) return;
   const box = document.createElement('div');
   box.className = 'photo-lightbox';
   box.innerHTML = `<img src="${img.src}" alt="" />`;
-  box.addEventListener('click', () => box.remove());
-  document.addEventListener('keydown', function onEsc(ev) {
-    if (ev.key === 'Escape') { box.remove(); document.removeEventListener('keydown', onEsc); }
-  });
+  const close = () => {
+    box.remove();
+    document.removeEventListener('keydown', onEsc);
+  };
+  const onEsc = (ev) => { if (ev.key === 'Escape') close(); };
+  box.addEventListener('click', close);
+  document.addEventListener('keydown', onEsc);
   document.body.appendChild(box);
 });
 
-// ─── Copy buttons ────────────────────────────────────
 document.addEventListener('click', (e) => {
-  const btn = e.target.closest('.copy-btn');
+  const btn = e.target.closest('.copy-btn[data-copy]');
   if (!btn) return;
-  const key = btn.dataset.copy;
-  const text = key === 'title' ? state.lastListing?.title : state.lastListing?.description;
-  if (!text) return;
-  navigator.clipboard.writeText(text).then(() => {
-    const original = btn.textContent;
-    btn.textContent = '✓ Copié';
-    btn.classList.add('done');
-    setTimeout(() => { btn.textContent = original; btn.classList.remove('done'); }, 1500);
-  });
+  const text = btn.dataset.copy === 'title' ? state.lastListing?.title : state.lastListing?.description;
+  if (text) copyText(text).then(() => flashCopied(btn), () => {});
 });
 
 $('copy-all-btn').addEventListener('click', () => {
-  const l = state.lastListing;
-  if (!l) return;
-  navigator.clipboard.writeText(formatFullListing(l)).then(() => showToast('Annonce copiée ✓'));
+  if (state.lastListing) copyText(formatFullListing(state.lastListing)).then(() => showToast('Annonce copiée ✓'), () => {});
 });
 
 $('restart-btn').addEventListener('click', doRestart);
 
-// ─── Settings ────────────────────────────────────────
+// Paramètres : une seule clé, le fournisseur est deviné à partir de son préfixe
+
 const settingsModal = $('settings-modal');
-const providerSelect = $('provider-select');
-const modelSelect = $('model-select');
-const apikeyField = $('apikey-field');
-const modelField = $('model-field');
 const apiKeyInput = $('api-key');
-const apikeyLabel = $('apikey-label');
-const apikeyLink = $('apikey-link');
-const providerHint = $('provider-hint');
+const keyStatus = $('key-status');
+const modelPicker = $('model-picker');
+const modelSelect = $('model-select');
 
-// Populate provider dropdown once
-Object.entries(PROVIDERS).forEach(([id, p]) => {
-  const opt = document.createElement('option');
-  opt.value = id;
-  opt.textContent = p.label;
-  providerSelect.appendChild(opt);
-});
+const KEY_PROBLEMS = {
+  empty: 'Claude, ChatGPT, Gemini ou Mistral : le fournisseur est reconnu tout seul.',
+  groq: 'Groq n\'est plus pris en charge : son modèle vision n\'accepte que 3 photos.',
+  openrouter: 'Les clés OpenRouter ne sont pas prises en charge. Utilise une clé Claude, ChatGPT, Gemini ou Mistral.',
+  unknown: 'Clé non reconnue. Vérifie que tu l\'as copiée en entier.',
+};
 
-function syncProviderUI() {
-  const id = providerSelect.value;
-  const p = PROVIDERS[id];
-  if (!p) return;
+$('key-links').innerHTML = Object.values(PROVIDERS)
+  .map(p => `<a href="${p.keyUrl}" target="_blank" rel="noopener">${p.label}</a>`)
+  .join(' · ');
 
-  providerHint.textContent = p.hint || '';
+let shownProvider = null;
 
-  // Models
-  modelSelect.innerHTML = '';
-  p.models.forEach(m => {
-    const opt = document.createElement('option');
-    opt.value = m.id;
-    opt.textContent = m.label;
-    modelSelect.appendChild(opt);
-  });
-  modelSelect.value = getStoredModel(id);
-  // Cache la liste si un seul modèle
-  modelField.hidden = p.models.length <= 1;
+function syncKeyStatus() {
+  const detected = detectProvider(apiKeyInput.value);
+  keyStatus.classList.toggle('ok', detected.ok);
+  keyStatus.classList.toggle('error', !detected.ok && detected.reason !== 'empty');
 
-  // API key
-  apikeyField.hidden = !p.needsKey;
-  if (p.needsKey) {
-    apikeyLabel.textContent = p.keyLabel;
-    apiKeyInput.type = 'password';
-    apiKeyInput.placeholder = (p.keyPrefix || '') + '...';
-    apiKeyInput.value = getApiKey(id);
-    if (p.keyUrl) {
-      apikeyLink.href = p.keyUrl;
-      apikeyLink.textContent = 'Obtenir une clé →';
-      apikeyLink.style.display = '';
-    } else {
-      apikeyLink.style.display = 'none';
-    }
+  if (!detected.ok) {
+    keyStatus.textContent = KEY_PROBLEMS[detected.reason];
+    modelPicker.hidden = true;
+    shownProvider = null;
+    return;
   }
+
+  const provider = PROVIDERS[detected.id];
+  if (shownProvider !== detected.id) {
+    modelSelect.innerHTML = provider.models
+      .map(m => `<option value="${m.id}">${m.label}</option>`)
+      .join('');
+    modelSelect.value = resolveModel(detected.id, localStorage.getItem('av-model'));
+    shownProvider = detected.id;
+  }
+  modelPicker.hidden = false;
+
+  const model = provider.models.find(m => m.id === modelSelect.value);
+  const { eur } = estimateCost({
+    providerId: detected.id,
+    modelId: model.id,
+    photos: 4,
+    textChars: buildSystemPrompt().length + 200,
+    listings: 1,
+  });
+  keyStatus.textContent = `✓ ${provider.label} reconnu · ${model.label} · ${formatEuro(eur)} par annonce de 4 photos`;
 }
 
-providerSelect.addEventListener('change', syncProviderUI);
+apiKeyInput.addEventListener('input', syncKeyStatus);
+modelSelect.addEventListener('change', syncKeyStatus);
 
-// Save key/model on change so user doesn't lose them between providers
-modelSelect.addEventListener('change', () => {
-  localStorage.setItem('av-model-' + providerSelect.value, modelSelect.value);
-});
-
-// ─── Personnalisation (features) ─────────────────────
 function renderFeatureToggles() {
-  const list = $('features-list');
-  list.innerHTML = Object.entries(FEATURE_LABELS).map(([key, info]) => `
+  $('features-list').innerHTML = Object.entries(FEATURE_LABELS).map(([key, info]) => `
     <label class="feature-toggle">
       <input type="checkbox" data-feature="${key}" ${state.features[key] ? 'checked' : ''} />
       <span class="feature-toggle-track"><span class="feature-toggle-thumb"></span></span>
@@ -1229,39 +919,52 @@ function renderFeatureToggles() {
     </label>
   `).join('');
 }
-renderFeatureToggles();
 
-$('settings-toggle').addEventListener('click', () => {
-  providerSelect.value = state.provider;
-  syncProviderUI();
+function fillSettings() {
+  apiKeyInput.value = localStorage.getItem('av-key') || '';
+  shownProvider = null;
+  syncKeyStatus();
   renderFeatureToggles();
+}
+
+function openSettings() {
+  fillSettings();
   settingsModal.hidden = false;
-});
+  apiKeyInput.focus();
+}
+
+$('settings-toggle').addEventListener('click', openSettings);
 $('settings-close').addEventListener('click', () => { settingsModal.hidden = true; });
 settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) settingsModal.hidden = true; });
 
 $('settings-save').addEventListener('click', () => {
-  const providerId = providerSelect.value;
-  state.provider = providerId;
-  state.model = modelSelect.value;
-  localStorage.setItem('av-provider', providerId);
-  if (state.model) localStorage.setItem('av-model-' + providerId, state.model);
-  if (PROVIDERS[providerId].needsKey) {
-    setApiKey(providerId, apiKeyInput.value.trim());
+  const key = apiKeyInput.value.trim();
+  const detected = detectProvider(key);
+  if (key && !detected.ok) {
+    showToast(KEY_PROBLEMS[detected.reason]);
+    apiKeyInput.focus();
+    return;
   }
-  // Save feature toggles
-  const newFeatures = { ...state.features };
+  if (key) {
+    localStorage.setItem('av-key', key);
+    localStorage.setItem('av-model', modelSelect.value);
+  } else {
+    localStorage.removeItem('av-key');
+    localStorage.removeItem('av-model');
+  }
+
+  const features = { ...state.features };
   document.querySelectorAll('#features-list input[data-feature]').forEach(cb => {
-    newFeatures[cb.dataset.feature] = cb.checked;
+    features[cb.dataset.feature] = cb.checked;
   });
-  state.features = newFeatures;
-  saveFeatures(newFeatures);
+  state.features = features;
+  saveFeatures(features);
+
   settingsModal.hidden = true;
   showToast('Paramètres enregistrés');
   updateEstimate();
 });
 
-// Close modals with Escape
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     settingsModal.hidden = true;
@@ -1270,38 +973,44 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// ─── Spotlight Tutorial ───────────────────────────────
+// Sur grand écran, les paramètres sont un panneau toujours visible : on le remplit dès le départ.
+fillSettings();
+
+// Tutoriel
+
 const TUTORIAL_STEPS = [
-  { target: '.hero',           emoji: '✦',  title: 'Bienvenue sur AutoVinted', text: 'Upload tes photos, l\'IA rédige ton annonce Vinted optimisée. Voici le tour en 30 secondes.', placement: 'bottom' },
-  { target: '.mode-toggle',    emoji: '🔀', title: 'Une annonce ou en lot',     text: '<strong>Une annonce</strong> — photos d\'un seul article.<br><strong>En lot</strong> — jusqu\'à 30 photos, l\'IA détecte les articles automatiquement.', placement: 'bottom' },
-  { target: '#dropzone',       emoji: '📸', title: 'Upload tes photos',         text: 'Glisse-dépose ici ou clique pour parcourir. 4 à 6 angles idéalement : face, dos, étiquette, défauts.', placement: 'bottom' },
-  { target: '#context-input',  emoji: '💬', title: 'Ajoute du contexte',        text: 'Infos que l\'IA ne peut pas deviner : taille réelle, prix d\'achat, état... Optionnel mais recommandé.', placement: 'top' },
-  { target: '#settings-toggle',emoji: '⚙', title: 'Configure ton IA',          text: 'Choisis ton fournisseur (<strong>OpenAI, Claude, Gemini, Groq, Mistral</strong>) et colle ta clé API. Tout reste stocké uniquement dans ton navigateur.', placement: 'bottom' },
-  { target: '#history-toggle', emoji: '⌛', title: 'Historique',                text: 'Retrouve toutes tes annonces ici. <strong>Un exemple Clarks est déjà disponible</strong> pour voir à quoi ressemble un résultat !', placement: 'bottom' },
+  { target: '.hero',            emoji: '✦',  title: 'Bienvenue sur AutoVinted', text: 'Upload tes photos, l\'IA rédige ton annonce Vinted optimisée. Voici le tour en 30 secondes.', placement: 'bottom' },
+  { target: '.mode-toggle',     emoji: '🔀', title: 'Une annonce ou en lot',    text: '<strong>Une annonce</strong> — photos d\'un seul article.<br><strong>En lot</strong> — jusqu\'à 30 photos, l\'IA détecte les articles automatiquement.', placement: 'bottom' },
+  { target: '#dropzone',        emoji: '📸', title: 'Upload tes photos',        text: 'Glisse-dépose ici ou clique pour parcourir. 4 à 6 angles idéalement : face, dos, étiquette, défauts.', placement: 'bottom' },
+  { target: '#context-input',   emoji: '💬', title: 'Ajoute du contexte',       text: 'Infos que l\'IA ne peut pas deviner : taille réelle, prix d\'achat, état... Optionnel mais recommandé.', placement: 'top' },
+  { target: '#settings-toggle', emoji: '⚙',  title: 'Ta clé API',               text: 'Colle une clé <strong>Claude, ChatGPT, Gemini ou Mistral</strong> : le fournisseur est reconnu tout seul. Elle reste uniquement dans ton navigateur.', placement: 'bottom' },
+  { target: '#history-toggle',  emoji: '⌛', title: 'Historique',               text: 'Retrouve toutes tes annonces ici. <strong>Un exemple Clarks est déjà disponible</strong> pour voir à quoi ressemble un résultat !', placement: 'bottom' },
 ];
 
-const tutorialOverlay  = $('tutorial-overlay');
-const tutorialSpotlight= $('tutorial-spotlight');
-const tutorialTooltip  = $('tutorial-tooltip');
-const tutorialTipDots  = $('tutorial-tip-dots');
-const tutorialTipPrev  = $('tutorial-tip-prev');
-const tutorialTipNext  = $('tutorial-tip-next');
+const tutorialOverlay = $('tutorial-overlay');
+const tutorialSpotlight = $('tutorial-spotlight');
+const tutorialTooltip = $('tutorial-tooltip');
+const tutorialTipDots = $('tutorial-tip-dots');
+const tutorialTipPrev = $('tutorial-tip-prev');
+const tutorialTipNext = $('tutorial-tip-next');
 let tutorialStep = 0;
 
-for (let i = 0; i < TUTORIAL_STEPS.length; i++) {
-  const d = document.createElement('button');
-  d.className = 'tutorial-tip-dot';
-  d.addEventListener('click', () => goToStep(i));
-  tutorialTipDots.appendChild(d);
-}
+TUTORIAL_STEPS.forEach((step, i) => {
+  const dot = document.createElement('button');
+  dot.className = 'tutorial-tip-dot';
+  dot.type = 'button';
+  dot.setAttribute('aria-label', `Étape ${i + 1} : ${step.title}`);
+  dot.addEventListener('click', () => goToStep(i));
+  tutorialTipDots.appendChild(dot);
+});
 
 function positionTutorial(target, placement) {
   const rect = target.getBoundingClientRect();
   const pad = 8, gap = 14, tW = 270, tH = 200;
 
-  tutorialSpotlight.style.left   = `${rect.left - pad}px`;
-  tutorialSpotlight.style.top    = `${rect.top  - pad}px`;
-  tutorialSpotlight.style.width  = `${rect.width  + pad * 2}px`;
+  tutorialSpotlight.style.left = `${rect.left - pad}px`;
+  tutorialSpotlight.style.top = `${rect.top - pad}px`;
+  tutorialSpotlight.style.width = `${rect.width + pad * 2}px`;
   tutorialSpotlight.style.height = `${rect.height + pad * 2}px`;
 
   let tx, ty;
@@ -1316,12 +1025,10 @@ function positionTutorial(target, placement) {
     ty = rect.top + rect.height / 2 - tH / 2;
   } else {
     tx = rect.left - pad - gap - tW;
-    ty = rect.top  + rect.height / 2 - tH / 2;
+    ty = rect.top + rect.height / 2 - tH / 2;
   }
-  tx = Math.max(8, Math.min(window.innerWidth  - tW - 8, tx));
-  ty = Math.max(8, Math.min(window.innerHeight - tH - 8, ty));
-  tutorialTooltip.style.left = `${tx}px`;
-  tutorialTooltip.style.top  = `${ty}px`;
+  tutorialTooltip.style.left = `${Math.max(8, Math.min(window.innerWidth - tW - 8, tx))}px`;
+  tutorialTooltip.style.top = `${Math.max(8, Math.min(window.innerHeight - tH - 8, ty))}px`;
 }
 
 function goToStep(i) {
@@ -1331,18 +1038,16 @@ function goToStep(i) {
   tutorialTipDots.querySelectorAll('.tutorial-tip-dot').forEach((d, idx) =>
     d.classList.toggle('active', idx === tutorialStep)
   );
-  $('tutorial-tip-emoji').textContent    = step.emoji;
-  $('tutorial-tip-title').textContent    = step.title;
-  $('tutorial-tip-text').innerHTML       = step.text;
+  $('tutorial-tip-emoji').textContent = step.emoji;
+  $('tutorial-tip-title').textContent = step.title;
+  $('tutorial-tip-text').innerHTML = step.text;
   tutorialTipPrev.hidden = tutorialStep === 0;
   tutorialTipNext.textContent = tutorialStep === TUTORIAL_STEPS.length - 1 ? 'Commencer ✦' : 'Suivant →';
 
-  // On desktop, the top header toggle buttons are hidden — point the
-  // tutorial at the always-visible side panels instead.
-  const isDesktop = window.matchMedia('(min-width: 1180px)').matches;
+  // Sur grand écran les boutons du haut sont cachés : on montre les panneaux latéraux à la place.
   let selector = step.target;
   let placement = step.placement;
-  if (isDesktop) {
+  if (window.matchMedia('(min-width: 1180px)').matches) {
     if (selector === '#settings-toggle') { selector = '#settings-modal .modal-card'; placement = 'left'; }
     else if (selector === '#history-toggle') { selector = '#history-modal .modal-card'; placement = 'right'; }
   }
@@ -1376,37 +1081,18 @@ if (!localStorage.getItem('av-tutorial-seen')) {
   setTimeout(openTutorial, 350);
 }
 
-function checkProvider() {
-  const p = PROVIDERS[state.provider];
-  if (!p) {
-    state.provider = 'openai';
-    return true;
-  }
-  if (p.needsKey && !getApiKey(state.provider)) {
-    showToast(`Ajoute ta clé ${p.keyLabel} dans les paramètres`);
-    providerSelect.value = state.provider;
-    syncProviderUI();
-    settingsModal.hidden = false;
-    return false;
-  }
-  return true;
-}
+// Historique
 
-// Initialize state.model with the current provider's default
-if (!state.model) state.model = getStoredModel(state.provider);
-
-// ─── History ─────────────────────────────────────────
 const historyModal = $('history-modal');
 $('history-toggle').addEventListener('click', () => { renderHistory(); historyModal.hidden = false; });
 $('history-close').addEventListener('click', () => { historyModal.hidden = true; });
 historyModal.addEventListener('click', (e) => { if (e.target === historyModal) historyModal.hidden = true; });
 
 $('history-clear').addEventListener('click', () => {
-  // Preserve the demo entry as a reference example.
+  // L'exemple Clarks reste : c'est la seule façon de voir un résultat sans clé API.
   const demoEntry = state.history.find(h => h.isDemo);
   state.history = demoEntry ? [demoEntry] : [];
-  localStorage.setItem('av-history', JSON.stringify(state.history));
-  // If somehow the demo was missing, re-seed it.
+  persistHistory();
   if (!demoEntry) {
     localStorage.removeItem('av-demo-seeded');
     seedDemoListing();
@@ -1415,69 +1101,52 @@ $('history-clear').addEventListener('click', () => {
   showToast('Historique effacé');
 });
 
-async function compressImage(dataUrl, maxSize = 120, quality = 0.5) {
+function compressImage(dataUrl, maxSize, quality) {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {
       const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
-      const w = Math.round(img.width * scale);
-      const h = Math.round(img.height * scale);
       const canvas = document.createElement('canvas');
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
       resolve(canvas.toDataURL('image/jpeg', quality));
     };
     img.onerror = () => resolve(null);
     img.src = dataUrl;
   });
 }
-// Backwards-compat alias
-const compressThumbnail = compressImage;
 
-// Max photos backed up per history entry (low-res copy for visual recall).
+// Copies basse définition des photos, pour se souvenir de l'article.
 const HISTORY_PHOTO_MAX = 6;
 const HISTORY_PHOTO_SIZE = 480;
 const HISTORY_PHOTO_QUALITY = 0.6;
 
-function tryPersistHistory() {
-  try {
-    localStorage.setItem('av-history', JSON.stringify(state.history));
-    return true;
-  } catch (e) {
-    // Quota likely — drop backup photos from oldest entries first, then trim entries.
-    for (let i = state.history.length - 1; i >= 0; i--) {
-      if (state.history[i].photos && state.history[i].photos.length) {
-        state.history[i].photos = [];
-        try { localStorage.setItem('av-history', JSON.stringify(state.history)); return true; }
-        catch {}
-      }
+// localStorage est limité (~5 Mo) : si ça déborde, on sacrifie d'abord les photos
+// des plus vieilles annonces, puis les annonces elles-mêmes.
+function persistHistory() {
+  const write = () => localStorage.setItem('av-history', JSON.stringify(state.history));
+  try { write(); return; } catch { /* quota dépassé */ }
+  for (let i = state.history.length - 1; i >= 0; i--) {
+    if (state.history[i].photos?.length) {
+      state.history[i].photos = [];
+      try { write(); return; } catch { /* encore trop gros */ }
     }
-    while (state.history.length > 1) {
-      state.history.pop();
-      try { localStorage.setItem('av-history', JSON.stringify(state.history)); return true; }
-      catch {}
-    }
-    return false;
+  }
+  while (state.history.length > 1) {
+    state.history.pop();
+    try { write(); return; } catch { /* encore trop gros */ }
   }
 }
 
 async function saveToHistory(listing, photos = null) {
-  await _doSaveToHistory(listing, photos);
-  // Re-render the sidebar list so new entries appear immediately on desktop
-  // (on mobile this is also fine — the modal will already show fresh data
-  // next time it's opened).
-  try { renderHistory(); } catch {}
-}
-
-async function _doSaveToHistory(listing, photos = null) {
+  const src = photos || state.photos;
   let thumbnail = null;
   let backupPhotos = [];
-  const src = photos || state.photos;
-  if (src && src.length > 0) {
+  if (src.length > 0) {
     thumbnail = await compressImage(src[0].dataUrl, 120, 0.5);
-    const toBackup = src.slice(0, HISTORY_PHOTO_MAX);
     const results = await Promise.all(
-      toBackup.map(p => compressImage(p.dataUrl, HISTORY_PHOTO_SIZE, HISTORY_PHOTO_QUALITY))
+      src.slice(0, HISTORY_PHOTO_MAX).map(p => compressImage(p.dataUrl, HISTORY_PHOTO_SIZE, HISTORY_PHOTO_QUALITY))
     );
     backupPhotos = results.filter(Boolean);
   }
@@ -1489,32 +1158,33 @@ async function _doSaveToHistory(listing, photos = null) {
     photos: backupPhotos,
   });
   state.history = state.history.slice(0, 30);
-  tryPersistHistory();
+  persistHistory();
+  renderHistory();
 }
 
 function renderHistory() {
   const list = $('history-list');
-  if (state.history.length === 0) {
+  const entries = state.history.filter(h => h && h.listing);
+  if (entries.length === 0) {
     list.innerHTML = '<p class="history-empty">Aucune annonce pour l\'instant</p>';
     $('history-clear').hidden = true;
     return;
   }
   $('history-clear').hidden = false;
-  list.innerHTML = state.history.map(h => {
-    const d = new Date(h.date);
-    const dateStr = d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+  list.innerHTML = entries.map(h => {
+    const dateStr = new Date(h.date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
     const thumbHtml = h.thumbnail
-      ? `<img class="history-thumb" src="${h.thumbnail}" alt="" />`
-      : `<div class="history-thumb-placeholder">👟</div>`;
+      ? `<img class="history-thumb" src="${escapeHtml(h.thumbnail)}" alt="" />`
+      : '<div class="history-thumb-placeholder">👟</div>';
     const badge = h.isDemo ? '<span class="history-item-badge">Exemple</span>' : '';
-    return `<div class="history-item" data-id="${h.id}">
+    return `<button type="button" class="history-item" data-id="${escapeHtml(h.id)}">
       ${thumbHtml}
-      <div class="history-item-info">
+      <span class="history-item-info">
         <span class="history-item-title">${escapeHtml(h.listing.title || '(sans titre)')}</span>
         <span class="history-item-date">${dateStr}</span>
         ${badge}
-      </div>
-    </div>`;
+      </span>
+    </button>`;
   }).join('');
 
   list.querySelectorAll('.history-item').forEach(el => {
@@ -1524,13 +1194,15 @@ function renderHistory() {
       historyModal.hidden = true;
       uploadSection.style.display = 'none';
       chatSection.hidden = true;
+      bulkSection.hidden = true;
       renderListing(item.listing, item.photos);
       resultSection.hidden = false;
     });
   });
 }
 
-// ─── Demo listing ────────────────────────────────────
+// Annonce d'exemple, pour voir un résultat sans clé API
+
 const DEMO_ID = 'demo-clarks-craftmaster-v3';
 const DEMO_PHOTOS = [
   'demo/clarks-1.jpg',
@@ -1538,29 +1210,11 @@ const DEMO_PHOTOS = [
   'demo/clarks-3.jpg',
   'demo/clarks-4.jpg',
 ];
+
 function seedDemoListing() {
-  if (localStorage.getItem('av-demo-seeded') === DEMO_ID) {
-    const existing = state.history.find(h => h.id === DEMO_ID);
-    if (existing) {
-      // Backfill photos/thumbnail if missing on an existing v3 entry.
-      let changed = false;
-      if (!existing.photos || !existing.photos.length) {
-        existing.photos = DEMO_PHOTOS; changed = true;
-      }
-      if (!existing.thumbnail) {
-        existing.thumbnail = DEMO_PHOTOS[0]; changed = true;
-      }
-      if (changed) {
-        try { localStorage.setItem('av-history', JSON.stringify(state.history)); } catch {}
-      }
-      return;
-    }
-    // Marked as seeded but the entry is gone (e.g. user wiped history before
-    // we started preserving it). Fall through to re-seed.
-  }
-  // Remove any older demo entries first so we don't end up with duplicates.
+  if (localStorage.getItem('av-demo-seeded') === DEMO_ID && state.history.some(h => h.id === DEMO_ID)) return;
   state.history = state.history.filter(h => !h.isDemo);
-  const demo = {
+  state.history.push({
     id: DEMO_ID,
     date: '2026-05-01T09:00:00.000Z',
     isDemo: true,
@@ -1578,20 +1232,10 @@ function seedDemoListing() {
       ],
       sourceLink: 'https://walkinparis.com/en/products/walk-in-paris-x-clarks-craft-james-lo-bordeaux',
     },
-  };
-  state.history = [...state.history, demo];
-  localStorage.setItem('av-history', JSON.stringify(state.history));
+  });
+  persistHistory();
   localStorage.setItem('av-demo-seeded', DEMO_ID);
 }
-seedDemoListing();
-// Render the history list once at startup so the desktop sidebar panel
-// (always visible) is populated. The mobile modal also benefits — no
-// flash of empty content when it's first opened.
-renderHistory();
 
-// ─── Helpers ─────────────────────────────────────────
-function setBtnLoading(btn, loading, label) {
-  btn.disabled = loading;
-  btn.querySelector('.btn-label').textContent = label;
-  btn.querySelector('.btn-spinner').hidden = !loading;
-}
+seedDemoListing();
+renderHistory();

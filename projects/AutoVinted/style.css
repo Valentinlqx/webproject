@@ -1,21 +1,15 @@
-/* ──────────────────────────────────────────────────────────────────────────
-   AutoVinted — Vinted Design System
-   Spec: ./DESIGN.md (Vinted teal #09B1BA, white surfaces, pill buttons,
-                       Vinted Sans typography stack, 4-px spacing scale).
-   Keeps the dark/light toggle: dark mode inverts the neutrals but the teal
-   accent stays vivid, exactly like the Vinted Android dark theme.
-   ────────────────────────────────────────────────────────────────────────── */
+/* Reprend les codes visuels de Vinted : teal #09B1BA, boutons pilule, fonds blancs.
+   Le thème sombre inverse les neutres et garde le teal. */
 
-/* Logo font — Pacifico (fontsource / Google Fonts mirror) */
+/* Police du logo */
 @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
 
 :root {
-  /* ── Vinted brand ─────────────────────────────────────── */
   --color-primary:       #09B1BA;
   --color-primary-dark:  #007782;
   --color-primary-light: #E0F7F8;
 
-  /* ── Surfaces (light theme = Vinted desktop) ──────────── */
+  /* Fonds */
   --bg:           #FFFFFF;
   --bg-card:      #FFFFFF;
   --bg-header:    #FFFFFF;
@@ -23,40 +17,35 @@
   --bg-soft-2:    #EFEFEF;
   --bg-input:     #FFFFFF;
 
-  /* ── Borders ──────────────────────────────────────────── */
+  /* Bordures */
   --border:       #E5E5E5;
   --border-2:     #D4D4D4;
   --border-hover: var(--color-primary);
 
-  /* ── Text ─────────────────────────────────────────────── */
+  /* Texte */
   --text:        #0F1419;
   --text-2:      #4A4A4A;
   --text-3:      #9B9B9B;
   --text-header: #0F1419;
   --text-sub:    #4A4A4A;
 
-  /* ── Accent (mapped to Vinted teal) ───────────────────── */
   --accent:        var(--color-primary);
   --accent-dark:   var(--color-primary-dark);
   --accent-light:  var(--color-primary-light);
   --accent-text:   #FFFFFF;
 
-  /* ── Semantic ─────────────────────────────────────────── */
   --success:  #0CB477;
   --error:    #D8232F;
   --warning:  #FFA621;
 
-  /* ── Shadows (Vinted is light-handed) ─────────────────── */
   --shadow:    0 1px 2px rgba(15, 20, 25, 0.04), 0 2px 8px rgba(15, 20, 25, 0.06);
   --shadow-lg: 0 4px 12px rgba(15, 20, 25, 0.08), 0 16px 32px rgba(15, 20, 25, 0.10);
 
-  /* ── Radius (pill-first, per spec §6.1) ───────────────── */
   --radius-s:    4px;
   --radius:      16px;
   --radius-sm:   8px;
   --radius-pill: 999px;
 
-  /* ── Spacing (4-px scale, per spec §5) ────────────────── */
   --space-xxs: 4px;
   --space-xs:  8px;
   --space-s:   12px;
@@ -65,13 +54,11 @@
   --space-xl:  32px;
   --space-xxl: 48px;
 
-  /* ── Typography stack ─────────────────────────────────── */
   --font-sans: "Vinted Sans", -apple-system, BlinkMacSystemFont,
                "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 body.dark {
-  /* Dark inverts neutrals; the teal stays Vinted's signature. */
   --bg:           #0D1418;
   --bg-card:      #151D22;
   --bg-header:    #0F1419;
@@ -89,7 +76,7 @@ body.dark {
   --text-header:  #E6EDF1;
   --text-sub:     #9BA8B2;
 
-  /* Soften teal a touch on dark for comfort */
+  /* Teal un peu adouci sur fond sombre */
   --accent:        #2BC9D2;
   --accent-dark:   #09B1BA;
   --accent-light:  rgba(43, 201, 210, 0.12);
@@ -98,7 +85,6 @@ body.dark {
   --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.5),  0 24px 48px rgba(0, 0, 0, 0.6);
 }
 
-/* ── Reset ──────────────────────────────────────────────────────────── */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 
@@ -110,7 +96,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
-  font-size: 16px;            /* Vinted body-l */
+  font-size: 16px;
   line-height: 1.5;
   transition: background 0.25s, color 0.25s;
   padding-bottom: 80px;
@@ -118,7 +104,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Header ─────────────────────────────────────────────────────────── */
+/* En-tête */
 header {
   background: var(--bg-header);
   color: var(--text-header);
@@ -139,7 +125,7 @@ header {
   gap: var(--space-xs);
 }
 
-/* Icon buttons — neutral pill style, Vinted iconography spirit */
+/* Boutons ronds du haut */
 .icon-btn {
   width: 44px;
   height: 44px;
@@ -159,17 +145,19 @@ header {
 .icon-btn:active { transform: scale(0.94); }
 body.dark .icon-btn:hover { color: var(--color-primary); }
 
-/* Hero — Pacifico wordmark logo in Vinted teal */
+/* Logo */
 .hero {
   max-width: 720px;
   margin: 0 auto;
   text-align: center;
   padding: var(--space-s) var(--space-xxs) var(--space-xs);
 }
+#site-title { cursor: pointer; }
+
 .hero h1 {
   font-family: "Pacifico", cursive;
-  font-size: clamp(3rem, 9vw, 5rem);          /* logo lockup, bigger */
-  font-weight: 400;                            /* Pacifico ships single weight */
+  font-size: clamp(3rem, 9vw, 5rem);
+  font-weight: 400;
   letter-spacing: 0;
   line-height: 1.05;
   margin-bottom: var(--space-s);
@@ -185,7 +173,6 @@ body.dark .hero h1 { color: var(--accent); }
   margin: 0 auto;
 }
 
-/* ── Main ───────────────────────────────────────────────────────────── */
 main {
   max-width: 720px;
   margin: 0 auto;
@@ -194,7 +181,7 @@ main {
 
 section { margin-bottom: var(--space-l); }
 
-/* ── Mode toggle (pill segment) ─────────────────────────────────────── */
+/* Choix une annonce / en lot */
 .mode-toggle {
   display: flex;
   gap: var(--space-xxs);
@@ -222,7 +209,7 @@ section { margin-bottom: var(--space-l); }
   box-shadow: var(--shadow);
 }
 
-/* ── Context field ──────────────────────────────────────────────────── */
+/* Contexte */
 .context-field { margin-top: var(--space-m); }
 .context-field textarea {
   padding: 12px 14px;
@@ -243,7 +230,7 @@ section { margin-bottom: var(--space-l); }
   box-shadow: 0 0 0 3px var(--accent-light);
 }
 
-/* ── Tips section ───────────────────────────────────────────────────── */
+/* Conseils */
 .tips-section {
   margin-top: var(--space-m);
   background: var(--bg-card);
@@ -301,7 +288,7 @@ section { margin-bottom: var(--space-l); }
   font-variant-numeric: tabular-nums;
 }
 
-/* Measurement grid — illustrated garment silhouettes */
+/* Schémas de mesures */
 .measure-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -366,7 +353,7 @@ section { margin-bottom: var(--space-l); }
   background: var(--accent);
 }
 
-/* Size conversion table — visual chart */
+/* Tableau des tailles */
 .size-table {
   margin-top: var(--space-xs);
   display: flex;
@@ -453,7 +440,7 @@ body.dark .size-pill:hover:not(.dash) { color: var(--accent); }
   .size-label { font-size: 0.7rem; }
 }
 
-/* ── Bulk results ───────────────────────────────────────────────────── */
+/* Mode lot */
 .bulk-progress {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -603,7 +590,7 @@ body.dark .size-pill:hover:not(.dash) { color: var(--accent); }
   transition: transform 0.2s;
 }
 
-/* ── Dropzone ───────────────────────────────────────────────────────── */
+/* Zone de dépôt */
 .dropzone {
   display: flex;
   flex-direction: column;
@@ -628,7 +615,7 @@ body.dark .size-pill:hover:not(.dash) { color: var(--accent); }
 .dropzone-title { font-weight: 600; font-size: 1.05rem; }
 .dropzone-sub { color: var(--text-2); font-size: 0.88rem; }
 
-/* ── Previews ───────────────────────────────────────────────────────── */
+/* Miniatures */
 .previews {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
@@ -664,7 +651,7 @@ body.dark .size-pill:hover:not(.dash) { color: var(--accent); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Estimate (tokens + price) ──────────────────────────────────────── */
+/* Estimation du coût */
 .estimate {
   margin-top: var(--space-m);
   padding: 10px 14px;
@@ -677,9 +664,7 @@ body.dark .size-pill:hover:not(.dash) { color: var(--accent); }
   font-variant-numeric: tabular-nums;
 }
 
-/* ──────────────────────────────────────────────────────────────────────
-   Buttons — pill-shaped, teal primary, per DESIGN.md §6.1
-   ────────────────────────────────────────────────────────────────────── */
+/* Boutons */
 .btn-primary {
   display: flex;
   align-items: center;
@@ -691,7 +676,7 @@ body.dark .size-pill:hover:not(.dash) { color: var(--accent); }
   background: var(--color-primary);
   color: #FFFFFF;
   border: none;
-  border-radius: var(--radius-pill);   /* pill */
+  border-radius: var(--radius-pill);
   font-weight: 600;
   font-size: 1rem;
   font-family: inherit;
@@ -717,7 +702,7 @@ body.dark .size-pill:hover:not(.dash) { color: var(--accent); }
   background: transparent;
   color: var(--color-primary);
   border: 1px solid var(--color-primary);
-  border-radius: var(--radius-pill);     /* secondary = pill outlined */
+  border-radius: var(--radius-pill);
   font-weight: 600;
   font-size: 0.98rem;
   font-family: inherit;
@@ -743,7 +728,7 @@ body.dark .size-pill:hover:not(.dash) { color: var(--accent); }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── Chat ───────────────────────────────────────────────────────────── */
+/* Chat */
 .chat-section {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -827,7 +812,7 @@ body.dark .size-pill:hover:not(.dash) { color: var(--accent); }
   padding: 12px 16px;
   background: var(--bg-input);
   border: 1px solid var(--border);
-  border-radius: var(--radius-pill);   /* pill input — Vinted search vibe */
+  border-radius: var(--radius-pill);
   color: var(--text);
   font-size: 0.96rem;
   font-family: inherit;
@@ -851,7 +836,7 @@ body.dark .size-pill:hover:not(.dash) { color: var(--accent); }
 }
 .chat-send:hover { background: var(--color-primary-dark); transform: scale(1.04); }
 
-/* ── Result ─────────────────────────────────────────────────────────── */
+/* Résultat */
 .result-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -887,7 +872,7 @@ body.dark .size-pill:hover:not(.dash) { color: var(--accent); }
 
 .result-title {
   font-size: 1.15rem;
-  font-weight: 700;       /* Vinted prices/titles are 700 */
+  font-weight: 700;
   line-height: 1.35;
   color: var(--text);
 }
@@ -941,7 +926,7 @@ body.dark .size-pill:hover:not(.dash) { color: var(--accent); }
 .price-cell-value {
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--color-primary-dark);   /* prices in teal foncé — Vinted touch */
+  color: var(--color-primary-dark);
 }
 body.dark .price-cell-value { color: var(--accent); }
 
@@ -994,7 +979,7 @@ body.dark .price-cell-value { color: var(--accent); }
   margin-top: var(--space-m);
 }
 
-/* ── Modal ──────────────────────────────────────────────────────────── */
+/* Fenêtres (historique, paramètres) */
 .modal {
   position: fixed;
   inset: 0;
@@ -1081,12 +1066,23 @@ body.dark .price-cell-value { color: var(--accent); }
 
 .field[hidden] { display: none; }
 
+.key-status.ok { color: var(--color-primary-dark); font-weight: 600; }
+body.dark .key-status.ok { color: var(--accent); }
+.key-status.error { color: var(--error); }
+
+.model-picker summary { cursor: pointer; list-style-position: inside; }
+.model-picker select { width: 100%; margin-top: 6px; }
+
 .history-list {
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
 }
 .history-item {
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  text-align: left;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -1147,7 +1143,7 @@ body.dark .history-item-badge { color: var(--accent); background: var(--accent-l
   font-size: 0.9rem;
 }
 
-/* ── Result photos (history recall gallery) ─────────────────────────── */
+/* Photos du résultat */
 .result-photos {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
@@ -1169,7 +1165,7 @@ body.dark .history-item-badge { color: var(--accent); background: var(--accent-l
   box-shadow: var(--shadow);
 }
 
-/* Lightbox */
+/* Photo en grand */
 .photo-lightbox {
   position: fixed;
   inset: 0;
@@ -1188,7 +1184,7 @@ body.dark .history-item-badge { color: var(--accent); background: var(--accent-l
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
 }
 
-/* ── Spotlight Tutorial ─────────────────────────────────────────────── */
+/* Tutoriel */
 #tutorial-overlay {
   position: fixed;
   inset: 0;
@@ -1303,7 +1299,7 @@ body.dark .history-item-badge { color: var(--accent); background: var(--accent-l
 }
 .btn-sm[hidden] { display: none; }
 
-/* ── Feature toggles ────────────────────────────────────────────────── */
+/* Interrupteurs des options */
 .features-list {
   display: flex;
   flex-direction: column;
@@ -1366,7 +1362,7 @@ body.dark .history-item-badge { color: var(--accent); background: var(--accent-l
   line-height: 1.3;
 }
 
-/* ── Warnings (Vinted policy) ───────────────────────────────────────── */
+/* Alertes règles Vinted */
 .result-warnings {
   background: rgba(255, 166, 33, 0.10);
   border: 1px solid rgba(255, 166, 33, 0.4);
@@ -1418,7 +1414,7 @@ body.dark .history-item-badge { color: var(--accent); background: var(--accent-l
 }
 .bulk-item-status.has-warn { color: var(--warning); }
 
-/* ── Source link ────────────────────────────────────────────────────── */
+/* Lien source */
 .source-link {
   font-size: 0.85rem;
   color: var(--color-primary);
@@ -1428,7 +1424,7 @@ body.dark .history-item-badge { color: var(--accent); background: var(--accent-l
 }
 .source-link:hover { color: var(--color-primary-dark); text-decoration: underline; }
 
-/* ── Toast ──────────────────────────────────────────────────────────── */
+/* Toast */
 .toast {
   position: fixed;
   bottom: 24px;
@@ -1449,15 +1445,7 @@ body.dark .history-item-badge { color: var(--accent); background: var(--accent-l
   to { opacity: 1; transform: translate(-50%, 0); }
 }
 
-/* ── Footer ─────────────────────────────────────────────────────────── */
-footer {
-  text-align: center;
-  padding: 30px 16px 16px;
-  font-size: 0.78rem;
-  color: var(--text-3);
-}
-
-/* ── Accessibility — focus rings & reduced motion ───────────────────── */
+/* Accessibilité */
 *:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
@@ -1472,7 +1460,6 @@ body.dark *:focus-visible { outline-color: var(--accent); }
   }
 }
 
-/* ── Responsive ─────────────────────────────────────────────────────── */
 @media (max-width: 480px) {
   header { padding: 14px 16px 24px; }
   .hero h1 { font-size: 2.75rem; }
@@ -1491,7 +1478,7 @@ body.dark *:focus-visible { outline-color: var(--accent); }
   .result-actions button { margin-top: 0; }
 }
 
-/* ── Desktop 3-column layout (history | main | settings) ────────────── */
+/* Grand écran : historique | app | paramètres */
 @media (min-width: 1180px) {
   .app-shell {
     display: grid;
