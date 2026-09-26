@@ -3,8 +3,8 @@
   "private": true,
   "description": "Outils de test du site. Le site lui-même n'a besoin de rien.",
   "scripts": {
-    "test": "node --test tests/unit/ && playwright test",
-    "test:unit": "node --test tests/unit/",
+    "test": "node --test \"tests/unit/*.test.mjs\" && playwright test",
+    "test:unit": "node --test \"tests/unit/*.test.mjs\"",
     "test:e2e": "playwright test",
     "serve": "node tests/serve.mjs"
   },
