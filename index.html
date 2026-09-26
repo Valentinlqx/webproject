@@ -3,24 +3,53 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Valentin L.</title>
-  <meta name="description" content="Valentin L. — graphiste freelance. Projets et création visuelle." />
+  <meta name="color-scheme" content="light dark" />
+  <title>Valentin L. — Graphiste indépendant</title>
+  <meta name="description" content="Valentin L., graphiste indépendant : affiches, identités visuelles, vidéo et motion." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>" />
-  <link rel="preload" href="assets/fonts/LaBelleAurore.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="preload" href="assets/goya-caprichos-43.jpg" as="image" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1 class="sr-only">Valentin</h1>
+  <main class="page">
 
-  <div class="plate">
-    <img class="plate-img" src="assets/goya-caprichos-43.jpg"
-         alt="Francisco de Goya — Le sommeil de la raison produit des monstres (Los Caprichos, n°43)" />
-    <nav class="desk-menu" aria-label="Projets">
-      <a class="line l2" href="projects/RessourcesGratuites/ressourcesgratuites.html">Ressources Gratuites</a>
-      <a class="line l3" href="projects/AutoVinted/autovinted.html">AutoVinted</a>
-      <a class="line l4" href="projects/ambience-forge/index.html">Ambience Forge</a>
-    </nav>
-  </div>
+    <!-- Pour mettre ta photo : dépose-la dans assets/portrait.jpg et remplace le <span> par
+         <img src="assets/portrait.jpg" alt="Portrait de Valentin L." width="480" height="640" /> -->
+    <figure class="portrait">
+      <span class="portrait-empty">Photo</span>
+    </figure>
+
+    <h1>Valentin L.</h1>
+    <p class="intro">
+      Graphiste indépendant. Affiches, identités visuelles, vidéo et motion —
+      et parfois de petits outils web.
+    </p>
+
+    <section aria-labelledby="projets">
+      <h2 id="projets">Projets</h2>
+      <ul class="projects">
+        <li>
+          <a href="projects/RessourcesGratuites/ressourcesgratuites.html">
+            <span class="project-name">Ressources Gratuites</span>
+            <span class="project-desc">Une sélection de ressources gratuites pour designers.</span>
+            <span class="arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
+        <li>
+          <a href="projects/AutoVinted/autovinted.html">
+            <span class="project-name">AutoVinted</span>
+            <span class="project-desc">Des photos à l’annonce Vinted, rédigée par l’IA.</span>
+            <span class="arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="contact">
+      <h2 id="contact">Contact</h2>
+      <!-- TODO : mettre la vraie adresse (dans le href et dans le texte) -->
+      <a class="mail" href="mailto:contact@exemple.fr">contact@exemple.fr</a>
+    </section>
+
+  </main>
 </body>
 </html>
