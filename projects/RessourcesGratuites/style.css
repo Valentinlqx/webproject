@@ -626,17 +626,6 @@ main {
   transition: transform 0.1s steps(2);
 }
 
-
-.card-warning {
-  font-family: 'Coconat', Georgia, serif;
-  font-size: 13px;
-  line-height: 1.15;
-  letter-spacing: 0.2px;
-  color: var(--text-2);
-  text-align: right;
-  opacity: 0.75;
-}
-
 /* Aucun résultat */
 
 .empty-state[hidden] { display: none; }

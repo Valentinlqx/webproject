@@ -25,8 +25,13 @@ test('chaque ressource est complète', () => {
       assert.equal(typeof r[field], 'string', `${r.name} : ${field}`);
       assert.ok(r[field].trim(), `${r.name} : ${field} vide`);
     }
-    assert.ok(['free', 'freemium'].includes(r.status), `${r.name} : status ${r.status}`);
   }
+});
+
+// Choix du 2026-09-26 : que du 100 % gratuit, pas de freemium.
+test('aucune ressource freemium', () => {
+  const paid = resources.filter(r => r.status !== 'free').map(r => r.name);
+  assert.equal(paid.length, 0, `freemium : ${paid.join(', ')}`);
 });
 
 test('chaque lien est en https', () => {

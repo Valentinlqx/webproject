@@ -11,7 +11,6 @@ const i18n = {
     heroSub: 'Une encyclopédie d\'outils et ressources pour designers & créateurs',
     empty: 'Aucune ressource trouvée',
     visit: 'Visiter →',
-    freemium: 'Peut contenir des ressources payantes',
     cats: {
       images: 'Images', polices: 'Polices', icones: 'Icônes', illustrations: 'Illustrations',
       couleurs: 'Couleurs', design: 'Design', sons: 'Sons', musiques: 'Musiques',
@@ -27,7 +26,6 @@ const i18n = {
     heroSub: 'An encyclopedia of tools and resources for designers & creators',
     empty: 'No resource found',
     visit: 'Visit →',
-    freemium: 'May contain paid resources',
     cats: {
       images: 'Images', polices: 'Fonts', icones: 'Icons', illustrations: 'Illustrations',
       couleurs: 'Colors', design: 'Design', sons: 'Sounds', musiques: 'Music',
@@ -197,12 +195,6 @@ function createCard(r, index) {
   visit.className = 'card-visit';
   visit.textContent = i18n[lang].visit;
   footer.append(visit);
-  if (r.status === 'freemium') {
-    const warning = document.createElement('span');
-    warning.className = 'card-warning';
-    warning.textContent = i18n[lang].freemium;
-    footer.append(warning);
-  }
 
   card.append(top, name, desc, footer);
   return card;

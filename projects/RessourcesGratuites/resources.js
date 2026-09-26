@@ -234,18 +234,6 @@ const RESOURCES_DATA = {
       "noaccount": true
     },
     {
-      "name": "Freepik",
-      "desc": "Vecteurs, photos, illustrations et PSD gratuits pour tous types de projets créatifs.",
-      "url": "https://www.freepik.com/",
-      "cats": [
-        "images",
-        "illustrations",
-        "icones"
-      ],
-      "emoji": "🎯",
-      "status": "freemium"
-    },
-    {
       "name": "ISO Republic",
       "desc": "Photos, vidéos et pistes audio gratuites et libres de droits pour usage commercial.",
       "url": "https://isorepublic.com/",
@@ -295,17 +283,6 @@ const RESOURCES_DATA = {
       "noaccount": true
     },
     {
-      "name": "DaFont",
-      "desc": "Des milliers de polices gratuites organisées par style et catégorie.",
-      "url": "https://www.dafont.com/fr/",
-      "cats": [
-        "polices"
-      ],
-      "emoji": "✒️",
-      "status": "freemium",
-      "noaccount": true
-    },
-    {
       "name": "Fontesk",
       "desc": "Polices gratuites soigneusement sélectionnées pour usage personnel et commercial.",
       "url": "https://fontesk.com",
@@ -314,17 +291,6 @@ const RESOURCES_DATA = {
       ],
       "emoji": "✍️",
       "status": "free",
-      "noaccount": true
-    },
-    {
-      "name": "1001 Fonts",
-      "desc": "Large collection de polices gratuites pour tous les projets créatifs.",
-      "url": "https://www.1001fonts.com",
-      "cats": [
-        "polices"
-      ],
-      "emoji": "📝",
-      "status": "freemium",
       "noaccount": true
     },
     {
@@ -349,17 +315,6 @@ const RESOURCES_DATA = {
       ],
       "emoji": "🤝",
       "status": "free"
-    },
-    {
-      "name": "Dirtyline Studio",
-      "desc": "Collection de polices originales et créatives proposées par Dirtyline Studio.",
-      "url": "https://dirtylinestudio.com/",
-      "cats": [
-        "polices"
-      ],
-      "emoji": "🖊️",
-      "status": "freemium",
-      "noaccount": true
     },
     {
       "name": "Velvetyne",
@@ -419,17 +374,6 @@ const RESOURCES_DATA = {
       ],
       "emoji": "🎯",
       "status": "free",
-      "noaccount": true
-    },
-    {
-      "name": "Pangram Pangram",
-      "desc": "Sélection de polices modernes et stylisées avec aperçus en contexte réel.",
-      "url": "https://pangrampangram.com/",
-      "cats": [
-        "polices"
-      ],
-      "emoji": "✦",
-      "status": "freemium",
       "noaccount": true
     },
     {
@@ -505,27 +449,6 @@ const RESOURCES_DATA = {
       "noaccount": true
     },
     {
-      "name": "Flaticon",
-      "desc": "La plus grande base de données d'icônes vectorielles gratuites — des millions d'icônes.",
-      "url": "https://www.flaticon.com",
-      "cats": [
-        "icones"
-      ],
-      "emoji": "🎯",
-      "status": "freemium"
-    },
-    {
-      "name": "Icons8",
-      "desc": "Icônes, illustrations, photos et musique réunis dans un seul endroit.",
-      "url": "https://icons8.com",
-      "cats": [
-        "icones",
-        "illustrations"
-      ],
-      "emoji": "🎨",
-      "status": "freemium"
-    },
-    {
       "name": "SVG Repo",
       "desc": "Collection massive de plus de 500 000 icônes SVG gratuites et open-source.",
       "url": "https://www.svgrepo.com",
@@ -572,16 +495,6 @@ const RESOURCES_DATA = {
       "emoji": "📚",
       "status": "free",
       "noaccount": true
-    },
-    {
-      "name": "The Noun Project",
-      "desc": "Plateforme communautaire de millions d'icônes et pictogrammes pour tous usages.",
-      "url": "https://thenounproject.com/",
-      "cats": [
-        "icones"
-      ],
-      "emoji": "🔠",
-      "status": "freemium"
     },
     {
       "name": "Ionicons",
@@ -695,16 +608,6 @@ const RESOURCES_DATA = {
       "noaccount": true
     },
     {
-      "name": "Blush",
-      "desc": "Illustrations personnalisables créées par des artistes indépendants du monde entier.",
-      "url": "https://blush.design",
-      "cats": [
-        "illustrations"
-      ],
-      "emoji": "🌸",
-      "status": "freemium"
-    },
-    {
       "name": "Humaaans",
       "desc": "Mix-and-match illustrations de personnes entièrement modulables, par Pablo Stanley.",
       "url": "https://www.humaaans.com",
@@ -718,27 +621,6 @@ const RESOURCES_DATA = {
       "noaccount": true
     },
     {
-      "name": "DrawKit",
-      "desc": "Illustrations vectorielles gratuites pour designers et startups.",
-      "url": "https://www.drawkit.com",
-      "cats": [
-        "illustrations"
-      ],
-      "emoji": "🖌️",
-      "status": "freemium"
-    },
-    {
-      "name": "Icons8 Mega Creator",
-      "desc": "Outil web pour créer des scènes personnalisées avec des illustrations modulaires et des icônes.",
-      "url": "https://icons8.com/mega-creator",
-      "cats": [
-        "illustrations",
-        "outils"
-      ],
-      "emoji": "🎭",
-      "status": "freemium"
-    },
-    {
       "name": "Open Peeps",
       "desc": "Pack de personnages dessinés à la main et entièrement modifiables, par Pablo Stanley.",
       "url": "https://openpeeps.com/",
@@ -750,16 +632,6 @@ const RESOURCES_DATA = {
       "status": "free",
       "opensource": true,
       "noaccount": true
-    },
-    {
-      "name": "Storytale",
-      "desc": "Générateur d'illustrations scénarisées pour narrations digitales et présentations.",
-      "url": "https://storytale.io/",
-      "cats": [
-        "illustrations"
-      ],
-      "emoji": "📚",
-      "status": "freemium"
     },
     {
       "name": "Absurd Design",
@@ -793,17 +665,6 @@ const RESOURCES_DATA = {
       ],
       "emoji": "📖",
       "status": "free",
-      "noaccount": true
-    },
-    {
-      "name": "Coolors",
-      "desc": "Générateur de palettes ultra-rapide — appuyez sur espace pour générer une nouvelle palette.",
-      "url": "https://coolors.co",
-      "cats": [
-        "couleurs"
-      ],
-      "emoji": "🎨",
-      "status": "freemium",
       "noaccount": true
     },
     {
@@ -896,16 +757,6 @@ const RESOURCES_DATA = {
       "noaccount": true
     },
     {
-      "name": "Figma",
-      "desc": "Outil de design collaboratif dans le navigateur, avec un plan gratuit très généreux.",
-      "url": "https://figma.com",
-      "cats": [
-        "design"
-      ],
-      "emoji": "✦",
-      "status": "freemium"
-    },
-    {
       "name": "Penpot",
       "desc": "Alternative open-source à Figma, 100% gratuite et auto-hébergeable.",
       "url": "https://penpot.app",
@@ -918,16 +769,6 @@ const RESOURCES_DATA = {
       "opensource": true
     },
     {
-      "name": "Canva",
-      "desc": "Créez des designs professionnels en quelques minutes avec des centaines de modèles gratuits.",
-      "url": "https://canva.com",
-      "cats": [
-        "design"
-      ],
-      "emoji": "🖼️",
-      "status": "freemium"
-    },
-    {
       "name": "Photopea",
       "desc": "Éditeur photo avancé dans le navigateur, compatible Photoshop — totalement gratuit.",
       "url": "https://www.photopea.com",
@@ -938,17 +779,6 @@ const RESOURCES_DATA = {
       "emoji": "🖊️",
       "status": "free",
       "noaccount": true
-    },
-    {
-      "name": "Remove.bg",
-      "desc": "Supprimez automatiquement l'arrière-plan de n'importe quelle photo en quelques secondes.",
-      "url": "https://www.remove.bg",
-      "cats": [
-        "design",
-        "outils"
-      ],
-      "emoji": "✂️",
-      "status": "freemium"
     },
     {
       "name": "Squoosh",
@@ -1015,17 +845,6 @@ const RESOURCES_DATA = {
       "status": "free"
     },
     {
-      "name": "ClipDrop",
-      "desc": "Suite d'outils IA pour retoucher, recadrer et améliorer vos visuels en un clic.",
-      "url": "https://clipdrop.co/",
-      "cats": [
-        "design",
-        "ia"
-      ],
-      "emoji": "✂️",
-      "status": "freemium"
-    },
-    {
       "name": "Freesound",
       "desc": "Bibliothèque collaborative de sons et effets sonores libres de droits, par la communauté.",
       "url": "https://freesound.org",
@@ -1047,16 +866,6 @@ const RESOURCES_DATA = {
       "emoji": "🎵",
       "status": "free",
       "noaccount": true
-    },
-    {
-      "name": "ZapSplat",
-      "desc": "Plus de 100 000 effets sonores et musiques libres de droits, téléchargements illimités.",
-      "url": "https://www.zapsplat.com",
-      "cats": [
-        "sons"
-      ],
-      "emoji": "⚡",
-      "status": "freemium"
     },
     {
       "name": "Free Music Archive",
@@ -1127,16 +936,6 @@ const RESOURCES_DATA = {
       "noaccount": true
     },
     {
-      "name": "Uppbeat",
-      "desc": "Collection de musiques libres de droits avec filtres par ambiance, genre et tempo.",
-      "url": "https://uppbeat.io/",
-      "cats": [
-        "musiques"
-      ],
-      "emoji": "🎚️",
-      "status": "freemium"
-    },
-    {
       "name": "Scott Buckley",
       "desc": "Catalogue de musiques orchestrales et ambiantes composées par Scott Buckley, gratuites.",
       "url": "https://www.scottbuckley.com.au/library/",
@@ -1157,16 +956,6 @@ const RESOURCES_DATA = {
       "emoji": "📡",
       "status": "free",
       "noaccount": true
-    },
-    {
-      "name": "Bensound",
-      "desc": "Sélection de pistes musicales gratuites pour projets multimédias sous licence libre.",
-      "url": "https://www.bensound.com/free-music-for-videos",
-      "cats": [
-        "musiques"
-      ],
-      "emoji": "🎧",
-      "status": "freemium"
     },
     {
       "name": "Purple Planet",
@@ -1258,16 +1047,6 @@ const RESOURCES_DATA = {
       "noaccount": true
     },
     {
-      "name": "Mockup World",
-      "desc": "La plus grande collection de mockups Photoshop gratuits au monde, tous styles confondus.",
-      "url": "https://www.mockupworld.co",
-      "cats": [
-        "mockups"
-      ],
-      "emoji": "🌍",
-      "status": "freemium"
-    },
-    {
       "name": "GraphicBurger",
       "desc": "Ressources design premium gratuites — mockups, templates, textures et UI kits.",
       "url": "https://graphicburger.com",
@@ -1278,26 +1057,6 @@ const RESOURCES_DATA = {
       "emoji": "🍔",
       "status": "free",
       "noaccount": true
-    },
-    {
-      "name": "Shots.so",
-      "desc": "Créez de magnifiques présentations de vos designs en quelques clics, sans Photoshop.",
-      "url": "https://shots.so",
-      "cats": [
-        "mockups"
-      ],
-      "emoji": "📱",
-      "status": "freemium"
-    },
-    {
-      "name": "Media Modifier",
-      "desc": "Mockups de devices professionnels pour présenter vos créations de façon convaincante.",
-      "url": "https://mediamodifier.com",
-      "cats": [
-        "mockups"
-      ],
-      "emoji": "🖥️",
-      "status": "freemium"
     },
     {
       "name": "Toools.design Mockups",
@@ -1320,16 +1079,6 @@ const RESOURCES_DATA = {
       "emoji": "📦",
       "status": "free",
       "noaccount": true
-    },
-    {
-      "name": "Mr Mockup",
-      "desc": "Galerie de mockups gratuits haute résolution pour branding, packaging et plus.",
-      "url": "https://mrmockup.com/free-mockups/",
-      "cats": [
-        "mockups"
-      ],
-      "emoji": "🎁",
-      "status": "freemium"
     },
     {
       "name": "Mockuphone",
@@ -1389,16 +1138,6 @@ const RESOURCES_DATA = {
       "emoji": "🔮",
       "status": "free",
       "noaccount": true
-    },
-    {
-      "name": "Tilesetter",
-      "desc": "Outil d'automatisation pour créer et organiser des tilesets pixel art facilement.",
-      "url": "https://www.tilesetter.org/",
-      "cats": [
-        "jeux"
-      ],
-      "emoji": "🗺️",
-      "status": "freemium"
     },
     {
       "name": "Tilemancer",
@@ -1505,18 +1244,6 @@ const RESOURCES_DATA = {
       "noaccount": true
     },
     {
-      "name": "LDtk",
-      "desc": "Level Designer Toolkit : éditeur de niveaux moderne basé sur une grille, gratuit et open-source.",
-      "url": "https://ldtk.io/",
-      "cats": [
-        "jeux",
-        "outils"
-      ],
-      "emoji": "📐",
-      "status": "freemium",
-      "noaccount": true
-    },
-    {
       "name": "TrenchBroom",
       "desc": "Éditeur de maps 3D pour jeux basés sur le moteur Quake, intuitif et puissant.",
       "url": "https://trenchbroom.github.io/",
@@ -1602,16 +1329,6 @@ const RESOURCES_DATA = {
       "noaccount": true
     },
     {
-      "name": "Sketchfab",
-      "desc": "Marketplace de modèles 3D dont une large sélection gratuite, visualisables dans le navigateur.",
-      "url": "https://sketchfab.com/",
-      "cats": [
-        "jeux"
-      ],
-      "emoji": "🗿",
-      "status": "freemium"
-    },
-    {
       "name": "Kenney",
       "desc": "Milliers d'assets de jeux gratuits (sprites, sons, modèles 3D, UI) sous licence CC0.",
       "url": "https://kenney.nl/",
@@ -1655,18 +1372,6 @@ const RESOURCES_DATA = {
       "emoji": "🎞️",
       "status": "free",
       "noaccount": true
-    },
-    {
-      "name": "Indieground Freebies",
-      "desc": "Sélection de freebies graphiques — illustrations, textures et polices disponibles gratuitement.",
-      "url": "https://indieground.net/shop-category/freebies/",
-      "cats": [
-        "textures",
-        "illustrations",
-        "polices"
-      ],
-      "emoji": "🎨",
-      "status": "freemium"
     },
     {
       "name": "StudioAAA Free",
@@ -1803,57 +1508,6 @@ const RESOURCES_DATA = {
       "status": "free",
       "opensource": true,
       "noaccount": true
-    },
-    {
-      "name": "Leonardo.ai",
-      "desc": "Générateur d'images IA de haute qualité, idéal pour le concept art et les assets de jeux.",
-      "url": "https://leonardo.ai/",
-      "cats": [
-        "ia"
-      ],
-      "emoji": "🦁",
-      "status": "freemium"
-    },
-    {
-      "name": "Ideogram",
-      "desc": "Générateur d'images IA avec une gestion remarquable du texte dans les visuels.",
-      "url": "https://ideogram.ai/",
-      "cats": [
-        "ia"
-      ],
-      "emoji": "💬",
-      "status": "freemium"
-    },
-    {
-      "name": "Adobe Firefly",
-      "desc": "Outils de génération d'images et d'effets IA par Adobe, intégrés à Creative Cloud.",
-      "url": "https://firefly.adobe.com/",
-      "cats": [
-        "ia",
-        "design"
-      ],
-      "emoji": "🔥",
-      "status": "freemium"
-    },
-    {
-      "name": "Krea.ai",
-      "desc": "Générateur d'images IA en temps réel avec contrôle avancé du style et de la composition.",
-      "url": "https://www.krea.ai/",
-      "cats": [
-        "ia"
-      ],
-      "emoji": "🎨",
-      "status": "freemium"
-    },
-    {
-      "name": "Playground AI",
-      "desc": "Plateforme de génération d'images IA gratuite avec de nombreux modèles disponibles.",
-      "url": "https://playground.com/",
-      "cats": [
-        "ia"
-      ],
-      "emoji": "🛝",
-      "status": "freemium"
     },
     {
       "name": "Space Type Generator",
@@ -2067,17 +1721,6 @@ const RESOURCES_DATA = {
       "noaccount": true
     },
     {
-      "name": "The Futur",
-      "desc": "Ressources éducatives gratuites sur le design, le branding et la direction artistique.",
-      "url": "https://www.thefutur.com/free-resources",
-      "cats": [
-        "tutos",
-        "inspi"
-      ],
-      "emoji": "🔭",
-      "status": "freemium"
-    },
-    {
       "name": "Sharpen Design",
       "desc": "Générateur de challenges de design pour pratiquer et améliorer vos compétences.",
       "url": "https://sharpen.design/",
@@ -2087,16 +1730,6 @@ const RESOURCES_DATA = {
       "emoji": "⚔️",
       "status": "free",
       "noaccount": true
-    },
-    {
-      "name": "Cosmos",
-      "desc": "Galerie d'inspiration pour interfaces web, avec sélection de sites et composants UI modernes.",
-      "url": "https://www.cosmos.so/discover",
-      "cats": [
-        "inspi"
-      ],
-      "emoji": "🌌",
-      "status": "freemium"
     },
     {
       "name": "Same Energy",
@@ -2162,46 +1795,6 @@ const RESOURCES_DATA = {
       "emoji": "🏷️",
       "status": "free",
       "noaccount": true
-    },
-    {
-      "name": "Behance",
-      "desc": "Plateforme Adobe pour découvrir et partager des projets créatifs dans tous les domaines du design.",
-      "url": "https://www.behance.net/",
-      "cats": [
-        "inspi"
-      ],
-      "emoji": "🅱️",
-      "status": "freemium"
-    },
-    {
-      "name": "Dribbble",
-      "desc": "Communauté de designers partageant leurs créations UI, branding et illustration.",
-      "url": "https://dribbble.com/",
-      "cats": [
-        "inspi"
-      ],
-      "emoji": "🏀",
-      "status": "freemium"
-    },
-    {
-      "name": "Awwwards",
-      "desc": "Prix et galerie des meilleurs sites web mondiaux en design, créativité et innovation.",
-      "url": "https://www.awwwards.com/",
-      "cats": [
-        "inspi"
-      ],
-      "emoji": "🏆",
-      "status": "freemium"
-    },
-    {
-      "name": "Mobbin",
-      "desc": "Bibliothèque de patterns et flows UI/UX réels issus des meilleures apps mobiles et web.",
-      "url": "https://mobbin.com/",
-      "cats": [
-        "inspi"
-      ],
-      "emoji": "📱",
-      "status": "freemium"
     },
     {
       "name": "Godly",
@@ -2270,16 +1863,6 @@ const RESOURCES_DATA = {
       "noaccount": true
     },
     {
-      "name": "Picjumbo",
-      "desc": "Photos gratuites de haute qualité couvrant lifestyle, tech, nature et affaires.",
-      "url": "https://picjumbo.com",
-      "cats": [
-        "images"
-      ],
-      "emoji": "🦘",
-      "status": "freemium"
-    },
-    {
       "name": "New Old Stock",
       "desc": "Photos vintage issues d'archives publiques, libres de droits sans restriction d'usage.",
       "url": "https://nos.twnsnd.co",
@@ -2289,16 +1872,6 @@ const RESOURCES_DATA = {
       "emoji": "🕰️",
       "status": "free",
       "noaccount": true
-    },
-    {
-      "name": "Foodiesfeed",
-      "desc": "Photos culinaires professionnelles gratuites pour projets food, blog et réseaux sociaux.",
-      "url": "https://www.foodiesfeed.com",
-      "cats": [
-        "images"
-      ],
-      "emoji": "🍕",
-      "status": "freemium"
     },
     {
       "name": "SplitShire",
@@ -2322,16 +1895,6 @@ const RESOURCES_DATA = {
       "emoji": "⬛",
       "status": "free",
       "noaccount": true
-    },
-    {
-      "name": "Pikwizard",
-      "desc": "Moteur de recherche de photos et vidéos gratuites avec millions d'images libres de droits.",
-      "url": "https://pikwizard.com",
-      "cats": [
-        "images"
-      ],
-      "emoji": "🔍",
-      "status": "freemium"
     },
     {
       "name": "Stockvault",
@@ -2634,16 +2197,6 @@ const RESOURCES_DATA = {
       "noaccount": true
     },
     {
-      "name": "ManyPixels",
-      "desc": "Bibliothèque d'illustrations vectorielles gratuites déclinées dans divers styles modernes.",
-      "url": "https://www.manypixels.co/gallery",
-      "cats": [
-        "illustrations"
-      ],
-      "emoji": "🖼️",
-      "status": "freemium"
-    },
-    {
       "name": "Illlustrations.co",
       "desc": "Illustrations SVG gratuites déclinées en 7 styles distincts pour tous types de projets.",
       "url": "https://illlustrations.co",
@@ -2678,16 +2231,6 @@ const RESOURCES_DATA = {
       "noaccount": true
     },
     {
-      "name": "Black Illustrations",
-      "desc": "Pack d'illustrations représentant des personnages noirs pour un design inclusif et diversifié.",
-      "url": "https://www.blackillustrations.com",
-      "cats": [
-        "illustrations"
-      ],
-      "emoji": "✊",
-      "status": "freemium"
-    },
-    {
       "name": "Fresh Folk",
       "desc": "Bibliothèque d'illustrations de personnages diversifiés en style plat, librement utilisables.",
       "url": "https://fresh-folk.com",
@@ -2708,18 +2251,6 @@ const RESOURCES_DATA = {
       "emoji": "😤",
       "status": "free",
       "noaccount": true
-    },
-    {
-      "name": "Vecteezy",
-      "desc": "Plateforme de vecteurs, SVG et illustrations gratuits — millions de ressources disponibles.",
-      "url": "https://www.vecteezy.com",
-      "cats": [
-        "illustrations",
-        "icones",
-        "images"
-      ],
-      "emoji": "🎨",
-      "status": "freemium"
     },
     {
       "name": "Khroma",
@@ -2777,16 +2308,6 @@ const RESOURCES_DATA = {
       "noaccount": true
     },
     {
-      "name": "Untitled UI",
-      "desc": "Kit Figma complet et professionnel — le UI kit gratuit le plus populaire de Figma Community.",
-      "url": "https://www.untitledui.com",
-      "cats": [
-        "design"
-      ],
-      "emoji": "⬜",
-      "status": "freemium"
-    },
-    {
       "name": "shadcn/ui",
       "desc": "Composants React réutilisables, accessibles et personnalisables avec Tailwind CSS.",
       "url": "https://ui.shadcn.com",
@@ -2799,62 +2320,6 @@ const RESOURCES_DATA = {
       "status": "free",
       "opensource": true,
       "noaccount": true
-    },
-    {
-      "name": "Aceternity UI",
-      "desc": "Composants UI animés et modernes pour React avec Tailwind CSS et Framer Motion.",
-      "url": "https://ui.aceternity.com",
-      "cats": [
-        "design",
-        "web"
-      ],
-      "emoji": "🌀",
-      "status": "freemium"
-    },
-    {
-      "name": "Spline",
-      "desc": "Outil de design 3D en ligne pour créer des scènes interactives directement dans le navigateur.",
-      "url": "https://spline.design",
-      "cats": [
-        "design",
-        "web",
-        "3d"
-      ],
-      "emoji": "🌐",
-      "status": "freemium"
-    },
-    {
-      "name": "Polotno Studio",
-      "desc": "Éditeur graphique web open-source sans inscription ni limite — alternative à Canva.",
-      "url": "https://studio.polotno.com",
-      "cats": [
-        "design"
-      ],
-      "emoji": "🎨",
-      "status": "freemium",
-      "noaccount": true
-    },
-    {
-      "name": "Pixlr",
-      "desc": "Éditeur photo en ligne complet avec outils IA intégrés, alternative légère à Photoshop.",
-      "url": "https://pixlr.com",
-      "cats": [
-        "design",
-        "outils"
-      ],
-      "emoji": "🖊️",
-      "status": "freemium"
-    },
-    {
-      "name": "Kapwing",
-      "desc": "Studio créatif en ligne pour éditer vidéos, images et sous-titres avec des outils IA.",
-      "url": "https://www.kapwing.com",
-      "cats": [
-        "design",
-        "video"
-      ],
-      "emoji": "🎬",
-      "status": "freemium"
     },
     {
       "name": "Audacity",
@@ -2908,58 +2373,6 @@ const RESOURCES_DATA = {
       "noaccount": true
     },
     {
-      "name": "MagicPattern",
-      "desc": "Générateur de motifs SVG et CSS géométriques pour fonds et textures web.",
-      "url": "https://www.magicpattern.design",
-      "cats": [
-        "textures",
-        "web"
-      ],
-      "emoji": "✨",
-      "status": "freemium"
-    },
-    {
-      "name": "SVG Backgrounds",
-      "desc": "Collection de fonds SVG géométriques personnalisables en couleur pour sites web.",
-      "url": "https://www.svgbackgrounds.com",
-      "cats": [
-        "textures",
-        "web"
-      ],
-      "emoji": "🔷",
-      "status": "freemium"
-    },
-    {
-      "name": "Texturelabs",
-      "desc": "Textures haute résolution gratuites pour photo-manipulation, compositing et design graphique.",
-      "url": "https://texturelabs.org",
-      "cats": [
-        "textures"
-      ],
-      "emoji": "🧱",
-      "status": "freemium"
-    },
-    {
-      "name": "Anthony Boyd Graphics",
-      "desc": "Mockups Photoshop haute qualité pour branding et print — section freebies régulièrement mise à jour.",
-      "url": "https://www.anthonyboyd.graphics",
-      "cats": [
-        "mockups"
-      ],
-      "emoji": "💎",
-      "status": "freemium"
-    },
-    {
-      "name": "LS Graphics",
-      "desc": "Mockups gratuits et ressources design pour présentations branding professionnelles.",
-      "url": "https://www.ls.graphics/free",
-      "cats": [
-        "mockups"
-      ],
-      "emoji": "🎁",
-      "status": "freemium"
-    },
-    {
       "name": "Mockup Hunt",
       "desc": "Annuaire de mockups gratuits provenant de diverses sources, actualisé régulièrement.",
       "url": "https://www.mockuphunt.co",
@@ -2969,27 +2382,6 @@ const RESOURCES_DATA = {
       "emoji": "🔍",
       "status": "free",
       "noaccount": true
-    },
-    {
-      "name": "Unblast Mockups",
-      "desc": "Mockups de qualité professionnelle gratuits — dispositifs, branding, print et packaging.",
-      "url": "https://unblast.com/mockups/",
-      "cats": [
-        "mockups"
-      ],
-      "emoji": "💥",
-      "status": "freemium"
-    },
-    {
-      "name": "True Grit Texture Supply",
-      "desc": "Textures, brushes et overlays grunge/rétro pour Photoshop et Procreate avec freebies.",
-      "url": "https://www.truegrittexturesupply.com",
-      "cats": [
-        "brushes",
-        "textures"
-      ],
-      "emoji": "🖌️",
-      "status": "freemium"
     },
     {
       "name": "CleanPNG",
@@ -3025,134 +2417,6 @@ const RESOURCES_DATA = {
       "noaccount": true
     },
     {
-      "name": "Lexica",
-      "desc": "Moteur de recherche et générateur d'images IA basé sur Stable Diffusion avec galerie communautaire.",
-      "url": "https://lexica.art",
-      "cats": [
-        "ia"
-      ],
-      "emoji": "📚",
-      "status": "freemium"
-    },
-    {
-      "name": "Craiyon",
-      "desc": "Générateur d'images IA gratuit et illimité dans le navigateur, anciennement DALL-E mini.",
-      "url": "https://www.craiyon.com",
-      "cats": [
-        "ia"
-      ],
-      "emoji": "🖍️",
-      "status": "freemium"
-    },
-    {
-      "name": "OpenArt",
-      "desc": "Plateforme de génération et exploration d'images IA avec des dizaines de modèles disponibles.",
-      "url": "https://openart.ai",
-      "cats": [
-        "ia"
-      ],
-      "emoji": "🎨",
-      "status": "freemium"
-    },
-    {
-      "name": "NightCafe",
-      "desc": "Créateur d'art IA avec plusieurs algorithmes de génération et communauté active.",
-      "url": "https://creator.nightcafe.studio",
-      "cats": [
-        "ia"
-      ],
-      "emoji": "🌙",
-      "status": "freemium"
-    },
-    {
-      "name": "Mage.space",
-      "desc": "Générateur Stable Diffusion rapide et gratuit dans le navigateur, sans inscription requise.",
-      "url": "https://www.mage.space",
-      "cats": [
-        "ia"
-      ],
-      "emoji": "🔮",
-      "status": "freemium"
-    },
-    {
-      "name": "Runway",
-      "desc": "Suite créative IA leader pour générer, éditer et transformer des vidéos et images.",
-      "url": "https://runwayml.com",
-      "cats": [
-        "ia",
-        "video"
-      ],
-      "emoji": "✈️",
-      "status": "freemium"
-    },
-    {
-      "name": "Pika",
-      "desc": "Générateur de vidéos IA à partir de texte ou d'images — résultats de haute qualité.",
-      "url": "https://pika.art",
-      "cats": [
-        "ia",
-        "video"
-      ],
-      "emoji": "⚡",
-      "status": "freemium"
-    },
-    {
-      "name": "Luma Dream Machine",
-      "desc": "Génère des vidéos réalistes et stylisées de haute qualité à partir de texte ou d'image.",
-      "url": "https://lumalabs.ai/dream-machine",
-      "cats": [
-        "ia",
-        "video"
-      ],
-      "emoji": "🌙",
-      "status": "freemium"
-    },
-    {
-      "name": "Kling AI",
-      "desc": "Modèle de génération vidéo IA par Kuaishou — clips cinématographiques de haute fidélité.",
-      "url": "https://klingai.com",
-      "cats": [
-        "ia",
-        "video"
-      ],
-      "emoji": "🎬",
-      "status": "freemium"
-    },
-    {
-      "name": "ElevenLabs",
-      "desc": "Synthèse vocale IA ultra-réaliste avec clonage de voix et support de nombreuses langues.",
-      "url": "https://elevenlabs.io",
-      "cats": [
-        "ia",
-        "sons"
-      ],
-      "emoji": "🎙️",
-      "status": "freemium"
-    },
-    {
-      "name": "TTSMaker",
-      "desc": "Convertisseur texte-parole gratuit avec plus de 200 voix en plusieurs langues.",
-      "url": "https://ttsmaker.com",
-      "cats": [
-        "ia",
-        "sons"
-      ],
-      "emoji": "🔊",
-      "status": "freemium",
-      "noaccount": true
-    },
-    {
-      "name": "Adobe Podcast Enhance",
-      "desc": "Améliore automatiquement la qualité audio de vos enregistrements par IA — résultats studio.",
-      "url": "https://podcast.adobe.com/enhance",
-      "cats": [
-        "ia",
-        "sons"
-      ],
-      "emoji": "🎚️",
-      "status": "freemium"
-    },
-    {
       "name": "Upscayl",
       "desc": "Logiciel open-source de mise à l'échelle d'images par IA, entièrement gratuit et local.",
       "url": "https://upscayl.org",
@@ -3164,105 +2428,6 @@ const RESOURCES_DATA = {
       "emoji": "🔍",
       "status": "free",
       "opensource": true,
-      "noaccount": true
-    },
-    {
-      "name": "Upscale.media",
-      "desc": "Service en ligne d'agrandissement d'images IA jusqu'à 4x sans perte de qualité visible.",
-      "url": "https://www.upscale.media",
-      "cats": [
-        "ia",
-        "outils"
-      ],
-      "emoji": "🔬",
-      "status": "freemium"
-    },
-    {
-      "name": "PhotoRoom",
-      "desc": "Suppression d'arrière-plan et création de visuels produit par IA, très précis et rapide.",
-      "url": "https://www.photoroom.com",
-      "cats": [
-        "ia",
-        "outils"
-      ],
-      "emoji": "📱",
-      "status": "freemium"
-    },
-    {
-      "name": "Cleanup.pictures",
-      "desc": "Supprimez des objets, personnes ou textes indésirables de vos photos par IA en secondes.",
-      "url": "https://cleanup.pictures",
-      "cats": [
-        "ia",
-        "outils"
-      ],
-      "emoji": "🧹",
-      "status": "freemium"
-    },
-    {
-      "name": "TinyPNG",
-      "desc": "Compressez vos PNG et JPEG — réduction de taille impressionnante sans perte visible de qualité.",
-      "url": "https://tinypng.com",
-      "cats": [
-        "outils"
-      ],
-      "emoji": "🐼",
-      "status": "freemium",
-      "noaccount": true
-    },
-    {
-      "name": "Compressor.io",
-      "desc": "Compression d'images JPEG, PNG, GIF et SVG en ligne avec contrôle qualité précis.",
-      "url": "https://compressor.io",
-      "cats": [
-        "outils"
-      ],
-      "emoji": "🗜️",
-      "status": "freemium",
-      "noaccount": true
-    },
-    {
-      "name": "Convertio",
-      "desc": "Convertissez plus de 300 formats de fichiers en ligne — images, vidéos, audio, docs.",
-      "url": "https://convertio.co",
-      "cats": [
-        "outils"
-      ],
-      "emoji": "🔄",
-      "status": "freemium",
-      "noaccount": true
-    },
-    {
-      "name": "CloudConvert",
-      "desc": "Conversion de fichiers en ligne avec support de 200+ formats et API disponible.",
-      "url": "https://cloudconvert.com",
-      "cats": [
-        "outils"
-      ],
-      "emoji": "☁️",
-      "status": "freemium",
-      "noaccount": true
-    },
-    {
-      "name": "iLovePDF",
-      "desc": "Suite d'outils PDF en ligne — fusionner, compresser, convertir, éditer et signer.",
-      "url": "https://www.ilovepdf.com",
-      "cats": [
-        "outils"
-      ],
-      "emoji": "❤️",
-      "status": "freemium",
-      "noaccount": true
-    },
-    {
-      "name": "Smallpdf",
-      "desc": "Outils PDF simples et efficaces pour compresser, éditer et convertir vos fichiers.",
-      "url": "https://smallpdf.com",
-      "cats": [
-        "outils"
-      ],
-      "emoji": "📄",
-      "status": "freemium",
       "noaccount": true
     },
     {
@@ -3289,16 +2454,6 @@ const RESOURCES_DATA = {
       "emoji": "🎞️",
       "status": "free",
       "noaccount": true
-    },
-    {
-      "name": "ScreenRec",
-      "desc": "Enregistreur d'écran gratuit avec partage instantané de captures et vidéos.",
-      "url": "https://screenrec.com",
-      "cats": [
-        "outils"
-      ],
-      "emoji": "📹",
-      "status": "freemium"
     },
     {
       "name": "UI Avatars",
@@ -3446,51 +2601,6 @@ const RESOURCES_DATA = {
       "noaccount": true
     },
     {
-      "name": "LottieFiles",
-      "desc": "Bibliothèque d'animations Lottie légères et interactives pour le web et les applications.",
-      "url": "https://lottiefiles.com",
-      "cats": [
-        "web",
-        "design"
-      ],
-      "emoji": "✨",
-      "status": "freemium"
-    },
-    {
-      "name": "Rive",
-      "desc": "Créez des animations interactives avec machines d'état pour web et applications natives.",
-      "url": "https://rive.app",
-      "cats": [
-        "web",
-        "design"
-      ],
-      "emoji": "🌀",
-      "status": "freemium"
-    },
-    {
-      "name": "SVGator",
-      "desc": "Outil en ligne pour créer et exporter des animations SVG complexes sans coder.",
-      "url": "https://www.svgator.com",
-      "cats": [
-        "web",
-        "design"
-      ],
-      "emoji": "🎬",
-      "status": "freemium"
-    },
-    {
-      "name": "Grafikart",
-      "desc": "Plateforme française de tutoriels vidéo sur le design, le développement web et la créativité.",
-      "url": "https://grafikart.fr",
-      "cats": [
-        "tutos",
-        "web"
-      ],
-      "emoji": "🇫🇷",
-      "status": "freemium",
-      "noaccount": true
-    },
-    {
       "name": "CSS-Tricks",
       "desc": "Blog de référence pour CSS, HTML et JavaScript avec guides approfondis et almanach interactif.",
       "url": "https://css-tricks.com",
@@ -3501,17 +2611,6 @@ const RESOURCES_DATA = {
       "emoji": "🎩",
       "status": "free",
       "noaccount": true
-    },
-    {
-      "name": "Smashing Magazine",
-      "desc": "Magazine en ligne de référence pour designers et développeurs — articles, guides et livres.",
-      "url": "https://www.smashingmagazine.com",
-      "cats": [
-        "tutos",
-        "web"
-      ],
-      "emoji": "💥",
-      "status": "freemium"
     },
     {
       "name": "Codrops",
@@ -3526,16 +2625,6 @@ const RESOURCES_DATA = {
       "noaccount": true
     },
     {
-      "name": "Envato Tuts+",
-      "desc": "Milliers de tutoriels gratuits en design, développement, photo et vidéo sur Envato.",
-      "url": "https://tutsplus.com",
-      "cats": [
-        "tutos"
-      ],
-      "emoji": "📚",
-      "status": "freemium"
-    },
-    {
       "name": "FreeCodeCamp",
       "desc": "Plateforme d'apprentissage du développement web entièrement gratuite, open-source et certifiante.",
       "url": "https://www.freecodecamp.org",
@@ -3547,16 +2636,6 @@ const RESOURCES_DATA = {
       "emoji": "🔥",
       "status": "free",
       "opensource": true
-    },
-    {
-      "name": "OpenClassrooms",
-      "desc": "Plateforme FR de formation en ligne — design, développement, marketing et data.",
-      "url": "https://openclassrooms.com",
-      "cats": [
-        "tutos"
-      ],
-      "emoji": "🎓",
-      "status": "freemium"
     },
     {
       "name": "Spoon Graphics",
@@ -3594,16 +2673,6 @@ const RESOURCES_DATA = {
       "noaccount": true
     },
     {
-      "name": "Refero",
-      "desc": "Collection d'interfaces d'applications réelles pour s'inspirer des meilleurs patterns UX.",
-      "url": "https://refero.design",
-      "cats": [
-        "inspi"
-      ],
-      "emoji": "📱",
-      "status": "freemium"
-    },
-    {
       "name": "UI Movement",
       "desc": "Collection d'animations et d'interactions UI remarquables soumises par la communauté.",
       "url": "https://uimovement.com",
@@ -3623,16 +2692,6 @@ const RESOURCES_DATA = {
       ],
       "emoji": "🔍",
       "status": "free"
-    },
-    {
-      "name": "Page Flows",
-      "desc": "Bibliothèque de flows UX et onboarding d'applications réelles pour s'inspirer.",
-      "url": "https://pageflows.com",
-      "cats": [
-        "inspi"
-      ],
-      "emoji": "📖",
-      "status": "freemium"
     },
     {
       "name": "Httpster",
@@ -3655,28 +2714,6 @@ const RESOURCES_DATA = {
       "emoji": "🎬",
       "status": "free",
       "noaccount": true
-    },
-    {
-      "name": "FootageCrate",
-      "desc": "Effets VFX, overlays et éléments visuels gratuits pour compositions et montages vidéo.",
-      "url": "https://footagecrate.com",
-      "cats": [
-        "motion",
-        "video"
-      ],
-      "emoji": "🎥",
-      "status": "freemium"
-    },
-    {
-      "name": "Videezy",
-      "desc": "Banque de vidéos stock et éléments motion graphics gratuits — footage HD et 4K.",
-      "url": "https://www.videezy.com",
-      "cats": [
-        "motion",
-        "video"
-      ],
-      "emoji": "🎞️",
-      "status": "freemium"
     },
     {
       "name": "ActionVFX Free",
@@ -3712,17 +2749,6 @@ const RESOURCES_DATA = {
       "noaccount": true
     },
     {
-      "name": "Videvo",
-      "desc": "Banque de vidéos stock et footage HD/4K gratuits avec différentes licences disponibles.",
-      "url": "https://www.videvo.net",
-      "cats": [
-        "video",
-        "motion"
-      ],
-      "emoji": "🎥",
-      "status": "freemium"
-    },
-    {
       "name": "Dareful",
       "desc": "Vidéos stock 4K sous licence CC0 — paysages, architectures et scènes urbaines cinématographiques.",
       "url": "https://dareful.com",
@@ -3732,16 +2758,6 @@ const RESOURCES_DATA = {
       "emoji": "🌅",
       "status": "free",
       "noaccount": true
-    },
-    {
-      "name": "Motion Array Free",
-      "desc": "Templates gratuits After Effects, Premiere et DaVinci Resolve par Motion Array.",
-      "url": "https://motionarray.com/browse/?q=&free=true",
-      "cats": [
-        "motion"
-      ],
-      "emoji": "🎬",
-      "status": "freemium"
     },
     {
       "name": "Velosofy",
@@ -3755,18 +2771,6 @@ const RESOURCES_DATA = {
       "noaccount": true
     },
     {
-      "name": "Jitter",
-      "desc": "Outil de motion design web pour créer des animations UI, intros et présentations.",
-      "url": "https://jitter.video",
-      "cats": [
-        "motion",
-        "web",
-        "design"
-      ],
-      "emoji": "💫",
-      "status": "freemium"
-    },
-    {
       "name": "Blendswap",
       "desc": "Communauté de partage de modèles Blender 3D sous différentes licences Creative Commons.",
       "url": "https://www.blendswap.com",
@@ -3778,36 +2782,6 @@ const RESOURCES_DATA = {
       "status": "free"
     },
     {
-      "name": "BlenderKit",
-      "desc": "Bibliothèque de modèles, matériaux et HDRIs intégrée directement dans Blender.",
-      "url": "https://www.blenderkit.com",
-      "cats": [
-        "3d"
-      ],
-      "emoji": "🧊",
-      "status": "freemium"
-    },
-    {
-      "name": "Free3D",
-      "desc": "Des milliers de modèles 3D gratuits téléchargeables dans de nombreux formats.",
-      "url": "https://free3d.com",
-      "cats": [
-        "3d"
-      ],
-      "emoji": "🗿",
-      "status": "freemium"
-    },
-    {
-      "name": "CGTrader Free",
-      "desc": "Sélection de modèles 3D gratuits sur la grande marketplace CGTrader.",
-      "url": "https://www.cgtrader.com/free-3d-models",
-      "cats": [
-        "3d"
-      ],
-      "emoji": "🎭",
-      "status": "freemium"
-    },
-    {
       "name": "KitBash3D Cargo",
       "desc": "Plateforme gratuite de KitBash3D avec des assets 3D de qualité studio hollywoodien.",
       "url": "https://cargo.kitbash3d.com",
@@ -3816,16 +2790,6 @@ const RESOURCES_DATA = {
       ],
       "emoji": "📦",
       "status": "free"
-    },
-    {
-      "name": "Greyscalegorilla Free",
-      "desc": "Ressources 3D gratuites pour Cinema 4D — HDRI, matériaux PBR et scènes par GSG.",
-      "url": "https://greyscalegorilla.com/free/",
-      "cats": [
-        "3d"
-      ],
-      "emoji": "🦍",
-      "status": "freemium"
     },
     {
       "name": "Wikimedia Commons",
@@ -3990,16 +2954,6 @@ const RESOURCES_DATA = {
       "status": "free",
       "opensource": true,
       "noaccount": true
-    },
-    {
-      "name": "The Noun Project (icônes free)",
-      "desc": "Section gratuite avec attribution de la grande bibliothèque d'icônes universelles.",
-      "url": "https://thenounproject.com/browse/icons/",
-      "cats": [
-        "icones"
-      ],
-      "emoji": "🔣",
-      "status": "freemium"
     },
     {
       "name": "Open Props",
