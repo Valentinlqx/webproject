@@ -2746,7 +2746,7 @@ const RESOURCES_DATA = {
     {
       "name": "Colormind",
       "desc": "Générateur de palettes IA qui apprend les styles des films, œuvres d'art et designs.",
-      "url": "http://colormind.io",
+      "url": "https://colormind.io",
       "cats": [
         "couleurs"
       ],
@@ -4058,7 +4058,7 @@ const RESOURCES_DATA = {
     {
       "name": "Impeccable",
       "desc": "Skill Claude Code pour interfaces frontend de niveau production : sens du registre (brand vs product), refus des défauts AI génériques, vrai code livrable.",
-      "url": "https://github.com/anthropics/claude-code",
+      "url": "https://github.com/pbakaus/impeccable",
       "cats": [
         "ai-skills",
         "design",
@@ -4071,7 +4071,7 @@ const RESOURCES_DATA = {
     {
       "name": "Design Taste",
       "desc": "Skill UI/UX engineering : règles métriques strictes, layouts anti-slop, motion hardware-accelerated, discipline typo et palette premium.",
-      "url": "https://github.com/anthropics/claude-code",
+      "url": "https://github.com/Leonxlnx/taste-skill",
       "cats": [
         "ai-skills",
         "design"

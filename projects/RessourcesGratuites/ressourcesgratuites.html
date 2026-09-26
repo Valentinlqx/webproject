@@ -10,16 +10,15 @@
   <meta property="og:type" content="website" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>" />
   <link rel="stylesheet" href="style.css" />
-  <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
 </head>
 <body>
 
   <div class="page-panel">
 
   <header>
-    <a href="../../index.html" class="back-btn" title="Retour" aria-label="Retour"><</a>
+    <a href="../../index.html" class="back-btn" title="Retour" aria-label="Retour">&lt;</a>
     <div class="header-controls">
-      <button class="lang-toggle" id="lang-toggle" title="Switch language" aria-label="Switch language">
+      <button class="lang-toggle" id="lang-toggle" type="button" title="Switch to English" aria-label="Switch to English">
         <span class="lang-flag" id="lang-flag" aria-hidden="true"></span>
       </button>
     </div>
@@ -30,15 +29,18 @@
   </header>
 
   <main>
-    <div class="categories" id="categories"></div>
+    <div class="categories" id="categories" role="group" aria-label="Catégories"></div>
     <div class="grid" id="grid"></div>
-    <div class="empty-state" id="empty" style="display:none">
+    <div class="empty-state" id="empty" hidden>
       <span>🔍</span>
       <p data-i18n="empty">Aucune ressource trouvée</p>
     </div>
   </main>
 
+  </div>
+
   <script src="resources.js"></script>
+  <script src="rg-core.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

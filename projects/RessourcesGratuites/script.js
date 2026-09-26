@@ -1,58 +1,17 @@
-let categories = [];
-let resources = [];
+const { filterResources, countWith, parseHash, buildHash } = window.RGCore;
+const { categories, resources } = RESOURCES_DATA;
 
-// ── OpenMoji sprite URLs ──
-// Convert an emoji to its codepoint sequence (joined by "-", uppercase, 4-pad)
-// then build a jsDelivr URL to the OpenMoji SVG for that codepoint.
-// Some glyphs aren't in OpenMoji — map them to a close cousin that is
-const OPENMOJI_FALLBACKS = {
-  '✦': '✨',  // four-pointed star → sparkles
-};
-function normalizeEmoji(emoji) {
-  return OPENMOJI_FALLBACKS[emoji] || emoji;
-}
-
-function emojiToCodepoint(emoji) {
-  return [...normalizeEmoji(emoji)]
-    .map(c => c.codePointAt(0))
-    .filter(cp => cp !== 0xFE0F)            // strip VS-16; OpenMoji files don't include it
-    .map(cp => cp.toString(16).toUpperCase().padStart(4, '0'))
-    .join('-');
-}
-function openmojiUrl(emoji) {
-  return `https://cdn.jsdelivr.net/npm/openmoji@latest/color/svg/${emojiToCodepoint(emoji)}.svg`;
-}
-
-// "🖼️ Images" → ["🖼️", "Images"]
-function splitLeadingEmoji(label) {
-  const m = label.match(/^([^\p{L}\p{N}\s]+)\s+(.*)$/u);
-  if (m) return [m[1].trim(), m[2].trim()];
-  return ['', label];
-}
-
-function inlineEmojiImg(emoji, cls) {
-  if (!emoji) return '';
-  return `<img class="${cls || 'pixel-emoji-inline'}" src="${openmojiUrl(emoji)}" alt="" aria-hidden="true" onerror="this.replaceWith(document.createTextNode('${emoji.replace(/'/g, "\\'")}'))" />`;
-}
-
-// ── State ──
 let selectedCats = new Set();
-let searchQuery = '';
-let lang = localStorage.getItem('lang') || 'fr';
+let lang = localStorage.getItem('lang') === 'en' ? 'en' : 'fr';
 
-// ── i18n ──
 const i18n = {
   fr: {
-    title:       'Ressources Gratuites — Design & Création',
-    h1:          'Ressources Gratuites',
-    heroSub:     'Une encyclopédie d\'outils et ressources pour designers & créateurs',
-    placeholder: '',
-    footer:      '© 2026 Valentin L. — Ressources mises à jour régulièrement',
-    empty:       'Aucune ressource trouvée',
-    all:         'Tout',
-    results:     n => `${n} ressource${n > 1 ? 's' : ''}`,
-    visit:       'Visiter →',
-    freemium:    'Peut contenir des ressources payantes',
+    title: 'Ressources Gratuites — Design & Création',
+    h1: 'Ressources Gratuites',
+    heroSub: 'Une encyclopédie d\'outils et ressources pour designers & créateurs',
+    empty: 'Aucune ressource trouvée',
+    visit: 'Visiter →',
+    freemium: 'Peut contenir des ressources payantes',
     cats: {
       images: 'Images', polices: 'Polices', icones: 'Icônes', illustrations: 'Illustrations',
       couleurs: 'Couleurs', design: 'Design', sons: 'Sons', musiques: 'Musiques',
@@ -63,16 +22,12 @@ const i18n = {
     },
   },
   en: {
-    title:       'Free Resources — Design & Creation',
-    h1:          'Free Resources',
-    heroSub:     'An encyclopedia of tools and resources for designers & creators',
-    placeholder: '',
-    footer:      '© 2026 Valentin L. — Resources updated regularly',
-    empty:       'No resource found',
-    all:         'All',
-    results:     n => `${n} resource${n > 1 ? 's' : ''}`,
-    visit:       'Visit →',
-    freemium:    'May contain paid resources',
+    title: 'Free Resources — Design & Creation',
+    h1: 'Free Resources',
+    heroSub: 'An encyclopedia of tools and resources for designers & creators',
+    empty: 'No resource found',
+    visit: 'Visit →',
+    freemium: 'May contain paid resources',
     cats: {
       images: 'Images', polices: 'Fonts', icones: 'Icons', illustrations: 'Illustrations',
       couleurs: 'Colors', design: 'Design', sons: 'Sounds', musiques: 'Music',
@@ -84,28 +39,48 @@ const i18n = {
   },
 };
 
-function catLabel(catId) {
-  const cat = categories.find(c => c.id === catId);
-  if (!cat) return '';
-  const tr = i18n[lang].cats && i18n[lang].cats[catId];
-  if (tr) return tr;
-  const [, txt] = splitLeadingEmoji(cat.label);
-  return txt || cat.label;
+// Emojis dessinés par OpenMoji (même style partout), avec l'emoji système en secours.
+
+// Quelques glyphes n'existent pas chez OpenMoji : on prend le plus proche.
+const OPENMOJI_FALLBACKS = { '✦': '✨' };
+
+function openmojiUrl(emoji) {
+  const code = [...(OPENMOJI_FALLBACKS[emoji] || emoji)]
+    .map(c => c.codePointAt(0))
+    .filter(cp => cp !== 0xFE0F) // OpenMoji nomme ses fichiers sans le sélecteur de variante
+    .map(cp => cp.toString(16).toUpperCase().padStart(4, '0'))
+    .join('-');
+  return `https://cdn.jsdelivr.net/npm/openmoji@latest/color/svg/${code}.svg`;
 }
 
-function applyLang() {
-  const t = i18n[lang];
-  document.title = t.title;
-  document.documentElement.lang = lang;
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.dataset.i18n;
-    if (t[key]) el.textContent = t[key];
-  });
-  setLangLabel();
+function emojiImage(emoji, className) {
+  const img = document.createElement('img');
+  img.className = className;
+  img.src = openmojiUrl(emoji);
+  img.alt = '';
+  img.setAttribute('aria-hidden', 'true');
+  img.addEventListener('error', () => {
+    const span = document.createElement('span');
+    span.className = `${className} ${className}-fallback`;
+    span.setAttribute('aria-hidden', 'true');
+    span.textContent = emoji;
+    img.replaceWith(span);
+  }, { once: true });
+  return img;
 }
 
-// Flag SVGs — pixel-crisp to match back-btn icon. The flag shown is the
-// language you'll SWITCH TO when clicked.
+// "🖼️ Images" → "🖼️"
+function leadingEmoji(label) {
+  const m = label.match(/^([^\p{L}\p{N}\s]+)\s/u);
+  return m ? m[1] : '';
+}
+
+function catLabel(id) {
+  return i18n[lang].cats[id] || categories.find(c => c.id === id)?.label || id;
+}
+
+// Langue
+
 const FLAG_GB = '<svg viewBox="0 0 24 16" shape-rendering="crispEdges" aria-hidden="true">'
   + '<rect width="24" height="16" fill="#012169"/>'
   + '<rect x="0" y="6" width="24" height="4" fill="#ffffff"/>'
@@ -114,179 +89,134 @@ const FLAG_GB = '<svg viewBox="0 0 24 16" shape-rendering="crispEdges" aria-hidd
   + '<rect x="11" y="0" width="2" height="16" fill="#C8102E"/>'
   + '</svg>';
 const FLAG_FR = '<svg viewBox="0 0 24 16" shape-rendering="crispEdges" aria-hidden="true">'
-  + '<rect x="0"  y="0" width="8" height="16" fill="#0055A4"/>'
-  + '<rect x="8"  y="0" width="8" height="16" fill="#F5F5F5"/>'
+  + '<rect x="0" y="0" width="8" height="16" fill="#0055A4"/>'
+  + '<rect x="8" y="0" width="8" height="16" fill="#F5F5F5"/>'
   + '<rect x="16" y="0" width="8" height="16" fill="#EF4135"/>'
   + '</svg>';
 
-function setLangLabel() {
-  const slot = document.getElementById('lang-flag');
-  if (!slot) return;
-  slot.innerHTML = lang === 'fr' ? FLAG_GB : FLAG_FR;
+function applyLang() {
+  const t = i18n[lang];
+  document.title = t.title;
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    if (t[el.dataset.i18n]) el.textContent = t[el.dataset.i18n];
+  });
+
+  // Le drapeau montre la langue vers laquelle on bascule.
+  document.getElementById('lang-flag').innerHTML = lang === 'fr' ? FLAG_GB : FLAG_FR;
+  const label = lang === 'fr' ? 'Switch to English' : 'Passer en français';
   const btn = document.getElementById('lang-toggle');
-  if (btn) {
-    const switchTo = lang === 'fr' ? 'English' : 'Français';
-    btn.title = `Switch to ${switchTo}`;
-    btn.setAttribute('aria-label', `Switch to ${switchTo}`);
-  }
+  btn.title = label;
+  btn.setAttribute('aria-label', label);
 }
 
-// ── URL hash state ──
-function pushURLState() {
-  const params = new URLSearchParams();
-  const isDefault = selectedCats.size === 1 && selectedCats.has('opensource');
-  if (selectedCats.size === 0) {
-    params.set('cats', 'all');
-  } else if (!isDefault) {
-    params.set('cats', [...selectedCats].join(','));
-  }
-  if (searchQuery) params.set('q', searchQuery);
-  const str = params.toString();
-  history.replaceState(null, '', str ? '#' + str : location.pathname + location.search);
-}
-
-function readURLState() {
-  const params = new URLSearchParams(location.hash.slice(1));
-  const catsParam = params.get('cats');
-  if (!catsParam) {
-    selectedCats = new Set();
-  } else if (catsParam === 'all') {
-    selectedCats = new Set();
-  } else {
-    selectedCats = new Set(catsParam.split(',').filter(Boolean));
-  }
-  searchQuery = params.get('q') || '';
-}
-
-// ── Filtering ──
-function getFiltered() {
-  const q = searchQuery.toLowerCase();
-  return resources.filter(r => {
-    const matchCat = selectedCats.size === 0 || [...selectedCats].every(c => r.cats.includes(c));
-    const matchSearch = !q || r.name.toLowerCase().includes(q) || r.desc.toLowerCase().includes(q);
-    return matchCat && matchSearch;
-  });
-}
-
-function getCatCount(catId) {
-  const q = searchQuery.toLowerCase();
-  const testCats = new Set([...selectedCats, catId]);
-  return resources.filter(r => {
-    const matchCat = [...testCats].every(c => r.cats.includes(c));
-    const matchSearch = !q || r.name.toLowerCase().includes(q) || r.desc.toLowerCase().includes(q);
-    return matchCat && matchSearch;
-  }).length;
-}
-
-// ── Render categories ──
-function renderCategories() {
-  const container = document.getElementById('categories');
-  container.innerHTML = '';
-
-  categories.forEach(cat => {
-    const btn = document.createElement('button');
-    btn.className = 'cat-btn' + (selectedCats.has(cat.id) ? ' active' : '');
-    btn.dataset.cat = cat.id;
-    const [emoji, text] = splitLeadingEmoji(cat.label);
-    btn.innerHTML = `${inlineEmojiImg(emoji)}<span>${catLabel(cat.id)}</span> <span class="cat-count"></span>`;
-    btn.addEventListener('click', () => toggleCategory(cat.id));
-    container.appendChild(btn);
-  });
-}
-
-function updateCatCounts() {
-  document.querySelectorAll('.cat-btn').forEach(btn => {
-    const count = getCatCount(btn.dataset.cat);
-    const span = btn.querySelector('.cat-count');
-    if (span) span.textContent = count || '';
-    btn.style.opacity = count === 0 ? '0.3' : '';
-  });
-}
-
-function toggleCategory(id) {
-  if (selectedCats.has(id)) {
-    selectedCats.delete(id);
-  } else {
-    selectedCats.add(id);
-  }
-  renderCategories();
-  render();
-}
-
-// ── Render cards ──
-function render() {
-  const filtered = getFiltered();
-  const grid = document.getElementById('grid');
-  const empty = document.getElementById('empty');
-
-  grid.innerHTML = '';
-  updateCatCounts();
-  pushURLState();
-
-  if (filtered.length === 0) {
-    empty.style.display = 'block';
-    return;
-  }
-
-  empty.style.display = 'none';
-
-  filtered.forEach((r, i) => {
-    const card = document.createElement('a');
-    card.href = r.url;
-    card.target = '_blank';
-    card.rel = 'noopener noreferrer';
-    card.className = 'card';
-    // Cap stagger so a 50-card grid doesn't make the last cards wait a full second.
-    card.style.animationDelay = `${Math.min(i, 8) * 20}ms`;
-
-    const tagsHTML = r.cats.map(catId => {
-      const cat = categories.find(c => c.id === catId);
-      if (!cat) return '';
-      const [, text] = splitLeadingEmoji(cat.label);
-      return `<span class="card-tag" style="background:${cat.color};border-color:#1a0307">${catLabel(catId)}</span>`;
-    }).join('');
-
-    const emojiUrl = openmojiUrl(r.emoji);
-    const safeEmoji = (r.emoji || '').replace(/'/g, "\\'");
-
-    card.innerHTML = `
-      <div class="card-top">
-        <img class="card-emoji" src="${emojiUrl}" alt="" aria-hidden="true"
-             onerror="this.outerHTML='<span class=&quot;card-emoji card-emoji-fallback&quot;>${safeEmoji}</span>'" />
-        <div class="card-tags">${tagsHTML}</div>
-      </div>
-      <div class="card-name">${r.name}</div>
-      <div class="card-desc">${r.desc}</div>
-      <div class="card-footer">
-        <span class="card-visit">${i18n[lang].visit}</span>
-        ${r.status === 'freemium' ? `<span class="card-warning">${i18n[lang].freemium}</span>` : ''}
-      </div>
-    `;
-
-    grid.appendChild(card);
-  });
-}
-
-// ── Events ──
-// (search removed)
-
-document.addEventListener('keydown', e => {
-  // no-op
-});
-
-// ── Language toggle ──
 document.getElementById('lang-toggle').addEventListener('click', () => {
   lang = lang === 'fr' ? 'en' : 'fr';
   localStorage.setItem('lang', lang);
   applyLang();
-  renderCategories();
   render();
 });
 
-// ── Init ──
-categories = RESOURCES_DATA.categories;
-resources = RESOURCES_DATA.resources;
-readURLState();
+// Catégories
+
+const categoriesEl = document.getElementById('categories');
+
+categories.forEach(cat => {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'cat-btn';
+  btn.dataset.cat = cat.id;
+  const emoji = leadingEmoji(cat.label);
+  if (emoji) btn.append(emojiImage(emoji, 'pixel-emoji-inline'));
+  const label = document.createElement('span');
+  label.className = 'cat-label';
+  const count = document.createElement('span');
+  count.className = 'cat-count';
+  btn.append(label, count);
+  btn.addEventListener('click', () => {
+    if (selectedCats.has(cat.id)) selectedCats.delete(cat.id);
+    else selectedCats.add(cat.id);
+    render();
+  });
+  categoriesEl.append(btn);
+});
+
+function updateCategories() {
+  categoriesEl.querySelectorAll('.cat-btn').forEach(btn => {
+    const id = btn.dataset.cat;
+    const active = selectedCats.has(id);
+    const count = countWith(resources, selectedCats, id);
+    btn.classList.toggle('active', active);
+    btn.setAttribute('aria-pressed', String(active));
+    btn.querySelector('.cat-label').textContent = catLabel(id);
+    btn.querySelector('.cat-count').textContent = count || '';
+    btn.style.opacity = count === 0 ? '0.3' : '';
+  });
+}
+
+// Cartes
+
+const gridEl = document.getElementById('grid');
+const emptyEl = document.getElementById('empty');
+
+function createCard(r, index) {
+  const card = document.createElement('a');
+  card.className = 'card';
+  card.href = r.url;
+  card.target = '_blank';
+  card.rel = 'noopener noreferrer';
+  card.dataset.cats = r.cats.join(',');
+  // Décalage plafonné : sur une grande grille, les dernières cartes n'attendent pas une seconde.
+  card.style.animationDelay = `${Math.min(index, 8) * 20}ms`;
+
+  const top = document.createElement('div');
+  top.className = 'card-top';
+  const tags = document.createElement('div');
+  tags.className = 'card-tags';
+  for (const id of r.cats) {
+    const cat = categories.find(c => c.id === id);
+    if (!cat) continue;
+    const tag = document.createElement('span');
+    tag.className = 'card-tag';
+    tag.textContent = catLabel(id);
+    tags.append(tag);
+  }
+  top.append(emojiImage(r.emoji, 'card-emoji'), tags);
+
+  const name = document.createElement('div');
+  name.className = 'card-name';
+  name.textContent = r.name;
+
+  const desc = document.createElement('div');
+  desc.className = 'card-desc';
+  desc.textContent = r.desc;
+
+  const footer = document.createElement('div');
+  footer.className = 'card-footer';
+  const visit = document.createElement('span');
+  visit.className = 'card-visit';
+  visit.textContent = i18n[lang].visit;
+  footer.append(visit);
+  if (r.status === 'freemium') {
+    const warning = document.createElement('span');
+    warning.className = 'card-warning';
+    warning.textContent = i18n[lang].freemium;
+    footer.append(warning);
+  }
+
+  card.append(top, name, desc, footer);
+  return card;
+}
+
+function render() {
+  const filtered = filterResources(resources, selectedCats);
+  updateCategories();
+  history.replaceState(null, '', buildHash(selectedCats) || location.pathname + location.search);
+
+  gridEl.replaceChildren(...filtered.map(createCard));
+  emptyEl.hidden = filtered.length > 0;
+}
+
+selectedCats = parseHash(location.hash, categories.map(c => c.id));
 applyLang();
-renderCategories();
 render();

@@ -1,11 +1,4 @@
-/* ─────────────────────────────────────────────
-   Scale (16px base, ~1.25 ratio):
-     12px / 14px — chrome / micro labels
-     14px / 16px — body
-     20px / 24px — sub-display
-     32px / 40px — display
-     56–96px     — hero
-   ───────────────────────────────────────────── */
+/* Thème Balatro : cartes à jouer, pixels, fond de velours qui ondule. */
 
 @font-face {
   font-family: 'Basteleur';
@@ -30,7 +23,6 @@
 }
 
 :root {
-  /* Palette */
   --bg-card:       #fbf1d3;
   --bg-card-2:     #f0e1c0;
   --bg-input:      #2a040c;
@@ -42,20 +34,18 @@
   --cream-deep:    #d4bd8a;
   --gold:          #f3c53c;
   --gold-deep:     #b8932e;
-  --mult:          #fe5f55;            /* red */
-  --chip:          #4e96d7;            /* blue */
-  --money:         #56a86c;            /* green */
-  --joker:         #a064c9;            /* purple */
+  --mult:          #fe5f55;
+  --chip:          #4e96d7;
+  --money:         #56a86c;
+  --joker:         #a064c9;
   --shadow-hover:  rgba(0, 0, 0, 0.55);
 
-  /* Geometry */
   --pixel:        3px;
   --radius:       0;
-  --radius-card:  14px;        /* playing-card roundness */
+  --radius-card:  14px;
   --radius-pill:  999px;
   --radius-pip:   8px;
 
-  /* Spacing scale (4px base) */
   --s-1:  4px;
   --s-2:  8px;
   --s-3: 12px;
@@ -68,7 +58,7 @@
   --s-16: 64px;
 }
 
-/* ── Base ── */
+/* Base */
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { image-rendering: pixelated; }
@@ -84,7 +74,7 @@ body {
   overflow-x: hidden;
 }
 
-/* ── Velvet psychedelic swirl ── */
+/* Fond de velours animé */
 body::before {
   content: '';
   position: fixed;
@@ -111,7 +101,7 @@ body::before {
   100% { transform: scale(1.05) rotate(-6deg)  translate(3%, -2%); }
 }
 
-/* ── Grain (only behind content) ── */
+/* Grain */
 body::after {
   content: '';
   position: fixed;
@@ -125,33 +115,30 @@ body::after {
   opacity: 0.85;
 }
 
-/* ── Card-suit lattice (casino damask) ── */
+/* Motif de couleurs de cartes */
 html::after {
   content: '';
   position: fixed;
   --tile: 180px;
-  /* oversized up/left by more than the one-tile drift below, so the
-     blurred layer edge never enters the viewport and the loop reset
-     (exactly one tile, i.e. onto itself) is invisible */
+  /* Plus grand que l'écran d'au moins une case : le bord flou ne se voit jamais
+     et le retour au début de la boucle tombe pile sur le même motif. */
   inset: calc(var(--tile) * -1.5) 0 0 calc(var(--tile) * -1.5);
   pointer-events: none;
-  /* same z-index as the swirl/grain but later in tree order,
-     so it paints above them and below the z-index:1 content */
+  /* Même z-index que le velours et le grain, mais peint après eux, sous le contenu. */
   z-index: 0;
   background-image:
     url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'><defs><g id='c'><circle cx='20' cy='11.5' r='7'/><circle cx='12' cy='23' r='7'/><circle cx='28' cy='23' r='7'/><path d='M18.5 24 C18.8 29.2 17.4 32.7 15.2 34.8 L24.8 34.8 C22.6 32.7 21.2 29.2 21.5 24 Z'/></g></defs><g fill='%23e8506a' fill-opacity='0.17'><path transform='translate(24,24) scale(0.8)' d='M20 4 C14 10 7 15 7 21.5 C7 26 10.2 29 13.8 29 C16.2 29 18 27.8 19.1 26 C18.8 29.6 17.4 32.6 15.2 34.6 L24.8 34.6 C22.6 32.6 21.2 29.6 20.9 26 C22 27.8 23.8 29 26.2 29 C29.8 29 33 26 33 21.5 C33 15 26 10 20 4 Z'/><path transform='translate(104,24) scale(0.8)' d='M20 34 C14 29 6 23 6 14.5 C6 9 10 5.5 14.2 5.5 C16.8 5.5 19 7 20 9.2 C21 7 23.2 5.5 25.8 5.5 C30 5.5 34 9 34 14.5 C34 23 26 29 20 34 Z'/><path transform='translate(64,104) scale(0.8)' d='M20 4 L31 20 L20 36 L9 20 Z'/><use href='%23c' transform='translate(-16,104) scale(0.8)'/><use href='%23c' transform='translate(144,104) scale(0.8)'/></g></svg>");
   background-size: var(--tile) var(--tile);
-  /* the drift is ~6px/s, so it must glide sub-pixel: undo the page's
-     inherited `pixelated` (whole-pixel snapping) and keep the animation
-     on the compositor instead of repainting the blurred layer each frame */
+  /* Le motif avance d'environ 6px/s : il doit glisser au sous-pixel, donc on annule
+     le rendu « pixelated » hérité, et will-change évite de repeindre le flou à chaque image. */
   image-rendering: auto;
   will-change: transform;
   filter: blur(2px);
   animation: suit-drift-180 30s linear infinite;
 }
 
-/* Literal px (must match --tile): var() inside @keyframes is not reliably
-   resolved on pseudo-elements in Chromium, which leaves the animation inert */
+/* Valeurs en px en dur (égales à --tile) : Chromium ne résout pas bien var() dans
+   un @keyframes sur un pseudo-élément, et l'animation reste figée. */
 @keyframes suit-drift-180 {
   to { transform: translate(180px, 180px); }
 }
@@ -159,9 +146,9 @@ html::after {
   to { transform: translate(140px, 140px); }
 }
 
-header, main, footer { position: relative; z-index: 1; }
+header, main { position: relative; z-index: 1; }
 
-/* ── Page panel ── */
+/* Panneau central */
 .page-panel {
   position: relative;
   z-index: 1;
@@ -172,11 +159,11 @@ header, main, footer { position: relative; z-index: 1; }
 @media (max-width: 1320px) { .page-panel { margin: var(--s-6); } }
 @media (max-width: 600px)  { .page-panel { margin: var(--s-3) var(--s-2); } }
 
-/* ── Header ── */
+/* En-tête */
 
 header {
   position: relative;
-  /* top padding reserves room for the corner button cards (~80px tall) */
+  /* Le haut laisse la place aux deux cartes-boutons des coins (~80px). */
   padding: clamp(96px, 11vw, 132px) var(--s-12) var(--s-12);
   text-align: center;
 }
@@ -214,7 +201,7 @@ header {
     background 0.12s;
 }
 
-/* Inner frame — like the resource cards */
+/* Cadre intérieur, comme sur les cartes */
 .back-btn::before,
 .lang-toggle::before {
   content: '';
@@ -223,21 +210,6 @@ header {
   border: 2px solid var(--border-dark);
   pointer-events: none;
   opacity: 0.22;
-}
-
-.back-btn .btn-icon {
-  width: 22px;
-  height: 22px;
-  fill: currentColor;
-  display: block;
-}
-
-.lang-toggle .lang-label {
-  font-family: 'Basteleur', serif;
-  font-weight: 700;
-  font-size: 20px;
-  line-height: 1;
-  letter-spacing: 0;
 }
 
 .lang-toggle .lang-flag {
@@ -255,7 +227,7 @@ header {
   height: 100%;
 }
 
-/* ── Back: Joker-red card, slight left tilt ── */
+/* Retour : carte rouge penchée à gauche */
 .back-btn {
   position: absolute;
   top: var(--s-4);
@@ -270,7 +242,7 @@ header {
     calc(var(--pixel) * 2) calc(var(--pixel) * 2) 0 var(--gold);
 }
 
-/* ── Lang: gold tarot card, slight right tilt ── */
+/* Langue : carte dorée penchée à droite */
 .lang-toggle {
   background: var(--gold);
   color: var(--border-dark);
@@ -323,7 +295,7 @@ header {
   outline-offset: 4px;
 }
 
-/* ── Hero ── */
+/* Titre */
 
 .hero {
   position: relative;
@@ -340,7 +312,6 @@ header {
   letter-spacing: 0;
   color: var(--gold);
   margin-bottom: var(--s-5);
-  /* chunky display drop shadow — Balatro score-screen feel */
   text-shadow:
     3px 3px 0 var(--mult),
     6px 6px 0 var(--border-dark);
@@ -359,13 +330,13 @@ header {
   margin: 0 auto;
 }
 
-/* ── Main ── */
+/* Contenu */
 
 main {
   padding: var(--s-10) var(--s-8) var(--s-16);
 }
 
-/* ── Categories ── */
+/* Catégories */
 
 .categories {
   display: flex;
@@ -460,7 +431,8 @@ main {
   font-size: 12px;
   padding: 3px 7px;
   margin-left: 2px;
-  min-width: 24px;          /* reserve room for two digits so pills don't reflow */
+  min-width: 24px;  /* place pour deux chiffres : les boutons ne bougent pas */
+  flex-shrink: 0;
   background: var(--chip);
   color: var(--cream);
   border: 2px solid var(--border-dark);
@@ -470,8 +442,7 @@ main {
   box-sizing: border-box;
 }
 
-/* When a filter zeroes a category, the badge stays in place but goes invisible —
-   no more stray empty blue squares on dimmed pills. */
+/* Compteur à zéro : il garde sa place mais devient invisible. */
 .cat-count:empty {
   visibility: hidden;
 }
@@ -484,25 +455,7 @@ main {
   flex-shrink: 0;
 }
 
-/* ── Results count ── */
-
-.results-count {
-  font-family: 'Basteleur', serif;
-  font-weight: 700;
-  font-size: 16px;
-  line-height: 1.2;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  color: var(--gold);
-  text-align: center;
-  margin-bottom: var(--s-6);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  width: 100%;
-}
-/* ── Grid ── */
+/* Grille */
 
 .grid {
   display: grid;
@@ -510,7 +463,7 @@ main {
   gap: var(--s-5);
 }
 
-/* ── Card ── */
+/* Cartes */
 
 .card {
   display: flex;
@@ -587,7 +540,6 @@ main {
   line-height: 56px;
   text-align: center;
   color: var(--text);
-  /* steps(3) keeps the chunky pixel feel cohesive with the card-visit arrow */
   transition: transform 200ms steps(3, end);
 }
 
@@ -685,7 +637,9 @@ main {
   opacity: 0.75;
 }
 
-/* ── Empty state ── */
+/* Aucun résultat */
+
+.empty-state[hidden] { display: none; }
 
 .empty-state {
   text-align: center;
@@ -698,7 +652,7 @@ main {
   text-shadow: 2px 2px 0 var(--border-dark);
 }
 
-/* Card-back styled icon — empty hand */
+/* Icône en dos de carte */
 .empty-state span {
   display: inline-flex;
   align-items: center;
@@ -729,87 +683,7 @@ main {
   75%      { transform: translate(2px, 0); }
 }
 
-/* ── Footer ── */
-
-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--s-4);
-  flex-wrap: wrap;
-  padding: var(--s-6) var(--s-8);
-  border-top: var(--pixel) dashed rgba(243, 197, 60, 0.4);
-  margin: var(--s-5) var(--s-8) 0;
-}
-
-.footer-name {
-  font-family: 'Basteleur', serif;
-  font-weight: 700;
-  font-size: 28px;
-  line-height: 1;
-  letter-spacing: 0;
-  color: var(--gold);
-  text-shadow: 2px 2px 0 var(--mult), 4px 4px 0 var(--border-dark);
-}
-
-.socials {
-  display: flex;
-  align-items: center;
-  gap: var(--s-2);
-}
-
-.social-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 52px;        /* card proportion */
-  background: var(--bg-card);
-  border: var(--pixel) solid var(--border-dark);
-  border-radius: var(--radius-pip);
-  color: var(--border-dark);
-  font-size: 18px;
-  text-decoration: none;
-  box-shadow:
-    inset 0 -3px 0 var(--cream-deep),
-    var(--pixel) var(--pixel) 0 var(--border-dark),
-    calc(var(--pixel) * 2) calc(var(--pixel) * 2) 0 var(--gold);
-  transition: transform 0.1s var(--ease-card, cubic-bezier(0.2,0.8,0.2,1)),
-              box-shadow 0.1s var(--ease-card, cubic-bezier(0.2,0.8,0.2,1)),
-              background 0.12s,
-              color 0.12s;
-}
-.socials > .social-btn:nth-child(odd)  { transform: rotate(-2deg); }
-.socials > .social-btn:nth-child(even) { transform: rotate(2deg); }
-
-@media (hover: hover) and (pointer: fine) {
-  .social-btn:hover {
-    background: var(--mult);
-    color: var(--cream);
-    box-shadow:
-      inset 0 -3px 0 rgba(0, 0, 0, 0.25),
-      calc(var(--pixel) + 2px) calc(var(--pixel) + 2px) 0 var(--border-dark),
-      calc(var(--pixel) * 2 + 2px) calc(var(--pixel) * 2 + 2px) 0 var(--gold),
-      0 0 16px var(--shadow-hover);
-  }
-  .socials > .social-btn:nth-child(odd):hover  { transform: rotate(-3deg) translate(-2px, -2px); }
-  .socials > .social-btn:nth-child(even):hover { transform: rotate(3deg)  translate(-2px, -2px); }
-}
-
-.socials > .social-btn:nth-child(odd):active  { transform: rotate(-2deg) translate(var(--pixel), var(--pixel)); }
-.socials > .social-btn:nth-child(even):active { transform: rotate(2deg)  translate(var(--pixel), var(--pixel)); }
-.social-btn:active {
-  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.25), 0 0 0 var(--border-dark), 0 0 0 var(--gold);
-}
-
-.social-btn:focus-visible {
-  outline: 3px solid var(--gold);
-  outline-offset: 3px;
-}
-
-.social-btn i { line-height: 1; }
-
-/* ── Responsive ── */
+/* Mobile */
 
 @media (max-width: 900px) {
   main   { padding: var(--s-8) var(--s-5) var(--s-12); }
@@ -820,33 +694,42 @@ footer {
   html::after { --tile: 140px; animation-name: suit-drift-140; animation-duration: 24s; }
   header { padding: 88px var(--s-5) var(--s-10); }
   main   { padding: var(--s-6) var(--s-3) var(--s-12); }
-  footer { padding: var(--s-5) var(--s-4); margin: var(--s-5) var(--s-3) 0; }
 
   .categories {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    justify-content: stretch;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .cat-btn { width: 100%; justify-content: center; }
+  /* Deux colonnes étroites : le libellé passe à la ligne au lieu d'élargir la grille. */
+  .cat-btn {
+    width: 100%;
+    min-width: 0;
+    justify-content: center;
+    padding: 9px 8px;
+    font-size: 15px;
+    white-space: normal;
+    text-align: center;
+  }
 
   .grid { grid-template-columns: 1fr; gap: var(--s-4); }
 
   .header-controls { top: var(--s-3); right: var(--s-3); gap: var(--s-1); }
   .back-btn        { top: var(--s-3); left:  var(--s-3); }
   .back-btn, .lang-toggle { width: 44px; height: 54px; }
-  .back-btn .btn-icon { width: 20px; height: 20px; }
-  .lang-toggle .lang-label { font-size: 13px; }
 
   .card        { padding: var(--s-4); }
   .card-emoji  { width: 48px; height: 48px; }
   .card-name   { font-size: 24px; }
   .card-desc   { font-size: 15px; }
 
-  .footer-name { font-size: 24px; }
   .empty-state { font-size: 22px; }
 }
 
-/* ── Accessibilité motion ─────────────────────────────────────────────── */
+/* Très petits écrans : deux colonnes ne laissent plus assez de place à « Illustrations 23 ». */
+@media (max-width: 359px) {
+  .categories { grid-template-columns: 1fr; }
+}
+
+/* Moins d'animations si le système le demande */
 
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -857,7 +740,7 @@ footer {
     transition-duration: 0.01ms !important;
   }
 
-  /* The plasma swirl is the loudest thing on the page — kill it entirely. */
+  /* Le velours animé est ce qui bouge le plus : on le coupe complètement. */
   body::before {
     animation: none !important;
     transform: none !important;
@@ -868,8 +751,7 @@ footer {
   .card:hover .card-visit,
   .cat-btn:hover,
   .back-btn:hover,
-  .lang-toggle:hover,
-  .social-btn:hover {
+  .lang-toggle:hover {
     transform: none !important;
   }
 }
