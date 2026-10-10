@@ -250,6 +250,9 @@ $('theme-toggle').addEventListener('click', () => {
 });
 $('theme-toggle').textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
 
+// Sur GitHub Pages, lastModified = date du dernier déploiement : pratique pour vérifier qu'un push est en ligne.
+$('last-updated').textContent = 'Mis à jour le ' + new Date(document.lastModified).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
+
 let toastTimer;
 function showToast(msg) {
   toast.textContent = msg;

@@ -166,6 +166,13 @@ body.dark .icon-btn:hover { color: var(--color-primary); }
   user-select: none;
 }
 body.dark .hero h1 { color: var(--accent); }
+.last-updated {
+  color: var(--text-2);
+  font-size: 0.7rem;
+  opacity: 0.7;
+  margin: 0 0 var(--space-xs);
+}
+
 .hero-sub {
   color: var(--text-2);
   font-size: 1rem;
