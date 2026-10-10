@@ -296,7 +296,7 @@ dropzone.addEventListener('keydown', (e) => {
   dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.remove('drag'); })
 );
 dropzone.addEventListener('drop', (e) => {
-  addPhotos([...e.dataTransfer.files].filter(f => f.type.startsWith('image/')));
+  addPhotos([...e.dataTransfer.files].filter(f => f.type.startsWith('image/') || isHeic(f)));
 });
 
 fileInput.addEventListener('change', async () => {
@@ -318,10 +318,41 @@ async function addPhotos(files) {
   renderPreviews();
 }
 
-// Renvoie null si le navigateur ne sait pas lire l'image (HEIC sur certains navigateurs, fichier abîmé…).
-function downscaleImage(file, maxSide) {
+// Windows donne souvent un type vide aux HEIC, d'où le test sur l'extension.
+function isHeic(file) {
+  return /image\/hei[cf]/.test(file.type) || /\.hei[cf]$/i.test(file.name);
+}
+
+// Seul Safari sait lire le HEIC des iPhone : ailleurs on le convertit en JPEG.
+// heic2any pèse 1,3 Mo, on ne le charge qu'au premier HEIC.
+let heicLib;
+function loadHeicLib() {
+  heicLib ??= new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js';
+    s.onload = () => resolve(window.heic2any);
+    s.onerror = () => { heicLib = null; reject(new Error('heic2any')); };
+    document.head.appendChild(s);
+  });
+  return heicLib;
+}
+
+// Renvoie null si l'image reste illisible (fichier abîmé, format inconnu, HEIC hors ligne…).
+async function downscaleImage(file, maxSide) {
+  const dataUrl = await drawScaled(file, maxSide);
+  if (dataUrl || !isHeic(file)) return dataUrl;
+  try {
+    const heic2any = await loadHeicLib();
+    const jpeg = await heic2any({ blob: file, toType: 'image/jpeg', quality: JPEG_QUALITY });
+    return drawScaled(Array.isArray(jpeg) ? jpeg[0] : jpeg, maxSide);
+  } catch {
+    return null;
+  }
+}
+
+function drawScaled(blob, maxSide) {
   return new Promise((resolve) => {
-    const url = URL.createObjectURL(file);
+    const url = URL.createObjectURL(blob);
     const img = new Image();
     img.onload = () => {
       const scale = Math.min(1, maxSide / Math.max(img.width, img.height));

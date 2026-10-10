@@ -149,3 +149,12 @@ test('un historique corrompu ne casse pas la page', async ({ page }) => {
   await expect(page.locator('#analyze-btn')).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+// Chromium ne lit pas le HEIC : la photo passe par heic2any (chargé depuis jsDelivr, donc réseau requis).
+test('une photo HEIC d\'iPhone est convertie et acceptée', async ({ page }) => {
+  await open(page);
+  await page.setInputFiles('#file-input', path.resolve('tests/fixtures/iphone.heic'));
+  await expect(page.locator('.preview')).toHaveCount(1, { timeout: 20000 });
+  const src = await page.locator('.preview img').getAttribute('src');
+  expect(src).toMatch(/^data:image\/jpeg;base64,/);
+});
