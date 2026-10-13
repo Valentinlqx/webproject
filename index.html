@@ -7,15 +7,16 @@
   <title>Valentin L. — Graphiste indépendant</title>
   <meta name="description" content="Valentin L., graphiste indépendant : affiches, identités visuelles, vidéo et motion." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>" />
-  <link rel="stylesheet" href="style.css?v=2" />
+  <link rel="stylesheet" href="style.css?v=3" />
 </head>
 <body>
   <main class="page">
 
     <header>
+      <button class="lang" id="lang" type="button" lang="en">English</button>
       <h1>Valentin L.</h1>
       <!-- TODO : texte provisoire -->
-      <p class="intro">
+      <p class="intro" data-i18n="intro">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
         incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
         exercitation ullamco laboris.
@@ -23,23 +24,25 @@
     </header>
 
     <!-- Pour mettre une image : la déposer dans assets/ et remplacer le <span class="thumb-empty"> par
-         <img src="assets/mon-image.jpg" alt="" width="600" height="800" /> -->
+         <img src="assets/mon-image.jpg" alt="…" width="600" height="800" loading="lazy" decoding="async" />
+         Projets web : alt="" (le nom du projet suffit). Projets design : l'image est l'œuvre, alors alt
+         dit ce qu'on voit, par exemple alt="Affiche de festival : grand titre rouge sur fond noir". -->
 
     <section aria-labelledby="web">
-      <h2 id="web">Projets web</h2>
-      <ul class="grid">
+      <h2 id="web" data-i18n="web">Projets web</h2>
+      <ul class="grid" role="list">
         <li>
           <a class="tile" href="projects/AutoVinted/autovinted.html">
-            <span class="thumb"><span class="thumb-empty">Image</span></span>
-            <span class="tile-name">AutoVinted</span>
-            <span class="tile-desc">Des photos à l’annonce Vinted, rédigée par l’IA.</span>
+            <span class="thumb"><span class="thumb-empty" aria-hidden="true">Image</span></span>
+            <h3 class="tile-name">AutoVinted</h3>
+            <span class="tile-desc" data-i18n="avDesc">Des photos à l’annonce Vinted, rédigée par l’IA.</span>
           </a>
         </li>
         <li>
           <a class="tile" href="projects/RessourcesGratuites/ressourcesgratuites.html">
-            <span class="thumb"><span class="thumb-empty">Image</span></span>
-            <span class="tile-name">Ressources Gratuites</span>
-            <span class="tile-desc">Une sélection de ressources gratuites pour designers.</span>
+            <span class="thumb"><span class="thumb-empty" aria-hidden="true">Image</span></span>
+            <h3 class="tile-name">Ressources Gratuites</h3>
+            <span class="tile-desc" data-i18n="rgDesc">Des ressources vraiment gratuites pour designers, avec leur licence.</span>
           </a>
         </li>
       </ul>
@@ -47,40 +50,40 @@
 
     <!-- TODO : projets provisoires. Pour en faire un lien, changer <div class="tile"> en <a class="tile" href="..."> -->
     <section aria-labelledby="design">
-      <h2 id="design">Projets design</h2>
-      <ul class="grid">
+      <h2 id="design" data-i18n="design">Projets design</h2>
+      <ul class="grid" role="list">
         <li>
           <div class="tile">
-            <span class="thumb"><span class="thumb-empty">Image</span></span>
-            <span class="tile-name">Projet design 01</span>
+            <span class="thumb"><span class="thumb-empty" aria-hidden="true">Image</span></span>
+            <h3 class="tile-name">Projet design 01</h3>
             <span class="tile-desc">Lorem ipsum dolor sit amet.</span>
           </div>
         </li>
         <li>
           <div class="tile">
-            <span class="thumb"><span class="thumb-empty">Image</span></span>
-            <span class="tile-name">Projet design 02</span>
+            <span class="thumb"><span class="thumb-empty" aria-hidden="true">Image</span></span>
+            <h3 class="tile-name">Projet design 02</h3>
             <span class="tile-desc">Lorem ipsum dolor sit amet.</span>
           </div>
         </li>
         <li>
           <div class="tile">
-            <span class="thumb"><span class="thumb-empty">Image</span></span>
-            <span class="tile-name">Projet design 03</span>
+            <span class="thumb"><span class="thumb-empty" aria-hidden="true">Image</span></span>
+            <h3 class="tile-name">Projet design 03</h3>
             <span class="tile-desc">Lorem ipsum dolor sit amet.</span>
           </div>
         </li>
         <li>
           <div class="tile">
-            <span class="thumb"><span class="thumb-empty">Image</span></span>
-            <span class="tile-name">Projet design 04</span>
+            <span class="thumb"><span class="thumb-empty" aria-hidden="true">Image</span></span>
+            <h3 class="tile-name">Projet design 04</h3>
             <span class="tile-desc">Lorem ipsum dolor sit amet.</span>
           </div>
         </li>
         <li>
           <div class="tile">
-            <span class="thumb"><span class="thumb-empty">Image</span></span>
-            <span class="tile-name">Projet design 05</span>
+            <span class="thumb"><span class="thumb-empty" aria-hidden="true">Image</span></span>
+            <h3 class="tile-name">Projet design 05</h3>
             <span class="tile-desc">Lorem ipsum dolor sit amet.</span>
           </div>
         </li>
@@ -88,5 +91,7 @@
     </section>
 
   </main>
+  <script src="lang.js"></script>
+  <script src="home.js"></script>
 </body>
 </html>

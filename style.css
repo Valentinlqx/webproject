@@ -1,9 +1,9 @@
 :root {
   --paper: #fafaf8;
   --ink: #111;
-  --muted: #6b6b6b;
+  --muted: #555;
   --frame: #e6e5e1;
-  --accent: #e2231a;
+  --accent: #c8201a;
   --sans: "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
 }
 
@@ -39,6 +39,10 @@ body {
 
 a {
   color: inherit;
+  text-underline-offset: 0.15em;
+}
+
+a.tile {
   text-decoration: none;
 }
 
@@ -81,11 +85,12 @@ h2 {
   color: var(--muted);
 }
 
-/* Like a wall of posters: as many 3:4 frames per row as fit, two at least on a phone. */
+/* Like a wall of posters: as many 3:4 frames per row as fit, two on a phone,
+   one when the text is enlarged (large system font). */
 .grid {
   list-style: none;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(10rem, calc(50% - 0.5rem)), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 10rem, max(7.5rem, calc(50% - 0.5rem))), 1fr));
   gap: clamp(1rem, 2vw, 1.5rem) clamp(0.75rem, 1.5vw, 1rem);
 }
 
@@ -119,6 +124,7 @@ h2 {
 
 .tile-name {
   display: block;
+  font-size: 1rem;
   margin-top: 0.625rem;
   font-weight: 500;
   letter-spacing: -0.01em;
@@ -133,10 +139,46 @@ h2 {
   color: var(--muted);
 }
 
+/* A link tile says so without hover: phones and tablets have none. */
+a.tile .tile-name::after {
+  content: " →" / "";
+}
+
+a.tile:hover .tile-name,
+a.tile:focus-visible .tile-name {
+  color: var(--accent);
+}
+
+.tile-name,
+.tile-desc,
+h1 {
+  overflow-wrap: anywhere;
+}
+
+/* In forced colours the grey frame disappears: draw its edge. */
+@media (forced-colors: active) {
+  .thumb { border: 1px solid CanvasText; }
+}
+
+.lang {
+  float: right;
+  min-height: 44px;
+  padding: 0 0.75rem;
+  background: none;
+  border: 1px solid var(--muted);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.lang:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
 @media (hover: hover) and (pointer: fine) {
-  a.tile:hover .tile-name {
-    color: var(--accent);
-  }
+  .lang:hover { border-color: var(--ink); }
 
   a.tile:hover .thumb img {
     transform: scale(1.03);

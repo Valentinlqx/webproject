@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+import { WIDTHS } from './pages.mjs';
+import { axeViolations } from './a11y.mjs';
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
@@ -40,4 +42,43 @@ test('les liens sont assez grands pour le tactile', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 800 });
   const heights = await page.locator('main a').evaluateAll(as => as.map(a => a.getBoundingClientRect().height));
   for (const h of heights) expect(h).toBeGreaterThanOrEqual(44);
+});
+
+for (const colorScheme of ['light', 'dark']) {
+  for (const width of WIDTHS) {
+    test(`aucune erreur d'accessibilité AA @${width}px ${colorScheme}`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme });
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('/');
+      expect(await axeViolations(page)).toEqual([]);
+    });
+  }
+}
+
+test('avec une très grande police, rien ne déborde', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.goto('/');
+  await page.addStyleTag({ content: 'html { font-size: 200%; }' });
+  const { scrollWidth, clientWidth } = await page.evaluate(() => ({
+    scrollWidth: document.documentElement.scrollWidth,
+    clientWidth: document.documentElement.clientWidth,
+  }));
+  expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
+});
+
+test("le bouton de langue passe en anglais et vaut pour tout le site", async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('h2#web')).toHaveText('Projets web');
+  await page.click('#lang');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  await expect(page.locator('h2#web')).toHaveText('Web projects');
+  await expect(page.locator('#lang')).toHaveText('Français');
+  await page.goto('/projects/RessourcesGratuites/ressourcesgratuites.html');
+  await expect(page.locator('h1')).toHaveText('Free Resources');
+});
+
+test('les noms de projets sont des titres, et le mot « Image » est caché aux lecteurs d\'écran', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('h3.tile-name')).toHaveCount(7);
+  await expect(page.locator('a.tile').first()).toHaveAccessibleName(/^AutoVinted/);
 });

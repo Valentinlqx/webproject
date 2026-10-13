@@ -8,9 +8,8 @@ const store = {
   set(key, value) { try { localStorage.setItem(key, value); } catch { /* rien à garder */ } },
 };
 
-// La langue choisie vaut pour tout le site ; sans choix, celle du navigateur.
-const browserLang = ((navigator.languages && navigator.languages[0]) || navigator.language || '').toLowerCase();
-let lang = ['fr', 'en'].includes(store.get('lang')) ? store.get('lang') : browserLang.startsWith('fr') ? 'fr' : 'en';
+// La langue choisie vaut pour tout le site (lang.js à la racine).
+let lang = SiteLang.get();
 let state = RG.parseHash(location.hash, ctx);
 
 const i18n = {
@@ -133,7 +132,7 @@ function applyLang() {
 
 $('lang-toggle').addEventListener('click', () => {
   lang = lang === 'fr' ? 'en' : 'fr';
-  store.set('lang', lang);
+  SiteLang.set(lang);
   applyLang();
   render();
 });
