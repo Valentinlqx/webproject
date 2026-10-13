@@ -332,7 +332,7 @@ let heicLib;
 function loadHeicLib() {
   heicLib ??= new Promise((resolve, reject) => {
     const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js';
+    s.src = 'vendor/heic2any.min.js'; // copié dans le site : aucun appel à un autre serveur
     s.onload = () => resolve(window.heic2any);
     s.onerror = () => { heicLib = null; reject(new Error('heic2any')); };
     document.head.appendChild(s);

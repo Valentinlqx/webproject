@@ -150,7 +150,7 @@ test('un historique corrompu ne casse pas la page', async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
-// Chromium ne lit pas le HEIC : la photo passe par heic2any (chargé depuis jsDelivr, donc réseau requis).
+// Chromium ne lit pas le HEIC : la photo passe par heic2any (copié dans vendor/).
 test('une photo HEIC d\'iPhone est convertie et acceptée', async ({ page }) => {
   await open(page);
   await page.setInputFiles('#file-input', path.resolve('tests/fixtures/iphone.heic'));
