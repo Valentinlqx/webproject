@@ -13,6 +13,8 @@ window.AV_TEXT = {
     updated: d => `Mis à jour le ${d}`,
     heroSub: 'Ajoute tes photos, l\'IA rédige ton annonce Vinted.',
     tour: 'Voir le tour (30 s)',
+    keyNote: 'Il te faut ta propre clé d\'IA (Claude, ChatGPT, Gemini ou Mistral), payante à l\'usage : quelques centimes par annonce.',
+    brandNote: 'Outil indépendant, sans lien avec Vinted.',
     noscript: 'AutoVinted fonctionne entièrement dans ton navigateur et a besoin de JavaScript.',
 
     photosHeading: 'Tes photos',
@@ -139,7 +141,7 @@ window.AV_TEXT = {
     unexpected: 'Réponse inattendue, réessaie.',
 
     historyHeading: 'Historique',
-    historyClear: 'Tout effacer',
+    historyClear: 'Effacer mes annonces',
     historyCleared: 'Historique effacé',
     historyEmpty: 'Aucune annonce pour l\'instant',
     untitled: '(sans titre)',
@@ -175,6 +177,8 @@ window.AV_TEXT = {
     updated: d => `Updated on ${d}`,
     heroSub: 'Add your photos, AI writes your Vinted listing.',
     tour: 'Take the tour (30 s)',
+    keyNote: 'You need your own AI key (Claude, ChatGPT, Gemini or Mistral), paid per use: a few cents per listing.',
+    brandNote: 'Independent tool, not affiliated with Vinted.',
     noscript: 'AutoVinted runs entirely in your browser and needs JavaScript.',
 
     photosHeading: 'Your photos',
@@ -301,7 +305,7 @@ window.AV_TEXT = {
     unexpected: 'Unexpected answer, try again.',
 
     historyHeading: 'History',
-    historyClear: 'Clear all',
+    historyClear: 'Clear my listings',
     historyCleared: 'History cleared',
     historyEmpty: 'No listing yet',
     untitled: '(untitled)',

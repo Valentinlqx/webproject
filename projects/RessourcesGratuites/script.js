@@ -39,7 +39,7 @@ const i18n = {
     count: n => n === 0 ? 'Aucune ressource' : n === 1 ? '1 ressource' : `${n} ressources`,
     checked: d => `Licences vérifiées le ${d}.`,
     updated: d => `Mis à jour le ${d}`,
-    credits: 'Icônes : <a href="https://openmoji.org" target="_blank" rel="noopener noreferrer">OpenMoji</a>, sous licence <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>. Polices : Basteleur (Keussel, Velvetyne) et Coconat (Sara Lavazza, Collletttivo), sous licence SIL OFL.',
+    credits: 'Icônes : <a href="https://openmoji.org" target="_blank" rel="noopener noreferrer">OpenMoji</a>, sous licence <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>. Polices : Basteleur (Keussel, Velvetyne) et Coconat (Sara Lavazza, Collletttivo), sous licence <a href="fonts/OFL.txt">SIL OFL</a>.',
   },
   en: {
     title: 'Free Resources — Design & Creation',
@@ -67,7 +67,7 @@ const i18n = {
     count: n => n === 0 ? 'No resources' : n === 1 ? '1 resource' : `${n} resources`,
     checked: d => `Licenses checked on ${d}.`,
     updated: d => `Updated on ${d}`,
-    credits: 'Icons: <a href="https://openmoji.org" target="_blank" rel="noopener noreferrer">OpenMoji</a>, under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>. Fonts: Basteleur (Keussel, Velvetyne) and Coconat (Sara Lavazza, Collletttivo), under the SIL OFL.',
+    credits: 'Icons: <a href="https://openmoji.org" target="_blank" rel="noopener noreferrer">OpenMoji</a>, under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>. Fonts: Basteleur (Keussel, Velvetyne) and Coconat (Sara Lavazza, Collletttivo), under the <a href="fonts/OFL.txt">SIL OFL</a>.',
   },
 };
 
@@ -264,7 +264,8 @@ function reset() {
 }
 document.querySelectorAll('#reset, [data-reset]').forEach(btn => btn.addEventListener('click', reset));
 
-// Cartes, gardées en mémoire par langue : filtrer ne les reconstruit pas.
+// Cartes : créées une fois par langue, dans l'ordre des données. Filtrer ne fait que
+// les montrer ou les cacher (reconstruire 263 cartes à chaque lettre tapée coûte cher sur téléphone).
 
 const cards = new Map();
 
@@ -304,9 +305,19 @@ function createCard(r) {
   return card;
 }
 
-function cardFor(r) {
-  if (!cards.has(r)) cards.set(r, createCard(r));
-  return cards.get(r);
+function buildCards() {
+  if (cards.size) return;
+  for (const r of resources) cards.set(r, createCard(r));
+  $('grid').replaceChildren(...cards.values());
+}
+
+// Seules les premières cartes visibles sont « distribuées » : les autres sont hors de l'écran.
+const DEALT = 12;
+function deal(card, i) {
+  card.classList.remove('deal');
+  void card.offsetWidth; // relance l'animation
+  card.style.animationDelay = `${i * 20}ms`;
+  card.classList.add('deal');
 }
 
 // Le nombre de résultats est lu par les lecteurs d'écran : pendant la frappe,
@@ -326,14 +337,13 @@ function render(animate = true) {
   const hash = RG.buildHash(state);
   history.replaceState(null, '', hash || location.pathname + location.search);
 
-  const grid = $('grid');
-  grid.classList.toggle('dealing', animate);
-  grid.replaceChildren(...filtered.map((r, i) => {
-    const card = cardFor(r);
-    // Décalage plafonné : sur une grande grille, les dernières cartes n'attendent pas.
-    card.style.animationDelay = `${Math.min(i, 8) * 20}ms`;
-    return card;
-  }));
+  buildCards();
+  const shown = new Set(filtered);
+  let i = 0;
+  for (const [r, card] of cards) {
+    card.hidden = !shown.has(r);
+    if (!card.hidden && animate && i < DEALT) deal(card, i++);
+  }
 
   showCount(filtered.length, animate);
   // L'écran vide a déjà son propre bouton.

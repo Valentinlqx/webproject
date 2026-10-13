@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-  <title>AutoVinted — Génère ton annonce en 1 clic</title>
-  <meta name="description" content="Upload tes photos, l'IA rédige une annonce Vinted optimisée prête à copier-coller." />
+  <title>AutoVinted — Tes photos deviennent une annonce Vinted</title>
+  <meta name="description" content="Ajoute tes photos, l'IA rédige ton annonce Vinted, prête à copier. Avec ta propre clé d'IA, rien ne passe par ce site." />
+  <meta property="og:title" content="AutoVinted" />
+  <meta property="og:description" content="Ajoute tes photos, l'IA rédige ton annonce Vinted, prête à copier." />
+  <meta property="og:type" content="website" />
   <meta name="theme-color" content="#02050a" />
   <meta name="color-scheme" content="light dark" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>" />
@@ -37,7 +40,9 @@
       <h1 id="site-title">AutoVinted</h1>
       <p class="last-updated" id="last-updated"></p>
       <p class="hero-sub" data-i18n="heroSub">Ajoute tes photos, l'IA rédige ton annonce Vinted.</p>
+      <p class="key-note" data-i18n="keyNote">Il te faut ta propre clé d'IA (Claude, ChatGPT, Gemini ou Mistral), payante à l'usage : quelques centimes par annonce.</p>
       <button class="tour-btn" id="tour-btn" type="button" data-i18n="tour">Voir le tour (30 s)</button>
+      <p class="brand-note" data-i18n="brandNote">Outil indépendant, sans lien avec Vinted.</p>
     </div>
     <noscript><p class="noscript" data-i18n="noscript">AutoVinted fonctionne entièrement dans ton navigateur et a besoin de JavaScript.</p></noscript>
   </header>
@@ -50,7 +55,7 @@
         <button class="icon-btn" id="history-close" type="button" data-i18n-label="close" aria-label="Fermer"><span aria-hidden="true">✕</span></button>
       </div>
       <div class="history-list" id="history-list"></div>
-      <button class="btn-ghost" id="history-clear" type="button" data-i18n="historyClear" hidden>Tout effacer</button>
+      <button class="btn-ghost" id="history-clear" type="button" data-i18n="historyClear" hidden>Effacer mes annonces</button>
     </div>
   </div>
 

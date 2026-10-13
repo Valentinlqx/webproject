@@ -18,6 +18,7 @@ const MAX_PHOTO_SIZE = 1024; // px, on réduit avant l'envoi : moins cher et plu
 const JPEG_QUALITY = 0.8;
 
 const $ = (id) => document.getElementById(id);
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
 
 // En navigation privée, localStorage peut lever une erreur : l'app doit marcher quand même.
 const store = {
@@ -379,7 +380,7 @@ async function addPhotos(files) {
   let unreadable = 0;
   for (const file of files.slice(0, room)) {
     const dataUrl = await downscaleImage(file, MAX_PHOTO_SIZE);
-    if (dataUrl) state.photos.push({ id: crypto.randomUUID(), dataUrl });
+    if (dataUrl) state.photos.push({ id: uid(), dataUrl });
     else unreadable++;
   }
   if (unreadable) showToast(T().unreadable(unreadable));
@@ -395,7 +396,7 @@ function isHeic(file) {
 // heic2any pèse 1,3 Mo, on ne le charge qu'au premier HEIC.
 let heicLib;
 function loadHeicLib() {
-  heicLib ??= new Promise((resolve, reject) => {
+  heicLib = heicLib || new Promise((resolve, reject) => {
     const s = document.createElement('script');
     s.src = 'vendor/heic2any.min.js'; // copié dans le site : aucun appel à un autre serveur
     s.onload = () => resolve(window.heic2any);
@@ -1340,7 +1341,7 @@ async function saveToHistory(listing, photos = null) {
   state.history.unshift({
     listing,
     date: new Date().toISOString(),
-    id: crypto.randomUUID(),
+    id: uid(),
     thumbnail,
     photos: backupPhotos,
   });
@@ -1361,7 +1362,7 @@ function renderHistory() {
   list.innerHTML = entries.map(h => {
     const dateStr = new Date(h.date).toLocaleDateString(lang, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
     const thumbHtml = h.thumbnail
-      ? `<img class="history-thumb" src="${escapeHtml(h.thumbnail)}" alt="" />`
+      ? `<img class="history-thumb" src="${escapeHtml(h.thumbnail)}" alt="" width="52" height="52" loading="lazy" decoding="async" />`
       : '<span class="history-thumb-placeholder" aria-hidden="true">👟</span>';
     const badge = h.isDemo ? `<span class="history-item-badge">${escapeHtml(T().example)}</span>` : '';
     return `<button type="button" class="history-item" data-id="${escapeHtml(h.id)}">
@@ -1390,7 +1391,7 @@ function renderHistory() {
 
 // Annonce d'exemple, pour voir un résultat sans clé API
 
-const DEMO_ID = 'demo-clarks-craftmaster-v3';
+const DEMO_ID = 'demo-clarks-craftmaster-v4';
 const DEMO_PHOTOS = [
   'demo/clarks-1.jpg',
   'demo/clarks-2.jpg',
@@ -1405,7 +1406,7 @@ function seedDemoListing() {
     id: DEMO_ID,
     date: '2026-05-01T09:00:00.000Z',
     isDemo: true,
-    thumbnail: DEMO_PHOTOS[0],
+    thumbnail: 'demo/clarks-thumb.jpg', // 104 px : la photo entière pèse 74 Ko pour une vignette de 52 px
     photos: DEMO_PHOTOS,
     listing: {
       title: 'Mocassins Clarks × Walk in Paris Craftmaster — Cuir Bordeaux',

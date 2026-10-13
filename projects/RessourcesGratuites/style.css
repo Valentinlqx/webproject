@@ -8,13 +8,6 @@
   font-display: swap;
 }
 @font-face {
-  font-family: 'Basteleur';
-  src: url('fonts/Basteleur-Moonlight.woff2') format('woff2');
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
   font-family: 'Coconat';
   src: url('fonts/Coconat-Regular.woff2') format('woff2');
   font-weight: 400;
@@ -68,6 +61,7 @@
 html, body { image-rendering: pixelated; }
 
 body {
+  min-height: 100vh;
   min-height: 100dvh;
   background: #100204;
   font-family: 'Coconat', Georgia, serif;
@@ -820,12 +814,16 @@ main {
   transition: transform 0.14s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.14s cubic-bezier(0.2, 0.8, 0.2, 1);
   position: relative;
   overflow: hidden;
+  /* Le navigateur ne dessine que les cartes proches de l'écran. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 300px;
 }
 
-/* Distribution des cartes quand on change de filtre (pas pendant la frappe). */
-.grid.dealing .card {
+/* Distribution des premières cartes quand on change de filtre (pas pendant la frappe). */
+.card.deal {
   animation: dealIn 0.32s cubic-bezier(0.2, 0.9, 0.1, 1) both;
 }
+.card[hidden] { display: none; }
 
 @media (hover: hover) and (pointer: fine) {
   .card:hover {
@@ -1177,4 +1175,25 @@ main {
   .lang-toggle:hover {
     transform: none !important;
   }
+}
+
+/* Téléphone en paysage : l'en-tête ne doit pas prendre tout l'écran. */
+@media (max-height: 500px) and (orientation: landscape) {
+  header { padding-top: 72px; padding-bottom: 16px; }
+  .hero h1 { font-size: clamp(32px, 9vh, 56px); margin-bottom: 8px; }
+  .hero-sub { font-size: 16px; }
+}
+
+/* Impression : une liste lisible sur papier blanc, avec l'adresse de chaque site. */
+@media print {
+  html::after, body::before, body::after,
+  .skip-link, .header-controls, .back-btn, .search, .families, .subcats,
+  .filters, .guide, .results-bar, .empty-state { display: none !important; }
+  body, .page-panel { background: #fff; color: #000; margin: 0; }
+  .hero h1, .hero-sub, .last-updated, .site-footer { color: #000; text-shadow: none; }
+  .grid { display: block; }
+  .card { box-shadow: none; border: 1px solid #000; margin-bottom: 8px; break-inside: avoid; content-visibility: visible; }
+  .card[hidden] { display: none; }
+  .card::after { content: attr(href); font-size: 11px; color: #000; }
+  .card-emoji, .card-visit { display: none; }
 }

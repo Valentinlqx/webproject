@@ -16,7 +16,7 @@ const hashOf = page => new URL(page.url()).hash;
 test("choisir une famille filtre les cartes, montre ses sous-catégories et met à jour l'URL", async ({ page }) => {
   const errors = collectErrors(page);
   await page.goto(PAGES.rg);
-  const cards = page.locator('.card');
+  const cards = page.locator('.card:not([hidden])');
   const total = await cards.count();
   expect(total).toBeGreaterThan(100);
   await expect(page.locator('#subcats')).toBeHidden();
@@ -60,7 +60,7 @@ test('un lien partagé rouvre la même sélection', async ({ page }) => {
   await page.goto(PAGES.rg + '#f=typo&c=polices');
   await expect(page.locator('.family[data-family="typo"]')).toHaveClass(/active/);
   await expect(page.locator('.cat-btn[data-cat="polices"]')).toHaveClass(/active/);
-  const tags = await page.locator('.card').evaluateAll(cs => cs.map(c => c.dataset.cats));
+  const tags = await page.locator('.card:not([hidden])').evaluateAll(cs => cs.map(c => c.dataset.cats));
   expect(tags.length).toBeGreaterThan(0);
   for (const t of tags) expect(t.split(',')).toContain('polices');
 });
@@ -75,14 +75,14 @@ test('le filtre de licence ne garde que ces licences', async ({ page }) => {
   await page.goto(PAGES.rg);
   await page.locator('.license-btn[data-license="cc0"]').click();
   expect(hashOf(page)).toBe('#l=cc0');
-  const licenses = await page.locator('.card').evaluateAll(cs => cs.map(c => c.dataset.license));
+  const licenses = await page.locator('.card:not([hidden])').evaluateAll(cs => cs.map(c => c.dataset.license));
   expect(licenses.length).toBeGreaterThan(0);
   expect(new Set(licenses)).toEqual(new Set(['cc0']));
 });
 
 test('« Sans compte » retire ce qui demande une inscription', async ({ page }) => {
   await page.goto(PAGES.rg);
-  const withAccount = page.locator('.card:has(.account-tag)');
+  const withAccount = page.locator('.card:not([hidden]):has(.account-tag)');
   expect(await withAccount.count()).toBeGreaterThan(0);
   await page.locator('#no-account').click();
   await expect(page.locator('#no-account')).toHaveAttribute('aria-pressed', 'true');
@@ -92,7 +92,7 @@ test('« Sans compte » retire ce qui demande une inscription', async ({ page })
 
 test('la recherche filtre sans tenir compte des accents, et « Tout effacer » remet tout', async ({ page }) => {
   await page.goto(PAGES.rg);
-  const cards = page.locator('.card');
+  const cards = page.locator('.card:not([hidden])');
   const total = await cards.count();
   await page.fill('#search', 'icones');
   const found = await cards.count();
@@ -110,10 +110,10 @@ test('la recherche filtre sans tenir compte des accents, et « Tout effacer » r
 
 test('chaque carte montre sa licence', async ({ page }) => {
   await page.goto(PAGES.rg);
-  const cards = page.locator('.card');
+  const cards = page.locator('.card:not([hidden])');
   const count = await cards.count();
-  await expect(page.locator('.card .badge')).toHaveCount(count);
-  await expect(page.locator('.card .license-name')).toHaveCount(count);
+  await expect(page.locator('.card:not([hidden]) .badge')).toHaveCount(count);
+  await expect(page.locator('.card:not([hidden]) .license-name')).toHaveCount(count);
 });
 
 test('le mini-guide explique chaque badge', async ({ page }) => {
@@ -132,7 +132,7 @@ test('la date de dernière mise à jour est affichée sous le titre', async ({ p
 
 test('les cartes ouvrent le site dans un nouvel onglet', async ({ page }) => {
   await page.goto(PAGES.rg);
-  const first = page.locator('.card').first();
+  const first = page.locator('.card:not([hidden])').first();
   await expect(first).toHaveAttribute('target', '_blank');
   await expect(first).toHaveAttribute('rel', /noopener/);
   await expect(first).toHaveAttribute('href', /^https:\/\//);
@@ -175,7 +175,7 @@ test('la page marche même si le navigateur refuse localStorage', async ({ page 
     Object.defineProperty(window, 'localStorage', { get() { throw new Error('refusé'); } });
   });
   await page.goto(PAGES.rg);
-  expect(await page.locator('.card').count()).toBeGreaterThan(100);
+  expect(await page.locator('.card:not([hidden])').count()).toBeGreaterThan(100);
   await page.click('#lang-toggle');
   await expect(page.locator('h1')).toHaveText('Free Resources');
   expect(errors).toEqual([]);
@@ -225,14 +225,14 @@ test("la page suit un changement d'adresse (lien partagé, bouton précédent)",
   await page.goto(PAGES.rg + '#f=son');
   await page.evaluate(() => { location.hash = '#f=typo'; });
   await expect(page.locator('.family[data-family="typo"]')).toHaveAttribute('aria-pressed', 'true');
-  for (const cats of await page.locator('.card').evaluateAll(cs => cs.map(c => c.dataset.cats))) {
+  for (const cats of await page.locator('.card:not([hidden])').evaluateAll(cs => cs.map(c => c.dataset.cats))) {
     expect(cats).toMatch(/polices|outils-typo/);
   }
 });
 
 test("une carte a un nom court qui dit qu'elle ouvre un nouvel onglet", async ({ page }) => {
   await page.goto(PAGES.rg);
-  await expect(page.locator('.card').first()).toHaveAccessibleName(/^\S.* \(nouvel onglet\)$/);
+  await expect(page.locator('.card:not([hidden])').first()).toHaveAccessibleName(/^\S.* \(nouvel onglet\)$/);
 });
 
 test('à 360 px, aucun libellé ne déborde de son bouton', async ({ page }) => {

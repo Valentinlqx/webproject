@@ -107,6 +107,7 @@ body { color-scheme: light; }
 body.dark { color-scheme: dark; }
 
 body {
+  min-height: 100vh;
   min-height: 100dvh;
   background: var(--bg);
   color: var(--text);
@@ -1692,4 +1693,17 @@ h3.result-label, h4.result-label { font-family: inherit; }
   font: inherit;
   font-weight: 600;
   cursor: pointer;
+}
+
+.key-note, .brand-note {
+  max-width: 480px;
+  margin: var(--space-xs) auto 0;
+  font-size: 0.82rem;
+  color: var(--text-2);
+}
+
+/* Téléphone en paysage : l'en-tête ne doit pas prendre tout l'écran. */
+@media (max-height: 500px) and (orientation: landscape) {
+  header { padding-top: 12px; padding-bottom: 12px; }
+  .hero h1 { font-size: clamp(2rem, 10vh, 3rem); margin-bottom: 4px; }
 }

@@ -23,3 +23,5 @@ SOFTWARE.
 
 heic2any 0.0.4 (https://github.com/alexcorvi/heic2any) embarque libheif
 (https://github.com/strukturag/libheif), sous licence LGPL-3.0.
+Texte de la LGPL-3.0 : LGPL-3.0.txt (et GPL-3.0.txt, à laquelle elle renvoie).
+Sources de libheif : https://github.com/strukturag/libheif
