@@ -27,6 +27,14 @@ const store = {
   removeItem(k) { try { localStorage.removeItem(k); } catch { /* rien à effacer */ } },
 };
 
+// Clé non retenue (« Se souvenir » décoché) : gardée seulement le temps de l'onglet.
+const session = {
+  getItem(k) { try { return sessionStorage.getItem(k); } catch { return null; } },
+  setItem(k, v) { try { sessionStorage.setItem(k, v); } catch { /* rien à garder */ } },
+  removeItem(k) { try { sessionStorage.removeItem(k); } catch { /* rien à effacer */ } },
+};
+const savedKey = () => store.getItem('av-key') || session.getItem('av-key') || '';
+
 function readJSON(key, fallback) {
   try {
     const value = JSON.parse(store.getItem(key));
@@ -58,7 +66,7 @@ const maxPhotos = () => state.mode === 'bulk' ? MAX_PHOTOS_BULK : MAX_PHOTOS_SIN
 
 // Retourne { providerId, key, model } ou null si aucune clé valable n'est enregistrée.
 function currentSetup() {
-  const key = (store.getItem('av-key') || '').trim();
+  const key = savedKey().trim();
   const detected = detectProvider(key);
   if (!detected.ok) return null;
   return { providerId: detected.id, key, model: resolveModel(detected.id, store.getItem('av-model')) };
@@ -1088,7 +1096,9 @@ function renderFeatureToggles() {
 }
 
 function fillSettings() {
-  apiKeyInput.value = store.getItem('av-key') || '';
+  apiKeyInput.value = savedKey();
+  // Une clé gardée seulement pour l'onglet veut dire que la case avait été décochée.
+  $('remember-key').checked = !(session.getItem('av-key') && !store.getItem('av-key'));
   shownProvider = null;
   syncKeyStatus();
   renderFeatureToggles();
@@ -1110,11 +1120,12 @@ $('settings-save').addEventListener('click', () => {
     apiKeyInput.focus();
     return;
   }
+  store.removeItem('av-key');
+  session.removeItem('av-key');
   if (key) {
-    store.setItem('av-key', key);
+    (($('remember-key').checked) ? store : session).setItem('av-key', key);
     store.setItem('av-model', modelSelect.value);
   } else {
-    store.removeItem('av-key');
     store.removeItem('av-model');
   }
 
@@ -1136,6 +1147,7 @@ $('erase-all').addEventListener('click', () => {
   if (!confirm(T().eraseConfirm)) return;
   ['av-key', 'av-model', 'av-features', 'av-history', 'av-demo-seeded', 'av-theme', 'av-tutorial-seen']
     .forEach(k => store.removeItem(k));
+  session.removeItem('av-key');
   state.features = loadFeatures();
   state.history = [];
   seedDemoListing();
@@ -1391,10 +1403,9 @@ function renderHistory() {
 
 // Annonce d'exemple, pour voir un résultat sans clé API
 
-const DEMO_ID = 'demo-text-v5';
+const DEMO_ID = 'demo-derby-v6';
 
-// Exemple sans photos pour l'instant : les anciennes venaient d'un site marchand, sans droit
-// de réutilisation. Des photos libres (CC0) viendront les remplacer.
+// Photo d'exemple sous CC0 (domaine public) : voir demo/CREDITS.txt.
 function seedDemoListing() {
   if (store.getItem('av-demo-seeded') === DEMO_ID && state.history.some(h => h.id === DEMO_ID)) return;
   state.history = state.history.filter(h => !h.isDemo);
@@ -1402,16 +1413,16 @@ function seedDemoListing() {
     id: DEMO_ID,
     date: '2026-10-13T09:00:00.000Z',
     isDemo: true,
-    thumbnail: null,
-    photos: [],
+    thumbnail: 'demo/derby-thumb.jpg', // 104 px pour une vignette de 52 px
+    photos: ['demo/derby.jpg'],
     listing: {
-      title: 'Veste en jean bleu délavé, coupe droite, taille M',
-      description: 'Veste en jean classique, bleu délavé, coupe droite. Boutons métal, deux poches poitrine. Portée quelques fois, très bon état : pas de tache ni d\'accroc.\n\n#vestejean #denim #jean #vintage #basique #mi-saison',
-      details: { taille: 'M', categorie: 'Vestes', couleur: 'Bleu délavé', etat: 'Très bon état', matiere: 'Coton' },
-      prices: { ideal: '25 €', rapide: '18 €', minimum: '15 €' },
+      title: 'Chaussures derby en cuir marron, lacets',
+      description: 'Paire de derbies en cuir marron foncé, à lacets. Cuir souple, bout rond, semelle en bon état. Portées, avec quelques plis sur le dessus : rien de gênant, cirage conseillé.\n\n#derby #chaussuresencuir #cuir #marron #classique #homme',
+      details: { categorie: 'Chaussures', couleur: 'Marron foncé', etat: 'Bon état', matiere: 'Cuir' },
+      prices: { ideal: '22 €', rapide: '15 €', minimum: '12 €' },
       tips: [
-        'Ajoute une photo portée : on voit la coupe.',
-        'Donne la largeur d\'épaules et la longueur du dos en cm.',
+        'Indique la pointure et la longueur de la semelle intérieure en cm.',
+        'Ajoute une photo de la semelle et de l\'intérieur : les acheteurs regardent l\'usure.',
       ],
     },
   });

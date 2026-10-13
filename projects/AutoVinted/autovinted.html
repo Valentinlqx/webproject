@@ -340,6 +340,12 @@
         <span class="field-hint key-status" id="key-status" aria-live="polite"></span>
       </label>
 
+      <label class="remember">
+        <input type="checkbox" id="remember-key" checked aria-describedby="remember-hint" />
+        <span data-i18n="rememberKey">Se souvenir de la clé sur cet appareil</span>
+      </label>
+      <p class="field-hint" id="remember-hint" data-i18n="rememberHint">Sur un ordinateur partagé, décoche : la clé sera oubliée en fermant l'onglet. Fixe aussi une limite de dépense chez ton fournisseur.</p>
+
       <details class="field model-picker" id="model-picker" hidden>
         <summary class="field-label" data-i18n="chooseModel">Choisir le modèle</summary>
         <select id="model-select" data-i18n-label="model" aria-label="Modèle"></select>

@@ -272,3 +272,15 @@ test('en lot, chaque article s\'ouvre au clavier', async ({ page }) => {
   await expect(toggle).toHaveAttribute('aria-expanded', 'true');
   await expect(page.locator('.bulk-item-body .copy-btn').first()).toBeVisible();
 });
+
+test('« Se souvenir » décoché : la clé n\'est gardée que pour l\'onglet', async ({ page }) => {
+  await open(page);
+  await page.click('#settings-toggle');
+  await expect(page.locator('#remember-key')).toBeChecked();
+  await page.fill('#api-key', 'sk-ant-api03-test');
+  await page.uncheck('#remember-key');
+  await page.click('#settings-save');
+  const where = await page.evaluate(() => [localStorage.getItem('av-key'), sessionStorage.getItem('av-key')]);
+  expect(where).toEqual([null, 'sk-ant-api03-test']);
+  await expect(page.locator('#privacy-note')).toContainText('Claude');
+});

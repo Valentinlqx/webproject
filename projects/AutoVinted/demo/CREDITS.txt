@@ -1,0 +1,4 @@
+derby.jpg (et sa vignette derby-thumb.jpg) : photo du jeu « clothing-dataset-small »
+d'Alexey Grigorev, sous licence CC0 1.0 (domaine public).
+https://github.com/alexeygrigorev/clothing-dataset-small
+Fichier d'origine : test/shoes/132e5fa5-ed38-4293-8dff-20727b6b5ac2.jpg
