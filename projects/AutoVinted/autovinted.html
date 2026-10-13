@@ -1,86 +1,101 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="no-js">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <title>AutoVinted — Génère ton annonce en 1 clic</title>
   <meta name="description" content="Upload tes photos, l'IA rédige une annonce Vinted optimisée prête à copier-coller." />
   <meta name="theme-color" content="#02050a" />
+  <meta name="color-scheme" content="light dark" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=2" />
 </head>
 <body>
-<script>if(localStorage.getItem('av-theme')!=='light')document.body.classList.add('dark');</script>
+<script>
+  // Thème choisi, sinon celui de l'appareil. Appliqué avant l'affichage : pas de flash.
+  document.documentElement.classList.remove('no-js');
+  (function () {
+    let saved = null;
+    try { saved = localStorage.getItem('av-theme'); } catch {}
+    const dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    if (dark) document.body.classList.add('dark');
+  })();
+</script>
 
   <header>
     <div class="header-controls">
-      <a href="../../index.html" class="icon-btn" id="back-btn" title="Retour" aria-label="Retour">←</a>
+      <a href="../../index.html" class="icon-btn" id="back-btn" data-i18n-label="back" aria-label="Retour à l'accueil"><span aria-hidden="true">←</span></a>
       <div class="header-actions">
-        <button class="icon-btn" id="tutorial-toggle" type="button" title="Aide / Tutoriel" aria-label="Aide">?</button>
-        <button class="icon-btn" id="history-toggle" type="button" title="Historique" aria-label="Historique">⌛</button>
-        <button class="icon-btn" id="settings-toggle" type="button" title="Paramètres" aria-label="Paramètres">⚙</button>
-        <button class="icon-btn" id="theme-toggle" type="button" title="Thème clair / sombre" aria-label="Changer de thème">☀️</button>
+        <button class="icon-btn" id="lang-toggle" type="button"><span aria-hidden="true" id="lang-short">EN</span><span class="visually-hidden" id="lang-label" lang="en">Switch to English</span></button>
+        <button class="icon-btn" id="tutorial-toggle" type="button" data-i18n-label="help" aria-label="Voir le tour guidé"><span aria-hidden="true">?</span></button>
+        <button class="icon-btn" id="history-toggle" type="button" data-i18n-label="history" aria-label="Historique"><span aria-hidden="true">⌛</span></button>
+        <button class="icon-btn" id="settings-toggle" type="button" data-i18n-label="settings" aria-label="Paramètres"><span aria-hidden="true">⚙</span></button>
+        <button class="icon-btn" id="theme-toggle" type="button" aria-label="Passer en thème clair"><span aria-hidden="true" id="theme-icon">☀️</span></button>
       </div>
     </div>
     <div class="hero">
       <h1 id="site-title">AutoVinted</h1>
       <p class="last-updated" id="last-updated"></p>
-      <p class="hero-sub">Upload tes photos, l'IA rédige ton annonce Vinted optimisée.</p>
+      <p class="hero-sub" data-i18n="heroSub">Ajoute tes photos, l'IA rédige ton annonce Vinted.</p>
+      <button class="tour-btn" id="tour-btn" type="button" data-i18n="tour">Voir le tour (30 s)</button>
     </div>
+    <noscript><p class="noscript" data-i18n="noscript">AutoVinted fonctionne entièrement dans ton navigateur et a besoin de JavaScript.</p></noscript>
   </header>
 
   <div class="app-shell">
   <div class="modal" id="history-modal" hidden>
-    <div class="modal-card">
+    <div class="modal-card" aria-labelledby="history-heading">
       <div class="modal-head">
-        <h2>Historique</h2>
-        <button class="icon-btn" id="history-close" type="button" aria-label="Fermer">✕</button>
+        <h2 id="history-heading" data-i18n="historyHeading">Historique</h2>
+        <button class="icon-btn" id="history-close" type="button" data-i18n-label="close" aria-label="Fermer"><span aria-hidden="true">✕</span></button>
       </div>
       <div class="history-list" id="history-list"></div>
-      <button class="btn-ghost" id="history-clear" type="button" hidden>Tout effacer</button>
+      <button class="btn-ghost" id="history-clear" type="button" data-i18n="historyClear" hidden>Tout effacer</button>
     </div>
   </div>
 
   <main>
-    <section class="upload-section" id="upload-section">
-      <div class="mode-toggle" role="group" aria-label="Mode">
-        <button class="mode-btn active" data-mode="single" type="button" aria-pressed="true">Une annonce</button>
-        <button class="mode-btn" data-mode="bulk" type="button" aria-pressed="false">En lot</button>
+    <section class="upload-section" id="upload-section" aria-labelledby="photos-heading">
+      <h2 class="section-heading" id="photos-heading" data-i18n="photosHeading">Tes photos</h2>
+      <div class="mode-toggle" role="group" data-i18n-label="mode" aria-label="Mode">
+        <button class="mode-btn active" data-mode="single" type="button" aria-pressed="true" data-i18n="modeSingle">Une annonce</button>
+        <button class="mode-btn" data-mode="bulk" type="button" aria-pressed="false" data-i18n="modeBulk">En lot</button>
       </div>
 
-      <label for="file-input" class="dropzone" id="dropzone" tabindex="0">
-        <div class="dropzone-icon">📸</div>
-        <p class="dropzone-title" id="dropzone-title">Glisse tes photos ici</p>
-        <p class="dropzone-sub" id="dropzone-sub">ou clique pour parcourir — jusqu'à 8 photos</p>
+      <div class="dropzone" id="dropzone">
+        <div class="dropzone-icon" aria-hidden="true">📸</div>
+        <button class="btn-add" id="add-photos" type="button" aria-describedby="dropzone-sub" data-i18n="addPhotos">Ajouter des photos</button>
+        <p class="dropzone-title" id="dropzone-title" data-i18n="dropTitle">ou glisse-les ici</p>
+        <p class="dropzone-sub" id="dropzone-sub">Jusqu'à 8 photos d'un même article.</p>
         <input type="file" id="file-input" accept="image/*,.heic,.heif" multiple hidden />
-      </label>
+      </div>
 
       <div class="previews" id="previews"></div>
 
       <div class="context-field">
         <label class="field">
-          <span class="field-label">Contexte (optionnel)</span>
-          <textarea id="context-input" rows="2" placeholder="Ex : porté 3 fois, prix d'achat 80€, je veux vendre vite"></textarea>
-          <span class="field-hint" id="context-hint">Toute info utile que l'IA ne peut pas deviner (taille, état réel, prix d'achat...).</span>
+          <span class="field-label" data-i18n="contextLabel">Contexte (optionnel)</span>
+          <textarea id="context-input" rows="2" aria-describedby="context-hint"></textarea>
+          <span class="field-hint" id="context-hint" data-i18n="contextHintSingle">Ce que l'IA ne peut pas deviner : taille, état réel, prix d'achat… Exemple : porté 3 fois, acheté 80 €, je veux vendre vite.</span>
         </label>
       </div>
 
       <details class="tips-section">
         <summary>
-          <span class="tips-summary-text">💡 Conseils pour vendre vite sur Vinted</span>
-          <span class="tips-chevron">▾</span>
+          <span class="tips-summary-text"><span aria-hidden="true">💡 </span><span data-i18n="tipsSummary">Conseils pour vendre vite sur Vinted</span></span>
+          <span class="tips-chevron" aria-hidden="true">▾</span>
         </summary>
         <div class="tips-body">
           <div class="tip">
-            <strong>📸 Photos qui convertissent</strong>
-            <p>Fond uni clair, lumière naturelle (jour, fenêtre). 4 à 6 photos minimum : face, dos, étiquette, composition, défauts éventuels.</p>
+            <h3 class="tip-title"><span aria-hidden="true">📸 </span><span data-i18n="tipPhotosTitle">Photos qui convertissent</span></h3>
+            <p data-i18n="tipPhotosText">Fond uni clair, lumière naturelle (jour, fenêtre). 4 à 6 photos minimum : face, dos, étiquette, composition, défauts éventuels.</p>
           </div>
           <div class="tip">
-            <strong>👗 Photo portée</strong>
-            <p>Pour les vêtements, ajoute toujours une photo portée — ça multiplie les ventes par 2-3. Montre la coupe et la tombée du tissu.</p>
+            <h3 class="tip-title"><span aria-hidden="true">👗 </span><span data-i18n="tipWornTitle">Photo portée</span></h3>
+            <p data-i18n="tipWornText">Pour les vêtements, ajoute toujours une photo portée — ça multiplie les ventes par 2-3. Montre la coupe et la tombée du tissu.</p>
           </div>
           <div class="tip">
-            <strong>📏 Mesures précises (en cm)</strong>
+            <h3 class="tip-title"><span aria-hidden="true">📏 </span><span data-i18n="tipMeasureTitle">Mesures précises (en cm)</span></h3>
             <div class="measure-grid">
               <div class="measure-card">
                 <svg viewBox="0 0 100 100" class="garment-svg" aria-hidden="true">
@@ -90,12 +105,12 @@
                   <line x1="30" y1="46" x2="70" y2="46" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 2"/>
                 </svg>
                 <div class="measure-card-body">
-                  <h4>Hauts</h4>
+                  <h4 data-i18n="measureTops">Hauts</h4>
                   <ul>
-                    <li>largeur épaules</li>
-                    <li>longueur dos</li>
-                    <li>poitrine (sous bras)</li>
-                    <li>longueur manches</li>
+                    <li data-i18n="measureTops1">largeur épaules</li>
+                    <li data-i18n="measureTops2">longueur dos</li>
+                    <li data-i18n="measureTops3">poitrine (sous bras)</li>
+                    <li data-i18n="measureTops4">longueur manches</li>
                   </ul>
                 </div>
               </div>
@@ -108,12 +123,12 @@
                   <line x1="50" y1="40" x2="50" y2="86" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 2"/>
                 </svg>
                 <div class="measure-card-body">
-                  <h4>Pantalons</h4>
+                  <h4 data-i18n="measurePants">Pantalons</h4>
                   <ul>
-                    <li>tour de taille</li>
-                    <li>entrejambe</li>
-                    <li>largeur cuisse</li>
-                    <li>largeur ourlet</li>
+                    <li data-i18n="measurePants1">tour de taille</li>
+                    <li data-i18n="measurePants2">entrejambe</li>
+                    <li data-i18n="measurePants3">largeur cuisse</li>
+                    <li data-i18n="measurePants4">largeur ourlet</li>
                   </ul>
                 </div>
               </div>
@@ -126,12 +141,12 @@
                   <line x1="33" y1="54" x2="67" y2="54" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 2"/>
                 </svg>
                 <div class="measure-card-body">
-                  <h4>Robes</h4>
+                  <h4 data-i18n="measureDresses">Robes</h4>
                   <ul>
-                    <li>épaules</li>
-                    <li>longueur totale</li>
-                    <li>poitrine</li>
-                    <li>tour de taille</li>
+                    <li data-i18n="measureDresses1">épaules</li>
+                    <li data-i18n="measureDresses2">longueur totale</li>
+                    <li data-i18n="measureDresses3">poitrine</li>
+                    <li data-i18n="measureDresses4">tour de taille</li>
                   </ul>
                 </div>
               </div>
@@ -145,20 +160,20 @@
                   <circle cx="82" cy="66" r="1.6" fill="var(--accent)"/>
                 </svg>
                 <div class="measure-card-body">
-                  <h4>Chaussures</h4>
+                  <h4 data-i18n="measureShoes">Chaussures</h4>
                   <ul>
-                    <li>longueur intérieure de la semelle</li>
+                    <li data-i18n="measureShoes1">longueur intérieure de la semelle</li>
                   </ul>
                 </div>
               </div>
             </div>
           </div>
           <div class="tip">
-            <strong>🌍 Guide des tailles internationales</strong>
-            <p>Si la taille est étrangère, donne la correspondance pour rassurer :</p>
-            <div class="size-table" role="table" aria-label="Conversion de tailles">
+            <h3 class="tip-title"><span aria-hidden="true">🌍 </span><span data-i18n="tipSizesTitle">Guide des tailles internationales</span></h3>
+            <p data-i18n="tipSizesText">Si la taille est étrangère, donne la correspondance pour rassurer :</p>
+            <div class="size-table" role="table" data-i18n-label="sizesTable" aria-label="Correspondance des tailles">
               <div class="size-row size-row-head" role="row">
-                <span class="size-label" role="columnheader"></span>
+                <span class="size-label" role="columnheader" data-i18n="sizesSize">Taille</span>
                 <span role="columnheader">XS</span>
                 <span role="columnheader">S</span>
                 <span role="columnheader">M</span>
@@ -166,7 +181,7 @@
                 <span role="columnheader">XL</span>
               </div>
               <div class="size-row" role="row">
-                <span class="size-label" role="rowheader">FR Femme</span>
+                <span class="size-label" role="rowheader" data-i18n="sizesWomen">FR femme</span>
                 <span class="size-pill" role="cell">34</span>
                 <span class="size-pill" role="cell">36</span>
                 <span class="size-pill" role="cell">38</span>
@@ -174,7 +189,7 @@
                 <span class="size-pill" role="cell">42</span>
               </div>
               <div class="size-row" role="row">
-                <span class="size-label" role="rowheader">FR Homme</span>
+                <span class="size-label" role="rowheader" data-i18n="sizesMen">FR homme</span>
                 <span class="size-pill dash" role="cell">—</span>
                 <span class="size-pill" role="cell">44/46</span>
                 <span class="size-pill" role="cell">48</span>
@@ -192,69 +207,73 @@
             </div>
           </div>
           <div class="tip">
-            <strong>🔍 Défauts honnêtes</strong>
-            <p>Photographie et signale clairement les défauts (taches, bouloches, accrocs). Tu auras de meilleurs avis et zéro retour.</p>
+            <h3 class="tip-title"><span aria-hidden="true">🔍 </span><span data-i18n="tipFlawsTitle">Défauts honnêtes</span></h3>
+            <p data-i18n="tipFlawsText">Photographie et signale clairement les défauts (taches, bouloches, accrocs). Tu auras de meilleurs avis et zéro retour.</p>
           </div>
           <div class="tip">
-            <strong>🏷️ Hashtags & mots-clés</strong>
-            <p>Marque, style (vintage, oversize, Y2K, streetwear), saison, occasion. Utilise des termes que les acheteurs tapent vraiment.</p>
+            <h3 class="tip-title"><span aria-hidden="true">🏷️ </span><span data-i18n="tipTagsTitle">Hashtags & mots-clés</span></h3>
+            <p data-i18n="tipTagsText">Marque, style (vintage, oversize, Y2K, streetwear), saison, occasion. Utilise des termes que les acheteurs tapent vraiment.</p>
           </div>
           <div class="tip">
-            <strong>💰 Prix réaliste</strong>
-            <p>Regarde 5-10 annonces similaires vendues récemment. Vise le milieu de la fourchette. Tu peux toujours baisser ensuite.</p>
+            <h3 class="tip-title"><span aria-hidden="true">💰 </span><span data-i18n="tipPriceTitle">Prix réaliste</span></h3>
+            <p data-i18n="tipPriceText">Regarde 5-10 annonces similaires vendues récemment. Vise le milieu de la fourchette. Tu peux toujours baisser ensuite.</p>
           </div>
           <div class="tip">
-            <strong>⚡ Réactivité</strong>
-            <p>Réponds en moins d'1h aux messages — Vinted boost les vendeurs réactifs. Active les notifications.</p>
+            <h3 class="tip-title"><span aria-hidden="true">⚡ </span><span data-i18n="tipFastTitle">Réactivité</span></h3>
+            <p data-i18n="tipFastText">Réponds en moins d'1h aux messages — Vinted boost les vendeurs réactifs. Active les notifications.</p>
           </div>
           <div class="tip">
-            <strong>📦 Bundle & frais</strong>
-            <p>Active la remise lot (-10% pour 2+ articles). Les acheteurs achètent plus, tu paies moins de frais d'envoi par article.</p>
+            <h3 class="tip-title"><span aria-hidden="true">📦 </span><span data-i18n="tipBundleTitle">Bundle & frais</span></h3>
+            <p data-i18n="tipBundleText">Active la remise lot (-10% pour 2+ articles). Les acheteurs achètent plus, tu paies moins de frais d'envoi par article.</p>
           </div>
           <div class="tip">
-            <strong>🕐 Timing</strong>
-            <p>Poste tes annonces en soirée (19h-22h) ou dimanche après-midi : pic d'activité Vinted.</p>
+            <h3 class="tip-title"><span aria-hidden="true">🕐 </span><span data-i18n="tipTimingTitle">Timing</span></h3>
+            <p data-i18n="tipTimingText">Poste tes annonces en soirée (19h-22h) ou dimanche après-midi : pic d'activité Vinted.</p>
           </div>
         </div>
       </details>
 
       <div class="estimate" id="estimate" hidden></div>
 
-      <button class="btn-primary" id="analyze-btn" disabled>
+      <p class="privacy-note" id="privacy-note"></p>
+
+      <button class="btn-primary" id="analyze-btn" type="button" disabled>
         <span class="btn-label">Analyser mes photos</span>
-        <span class="btn-spinner" hidden></span>
+        <span class="btn-spinner" aria-hidden="true" hidden></span>
       </button>
     </section>
 
-    <section class="chat-section" id="chat-section" hidden>
+    <section class="chat-section" id="chat-section" aria-labelledby="chat-heading" hidden>
       <div class="chat-header">
-        <div class="chat-avatar">✦</div>
+        <div class="chat-avatar" aria-hidden="true">✦</div>
         <div>
-          <p class="chat-name">Assistant Vinted</p>
-          <p class="chat-status">Quelques précisions pour finaliser ton annonce</p>
+          <h2 class="chat-name" id="chat-heading" tabindex="-1" data-i18n="chatHeading">Questions de l'assistant</h2>
+          <p class="chat-status" data-i18n="chatStatus">Quelques précisions pour finir ton annonce</p>
         </div>
       </div>
-      <div class="chat-messages" id="chat-messages"></div>
+      <div class="chat-messages" id="chat-messages" role="log" aria-live="polite"></div>
       <form class="chat-input" id="chat-form">
-        <input type="text" id="chat-text" placeholder="Ta réponse..." autocomplete="off" aria-label="Ta réponse" />
-        <button type="submit" class="chat-send" title="Envoyer" aria-label="Envoyer">→</button>
+        <input type="text" id="chat-text" autocomplete="off" data-i18n-label="chatAnswer" aria-label="Ta réponse" />
+        <button type="submit" class="chat-send" data-i18n-label="send" aria-label="Envoyer"><span aria-hidden="true">→</span></button>
       </form>
-      <button class="btn-ghost" id="generate-btn" type="button" hidden>Générer l'annonce maintenant</button>
+      <button class="btn-ghost" id="generate-btn" type="button" data-i18n="generateNow" hidden>Rédiger l'annonce maintenant</button>
     </section>
 
-    <section class="bulk-section" id="bulk-section" hidden>
+    <section class="bulk-section" id="bulk-section" aria-labelledby="bulk-heading" hidden>
+      <h2 class="section-heading" id="bulk-heading" tabindex="-1" data-i18n="bulkHeading">Tes annonces</h2>
       <div class="bulk-progress" id="bulk-progress" hidden>
-        <div class="bulk-progress-text" id="bulk-progress-text"></div>
+        <div class="bulk-progress-text" id="bulk-progress-text" role="status"></div>
         <div class="bulk-progress-bar"><div class="bulk-progress-fill" id="bulk-progress-fill"></div></div>
       </div>
       <div class="bulk-results" id="bulk-results"></div>
       <div class="result-actions" id="bulk-actions" hidden>
-        <button class="btn-primary" id="bulk-copy-all-btn" type="button">Copier toutes les annonces</button>
-        <button class="btn-ghost" id="bulk-restart-btn" type="button">Recommencer</button>
+        <button class="btn-primary" id="bulk-copy-all-btn" type="button" data-i18n="copyAllListings">Copier toutes les annonces</button>
+        <button class="btn-ghost" id="bulk-restart-btn" type="button" data-i18n="restart">Recommencer</button>
       </div>
     </section>
 
-    <section class="result-section" id="result-section" hidden>
+    <section class="result-section" id="result-section" aria-labelledby="result-heading" hidden>
+      <h2 class="section-heading" id="result-heading" tabindex="-1" data-i18n="resultHeading">Ton annonce</h2>
       <div class="result-card">
         <div class="result-warnings" id="r-warnings" hidden></div>
 
@@ -262,98 +281,106 @@
 
         <div class="result-block">
           <div class="result-block-head">
-            <span class="result-label">Titre</span>
-            <button class="copy-btn" type="button" data-copy="title">Copier</button>
+            <h3 class="result-label" data-i18n="labelTitle">Titre</h3>
+            <button class="copy-btn" type="button" data-copy="title" data-i18n="copy" data-i18n-label="copyTitle" aria-label="Copier le titre">Copier</button>
           </div>
           <p class="result-title" id="r-title"></p>
         </div>
 
         <div class="result-block">
           <div class="result-block-head">
-            <span class="result-label">Description</span>
-            <button class="copy-btn" type="button" data-copy="description">Copier</button>
+            <h3 class="result-label" data-i18n="labelDescription">Description</h3>
+            <button class="copy-btn" type="button" data-copy="description" data-i18n="copy" data-i18n-label="copyDescription" aria-label="Copier la description">Copier</button>
           </div>
           <p class="result-description" id="r-description"></p>
         </div>
 
         <div class="result-block" id="r-details-block">
-          <span class="result-label">Détails</span>
+          <h3 class="result-label" data-i18n="labelDetails">Détails</h3>
           <ul class="result-details" id="r-details"></ul>
         </div>
 
         <div class="result-block" id="r-prices-block">
-          <span class="result-label">Prix conseillés</span>
-          <div class="price-grid" id="r-prices"></div>
+          <h3 class="result-label" data-i18n="labelPrices">Prix conseillés</h3>
+          <dl class="price-grid" id="r-prices"></dl>
         </div>
 
         <div class="result-block" id="r-tips-block">
-          <span class="result-label">Conseils</span>
+          <h3 class="result-label" data-i18n="labelTips">Conseils</h3>
           <ul class="result-tips" id="r-tips"></ul>
         </div>
 
         <div class="result-block" id="r-source-block" hidden>
-          <span class="result-label">Source / Copyright</span>
-          <a id="r-source-link" href="#" target="_blank" rel="noopener" class="source-link">Voir le produit original →</a>
+          <h3 class="result-label" data-i18n="labelSource">Source des photos</h3>
+          <a id="r-source-link" href="#" target="_blank" rel="noopener noreferrer" class="source-link"><span data-i18n="sourceLink">Voir le produit d'origine</span> <span aria-hidden="true">→</span></a>
         </div>
       </div>
 
       <div class="result-actions">
-        <button class="btn-primary" id="copy-all-btn" type="button">Copier toute l'annonce</button>
-        <button class="btn-ghost" id="restart-btn" type="button">Nouvelle annonce</button>
+        <button class="btn-primary" id="copy-all-btn" type="button" data-i18n="copyAll">Copier toute l'annonce</button>
+        <button class="btn-ghost" id="restart-btn" type="button" data-i18n="newListing">Nouvelle annonce</button>
       </div>
     </section>
   </main>
 
   <div class="modal" id="settings-modal" hidden>
-    <div class="modal-card">
+    <div class="modal-card" aria-labelledby="settings-heading">
       <div class="modal-head">
-        <h2>Paramètres</h2>
-        <button class="icon-btn" id="settings-close" type="button" aria-label="Fermer">✕</button>
+        <h2 id="settings-heading" data-i18n="settingsHeading">Paramètres</h2>
+        <button class="icon-btn" id="settings-close" type="button" data-i18n-label="close" aria-label="Fermer"><span aria-hidden="true">✕</span></button>
       </div>
       <label class="field">
-        <span class="field-label">Clé API</span>
-        <input type="password" id="api-key" placeholder="Colle ta clé ici" autocomplete="off" spellcheck="false" />
+        <span class="field-label" data-i18n="apiKey">Clé API</span>
+        <input type="password" id="api-key" data-i18n-placeholder="apiKeyPlaceholder" placeholder="Colle ta clé ici" autocomplete="off" spellcheck="false" aria-describedby="key-status key-stored" />
         <span class="field-hint key-status" id="key-status" aria-live="polite"></span>
       </label>
 
       <details class="field model-picker" id="model-picker" hidden>
-        <summary class="field-label">Choisir le modèle</summary>
-        <select id="model-select" aria-label="Modèle"></select>
+        <summary class="field-label" data-i18n="chooseModel">Choisir le modèle</summary>
+        <select id="model-select" data-i18n-label="model" aria-label="Modèle"></select>
       </details>
 
-      <p class="field-hint">Stockée uniquement dans ton navigateur. Obtenir une clé : <span id="key-links"></span></p>
+      <p class="field-hint" id="key-stored"><span data-i18n="keyStored">Ta clé reste dans ce navigateur. Obtenir une clé :</span> <span id="key-links"></span></p>
 
-      <div class="field">
-        <span class="field-label">Personnalisation</span>
-        <span class="field-hint">Désactive ce dont tu n'as pas besoin pour économiser des tokens.</span>
+      <fieldset class="field">
+        <legend class="field-label" data-i18n="customize">Personnalisation</legend>
+        <span class="field-hint" data-i18n="customizeHint">Coupe ce dont tu n'as pas besoin : l'annonce coûte moins cher.</span>
         <div class="features-list" id="features-list"></div>
-      </div>
+      </fieldset>
 
-      <button class="btn-primary" id="settings-save" type="button">Enregistrer</button>
+      <button class="btn-primary" id="settings-save" type="button" data-i18n="save">Enregistrer</button>
+
+      <div class="field privacy">
+        <h3 class="field-label" data-i18n="privacyHeading">Vie privée</h3>
+        <p class="field-hint" data-i18n="privacyText">Pas de compte, pas de cookie, pas de statistiques.</p>
+        <button class="btn-ghost" id="erase-all" type="button" data-i18n="eraseAll">Tout effacer de ce navigateur</button>
+      </div>
     </div>
   </div>
   </div>
 
-  <div id="tutorial-overlay" hidden aria-hidden="true">
+  <div id="tutorial-overlay" hidden>
     <div id="tutorial-spotlight"></div>
-    <div id="tutorial-tooltip">
-      <button class="tutorial-tip-close" id="tutorial-tip-close" type="button" title="Fermer" aria-label="Fermer le tutoriel">✕</button>
-      <div class="tutorial-tip-emoji" id="tutorial-tip-emoji"></div>
-      <h3 id="tutorial-tip-title"></h3>
+    <div id="tutorial-tooltip" role="dialog" aria-modal="true" aria-labelledby="tutorial-tip-title" aria-describedby="tutorial-tip-text">
+      <button class="tutorial-tip-close" id="tutorial-tip-close" type="button" data-i18n-label="tutorialClose" aria-label="Fermer le tour guidé"><span aria-hidden="true">✕</span></button>
+      <div class="tutorial-tip-emoji" id="tutorial-tip-emoji" aria-hidden="true"></div>
+      <h2 id="tutorial-tip-title"></h2>
       <p id="tutorial-tip-text"></p>
       <div class="tutorial-tip-footer">
         <div class="tutorial-tip-dots" id="tutorial-tip-dots"></div>
         <div class="tutorial-tip-btns">
-          <button class="btn-ghost btn-sm" id="tutorial-tip-prev" type="button" aria-label="Étape précédente">←</button>
+          <button class="btn-ghost btn-sm" id="tutorial-tip-prev" type="button" data-i18n-label="tutorialPrev" aria-label="Étape précédente"><span aria-hidden="true">←</span></button>
           <button class="btn-primary btn-sm" id="tutorial-tip-next" type="button">Suivant →</button>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="autovinted-core.js"></script>
-  <script src="script.js"></script>
+  <script src="../../lang.js?v=3"></script>
+  <script src="i18n.js?v=2"></script>
+  <script src="autovinted-core.js?v=2"></script>
+  <script src="script.js?v=2"></script>
 </body>
 </html>

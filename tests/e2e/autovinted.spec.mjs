@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
-import { PAGES, collectErrors } from './pages.mjs';
+import { PAGES, WIDTHS, collectErrors } from './pages.mjs';
+import { axeViolations } from './a11y.mjs';
 
 const PHOTO = path.resolve('projects/AutoVinted/demo/clarks-1.jpg');
 
@@ -157,4 +158,116 @@ test('une photo HEIC d\'iPhone est convertie et acceptée', async ({ page }) => 
   await expect(page.locator('.preview')).toHaveCount(1, { timeout: 20000 });
   const src = await page.locator('.preview img').getAttribute('src');
   expect(src).toMatch(/^data:image\/jpeg;base64,/);
+});
+
+for (const colorScheme of ['light', 'dark']) {
+  for (const width of WIDTHS) {
+    test(`aucune erreur d'accessibilité AA @${width}px ${colorScheme}`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme });
+      await open(page);
+      await page.setViewportSize({ width, height: 900 });
+      expect(await axeViolations(page)).toEqual([]);
+    });
+  }
+}
+
+test("aucune erreur d'accessibilité dans les paramètres, l'annonce et le tour", async ({ page }) => {
+  await open(page);
+  await page.click('#settings-toggle');
+  expect(await axeViolations(page)).toEqual([]);
+  await page.keyboard.press('Escape');
+  await page.click('#history-toggle');
+  await page.click('.history-item');
+  await expect(page.locator('#result-section')).toBeVisible();
+  expect(await axeViolations(page)).toEqual([]);
+  await page.click('#tour-btn');
+  expect(await axeViolations(page)).toEqual([]);
+});
+
+test('le thème suit l\'appareil à la première visite', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'light' });
+  await open(page);
+  await expect(page.locator('body')).not.toHaveClass(/dark/);
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await page.evaluate(() => sessionStorage.removeItem('seeded'));
+  await page.reload();
+  await expect(page.locator('body')).toHaveClass(/dark/);
+});
+
+test('les interrupteurs des paramètres se règlent au clavier', async ({ page }) => {
+  await open(page);
+  await page.click('#settings-toggle');
+  const switches = page.getByRole('switch');
+  await expect(switches).toHaveCount(5);
+  await switches.first().focus();
+  await page.keyboard.press('Space');
+  await expect(switches.first()).not.toBeChecked();
+});
+
+test('fermer une fenêtre rend le focus au bouton qui l\'a ouverte', async ({ page }) => {
+  await open(page);
+  await page.click('#settings-toggle');
+  await expect(page.locator('#api-key')).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#settings-modal')).toBeHidden();
+  await expect(page.locator('#settings-toggle')).toBeFocused();
+});
+
+test('le tour ne s\'ouvre plus tout seul ; le bouton le propose', async ({ page }) => {
+  await page.addInitScript(() => localStorage.clear());
+  await page.goto(PAGES.autovinted);
+  await page.waitForTimeout(600);
+  await expect(page.locator('#tutorial-overlay')).toBeHidden();
+  await page.click('#tour-btn');
+  await expect(page.locator('#tutorial-tooltip')).toBeVisible();
+  await expect(page.locator('#tutorial-tip-next')).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#tutorial-overlay')).toBeHidden();
+  await expect(page.locator('#tour-btn')).toBeFocused();
+});
+
+test('en anglais, l\'interface et l\'annonce demandée sont en anglais', async ({ page }) => {
+  await open(page, { 'av-key': 'sk-ant-test', lang: 'en' });
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  await expect(page.locator('#analyze-btn')).toContainText('Analyse my photos');
+  let sent;
+  await page.route('https://api.anthropic.com/v1/messages', route => {
+    sent = route.request().postDataJSON();
+    route.fulfill(claudeReply({ action: 'generate', message: '', listing: { title: 'Denim jacket', description: 'Nice.', warnings: [] } }));
+  });
+  await page.setInputFiles('#file-input', PHOTO);
+  await page.click('#analyze-btn');
+  await expect(page.locator('#r-title')).toHaveText('Denim jacket');
+  expect(JSON.stringify(sent.system)).toContain('en anglais');
+  await expect(page.locator('#result-heading')).toBeFocused();
+});
+
+test('avant l\'envoi, la page dit où partent les photos', async ({ page }) => {
+  await open(page, { 'av-key': 'sk-ant-test' });
+  await expect(page.locator('#privacy-note')).toContainText('Claude');
+});
+
+test('« Tout effacer de ce navigateur » retire la clé et l\'historique', async ({ page }) => {
+  await open(page, { 'av-key': 'sk-ant-test' });
+  page.on('dialog', d => d.accept());
+  await page.click('#settings-toggle');
+  await page.click('#erase-all');
+  expect(await page.evaluate(() => localStorage.getItem('av-key'))).toBeNull();
+  await expect(page.locator('#api-key')).toHaveValue('');
+});
+
+test('en lot, chaque article s\'ouvre au clavier', async ({ page }) => {
+  await open(page, { 'av-key': 'sk-ant-test' });
+  await page.route('https://api.anthropic.com/v1/messages', route => route.fulfill(claudeReply({
+    listings: [{ photo_indices: [0], title: 'Mocassins Clarks', description: 'Cuir bordeaux.', warnings: [] }],
+  })));
+  await page.click('.mode-btn[data-mode="bulk"]');
+  await page.setInputFiles('#file-input', PHOTO);
+  await page.click('#analyze-btn');
+  const toggle = page.locator('.bulk-item-toggle').first();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await toggle.focus();
+  await page.keyboard.press('Enter');
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.locator('.bulk-item-body .copy-btn').first()).toBeVisible();
 });

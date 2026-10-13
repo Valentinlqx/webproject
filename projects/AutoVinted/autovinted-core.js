@@ -13,7 +13,7 @@
       models: [
         { id: 'claude-opus-5', label: 'Claude Opus 5', in: 5, out: 25 },
         { id: 'claude-sonnet-5', label: 'Claude Sonnet 5', in: 2, out: 10 },
-        { id: 'claude-haiku-4-5', label: 'Claude Haiku 4.5 (économique)', in: 1, out: 5 },
+        { id: 'claude-haiku-4-5', label: 'Claude Haiku 4.5', tag: 'eco', in: 1, out: 5 },
       ],
     },
     openai: {
@@ -22,8 +22,8 @@
       imageTokens: 425,
       models: [
         { id: 'gpt-6-sol', label: 'GPT-6 Sol', in: 2, out: 10 },
-        { id: 'gpt-6-luna', label: 'GPT-6 Luna (économique)', in: 0.1, out: 0.5 },
-        { id: 'gpt-6-astra', label: 'GPT-6 Astra (le plus puissant)', in: 10, out: 50 },
+        { id: 'gpt-6-luna', label: 'GPT-6 Luna', tag: 'eco', in: 0.1, out: 0.5 },
+        { id: 'gpt-6-astra', label: 'GPT-6 Astra', tag: 'strongest', in: 10, out: 50 },
       ],
     },
     gemini: {
@@ -32,7 +32,7 @@
       imageTokens: 258,
       models: [
         { id: 'gemini-3.8-flash', label: 'Gemini 3.8 Flash', in: 0.75, out: 3.75 },
-        { id: 'gemini-3.5-flash-lite', label: 'Gemini 3.5 Flash-Lite (économique)', in: 0.3, out: 2.5 },
+        { id: 'gemini-3.5-flash-lite', label: 'Gemini 3.5 Flash-Lite', tag: 'eco', in: 0.3, out: 2.5 },
       ],
     },
     mistral: {
@@ -41,7 +41,7 @@
       imageTokens: 1000,
       models: [
         { id: 'mistral-medium-latest', label: 'Mistral Medium', in: 1.5, out: 7.5 },
-        { id: 'mistral-small-latest', label: 'Mistral Small (économique)', in: 0.15, out: 0.6 },
+        { id: 'mistral-small-latest', label: 'Mistral Small', tag: 'eco', in: 0.15, out: 0.6 },
       ],
     },
   };
@@ -82,7 +82,7 @@
   // Les modèles emballent parfois le JSON dans ```json … ``` ou dans une phrase.
   function parseJSON(text) {
     const raw = (text || '').trim();
-    if (!raw) throw new Error("L'IA a renvoyé une réponse vide. Réessaie.");
+    if (!raw) throw new Error(msg.empty);
 
     const attempts = [raw];
     const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
@@ -94,8 +94,35 @@
       try { return JSON.parse(candidate); } catch { /* on essaie la forme suivante */ }
     }
     const snippet = raw.length > 220 ? raw.slice(0, 220) + '…' : raw;
-    throw new Error(`Réponse de l'IA illisible : « ${snippet} »`);
+    throw new Error(msg.unreadable(snippet));
   }
+
+  // Messages montrés à l'utilisateur, dans la langue de la page (setLang).
+  const MESSAGES = {
+    fr: {
+      empty: "L'IA a renvoyé une réponse vide. Réessaie.",
+      unreadable: snippet => `Réponse de l'IA illisible : « ${snippet} »`,
+      claudeRefusal: "Claude a refusé de traiter ces photos. Essaie avec d'autres photos ou un autre modèle.",
+      geminiBlocked: 'Gemini a bloqué la demande (filtre de sécurité).',
+      badKey: 'Clé API refusée. Vérifie-la dans les paramètres.',
+      quota: 'Trop de requêtes ou quota épuisé chez ton fournisseur. Réessaie dans un moment.',
+      http: status => `Erreur du fournisseur (HTTP ${status}).`,
+      network: 'Impossible de joindre le fournisseur. Vérifie ta connexion.',
+    },
+    en: {
+      empty: 'The AI sent back an empty answer. Try again.',
+      unreadable: snippet => `Unreadable AI answer: "${snippet}"`,
+      claudeRefusal: 'Claude refused to process these photos. Try other photos or another model.',
+      geminiBlocked: 'Gemini blocked the request (safety filter).',
+      badKey: 'API key refused. Check it in the settings.',
+      quota: 'Too many requests or quota used up at your provider. Try again in a moment.',
+      http: status => `Provider error (HTTP ${status}).`,
+      network: 'Can\'t reach the provider. Check your connection.',
+    },
+  };
+  let msg = MESSAGES.fr;
+  function setLang(lang) { msg = MESSAGES[lang] || MESSAGES.fr; }
+  function message(key) { return msg[key]; }
 
   function splitDataUrl(url) {
     const m = /^data:(image\/[a-z+]+);base64,(.+)$/.exec(url);
@@ -218,12 +245,12 @@
 
     if (providerId === 'anthropic') {
       if (data.stop_reason === 'refusal') {
-        throw new Error('Claude a refusé de traiter ces photos. Essaie avec d\'autres photos ou un autre modèle.');
+        throw new Error(msg.claudeRefusal);
       }
       text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
     } else if (providerId === 'gemini') {
       if (data.promptFeedback && data.promptFeedback.blockReason) {
-        throw new Error('Gemini a bloqué la demande (filtre de sécurité).');
+        throw new Error(msg.geminiBlocked);
       }
       const parts = data.candidates?.[0]?.content?.parts || [];
       text = parts.filter(p => p.text && !p.thought).map(p => p.text).join('');
@@ -234,15 +261,15 @@
         : content || '';
     }
 
-    if (!text.trim()) throw new Error("L'IA a renvoyé une réponse vide. Réessaie.");
+    if (!text.trim()) throw new Error(msg.empty);
     return text;
   }
 
   function apiErrorMessage(status, body) {
-    if (status === 401 || status === 403) return 'Clé API refusée. Vérifie-la dans les paramètres.';
-    if (status === 429) return 'Trop de requêtes ou quota épuisé chez ton fournisseur. Réessaie dans un moment.';
+    if (status === 401 || status === 403) return msg.badKey;
+    if (status === 429) return msg.quota;
     const detail = body && (body.error?.message || body.message);
-    return detail || `Erreur du fournisseur (HTTP ${status}).`;
+    return detail || msg.http(status);
   }
 
   // Avant, on stockait une clé par fournisseur (av-key-openai, …). Il n'y en a plus qu'une.
@@ -272,6 +299,8 @@
     extractText,
     apiErrorMessage,
     migrateLegacyKey,
+    setLang,
+    message,
   };
 
   if (typeof module === 'object' && module.exports) module.exports = api;

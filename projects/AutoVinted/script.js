@@ -1,10 +1,11 @@
 // AutoVinted : des photos à l'annonce Vinted. Tout tourne dans le navigateur,
 // la clé API de l'utilisateur ne quitte jamais sa machine (sauf vers son fournisseur).
-// La partie « API » est dans autovinted-core.js.
+// La partie « API » est dans autovinted-core.js, les textes dans i18n.js.
 
 const {
   PROVIDERS, detectProvider, resolveModel, estimateCost,
   parseJSON, buildRequest, extractText, apiErrorMessage, migrateLegacyKey,
+  setLang: setCoreLang, message: coreMessage,
 } = window.AutoVintedCore;
 
 // Les modèles récents réfléchissent avant de répondre, et cette réflexion compte
@@ -18,16 +19,27 @@ const JPEG_QUALITY = 0.8;
 
 const $ = (id) => document.getElementById(id);
 
+// En navigation privée, localStorage peut lever une erreur : l'app doit marcher quand même.
+const store = {
+  getItem(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  setItem(k, v) { try { localStorage.setItem(k, v); } catch (err) { if (err.name === 'QuotaExceededError') throw err; } },
+  removeItem(k) { try { localStorage.removeItem(k); } catch { /* rien à effacer */ } },
+};
+
 function readJSON(key, fallback) {
   try {
-    const value = JSON.parse(localStorage.getItem(key));
+    const value = JSON.parse(store.getItem(key));
     return value ?? fallback;
   } catch {
     return fallback;
   }
 }
 
-migrateLegacyKey(localStorage);
+migrateLegacyKey(store);
+
+let lang = SiteLang.get();
+const T = () => window.AV_TEXT[lang];
+setCoreLang(lang);
 
 const state = {
   photos: [],        // [{ id, dataUrl }]
@@ -36,6 +48,7 @@ const state = {
   context: '',
   history: Array.isArray(readJSON('av-history', [])) ? readJSON('av-history', []) : [],
   lastListing: null,
+  lastPhotos: null,
   features: null,
   busy: false,
 };
@@ -44,16 +57,19 @@ const maxPhotos = () => state.mode === 'bulk' ? MAX_PHOTOS_BULK : MAX_PHOTOS_SIN
 
 // Retourne { providerId, key, model } ou null si aucune clé valable n'est enregistrée.
 function currentSetup() {
-  const key = (localStorage.getItem('av-key') || '').trim();
+  const key = (store.getItem('av-key') || '').trim();
   const detected = detectProvider(key);
   if (!detected.ok) return null;
-  return { providerId: detected.id, key, model: resolveModel(detected.id, localStorage.getItem('av-model')) };
+  return { providerId: detected.id, key, model: resolveModel(detected.id, store.getItem('av-model')) };
 }
 
 function formatEuro(eur) {
   if (eur < 0.005) return '< 0,01 €';
-  return `≈ ${eur.toFixed(eur < 1 ? 3 : 2).replace('.', ',')} €`;
+  const n = eur.toFixed(eur < 1 ? 3 : 2);
+  return `≈ ${lang === 'fr' ? n.replace('.', ',') : n} €`;
 }
+
+const modelLabel = m => m.tag ? `${m.label} (${T()[m.tag]})` : m.label;
 
 // Prompts
 
@@ -80,19 +96,12 @@ const DEFAULT_FEATURES = {
   prices: true,
   tips: true,
 };
-const FEATURE_LABELS = {
-  warnings: { label: 'Vérifier règles Vinted',    hint: 'Détecte les risques de retrait (contrefaçon, interdits…)' },
-  hashtags: { label: 'Hashtags dans description', hint: '6-10 #hashtags ajoutés à la fin' },
-  details:  { label: 'Détails (marque, taille…)', hint: 'Marque, taille, état, couleur, catégorie, matière' },
-  prices:   { label: 'Prix conseillés',           hint: '3 niveaux : idéal / vente rapide / minimum' },
-  tips:     { label: 'Conseils vendeur',          hint: 'Astuces pour vendre plus vite' },
-};
 
 function loadFeatures() {
   const saved = readJSON('av-features', {});
   return { ...DEFAULT_FEATURES, ...(saved && typeof saved === 'object' ? saved : {}) };
 }
-function saveFeatures(f) { localStorage.setItem('av-features', JSON.stringify(f)); }
+function saveFeatures(f) { store.setItem('av-features', JSON.stringify(f)); }
 state.features = loadFeatures();
 
 function buildSystemPrompt() {
@@ -126,6 +135,7 @@ INTERDIT ABSOLU :
     parts.push(VINTED_POLICY);
     parts.push('"warnings" = strings courtes signalant uniquement des risques RÉELS détectés. [] si rien.');
   }
+  if (T().listingLanguage) parts.push(T().listingLanguage);
 
   const fields = ['"title":"max 60 chars"', '"description":"courte, vendeuse"'];
   if (f.details) fields.push('"details":{"marque":"","taille":"","etat":"Neuf avec étiquette|Neuf sans étiquette|Très bon état|Bon état|Satisfaisant","couleur":"","categorie":"","matiere":"","isbn":"(livres uniquement, sinon vide)"}');
@@ -162,6 +172,7 @@ Si tu n'es vraiment pas sûr du type d'objet, mets categorie="Inconnu" et donne 
     parts.push(VINTED_POLICY);
     parts.push('"warnings" = strings courtes signalant uniquement des risques RÉELS pour cet article. [] sinon.');
   }
+  if (T().listingLanguage) parts.push(T().listingLanguage);
 
   const fields = ['"photo_indices":[0,1]', '"title":"max 60 chars"', '"description":"..."'];
   if (f.details) fields.push('"details":{"marque":"","taille":"","etat":"Neuf|Neuf sans étiquette|Très bon état|Bon état|Satisfaisant","couleur":"","categorie":"","matiere":"","isbn":"(livres uniquement, sinon vide)"}');
@@ -185,7 +196,7 @@ async function callAI(conversation) {
   try {
     res = await fetch(url, init);
   } catch {
-    throw new Error('Impossible de joindre le fournisseur. Vérifie ta connexion.');
+    throw new Error(coreMessage('network'));
   }
   const data = await res.json().catch(() => null);
   if (!res.ok) throw new Error(apiErrorMessage(res.status, data));
@@ -223,9 +234,15 @@ function updateEstimate() {
     el.hidden = true;
     return;
   }
-  const tokens = `≈ ${(usage.inTokens + usage.outTokens).toLocaleString('fr-FR')} tokens`;
+  const tokens = `≈ ${(usage.inTokens + usage.outTokens).toLocaleString(lang)} tokens`;
   el.textContent = usage.eur === null ? tokens : `${tokens} · ${formatEuro(usage.eur)}`;
   el.hidden = false;
+}
+
+// Dit, avant l'envoi, où partent les photos.
+function updatePrivacyNote() {
+  const setup = currentSetup();
+  $('privacy-note').textContent = T().privacyNote(setup && PROVIDERS[setup.providerId].label);
 }
 
 // DOM
@@ -243,54 +260,102 @@ const generateBtn = $('generate-btn');
 const resultSection = $('result-section');
 const toast = $('toast');
 
+// Langue
+
+function applyStaticTexts() {
+  const t = T();
+  document.documentElement.lang = lang;
+  document.title = t.title;
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t[el.dataset.i18n]; });
+  document.querySelectorAll('[data-i18n-label]').forEach(el => el.setAttribute('aria-label', t[el.dataset.i18nLabel]));
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t[el.dataset.i18nPlaceholder]; });
+
+  // Le bouton est dit dans la langue vers laquelle il bascule (lecteurs d'écran : bonne voix).
+  $('lang-short').textContent = lang === 'fr' ? 'EN' : 'FR';
+  $('lang-label').textContent = t.switchLang;
+  $('lang-label').lang = lang === 'fr' ? 'en' : 'fr';
+
+  // Sur GitHub Pages, lastModified = date du dernier déploiement : pratique pour vérifier qu'un push est en ligne.
+  $('last-updated').textContent = t.updated(new Date(document.lastModified).toLocaleString(lang, { dateStyle: 'short', timeStyle: 'short' }));
+}
+
+function applyLang() {
+  applyStaticTexts();
+  setCoreLang(lang);
+  syncTheme();
+  applyModeTexts();
+  updateAnalyzeBtnLabel();
+  updateEstimate();
+  updatePrivacyNote();
+  fillSettings();
+  renderHistory();
+  renderPreviews();
+  buildTutorialDots();
+  if (state.lastListing && !resultSection.hidden) renderListing(state.lastListing, state.lastPhotos, false);
+}
+
+$('lang-toggle').addEventListener('click', () => {
+  lang = lang === 'fr' ? 'en' : 'fr';
+  SiteLang.set(lang);
+  applyLang();
+});
+
+// Thème : clair ou sombre, retenu ; sinon celui de l'appareil (script en tête de page).
+
+function syncTheme() {
+  const isDark = document.body.classList.contains('dark');
+  $('theme-icon').textContent = isDark ? '☀️' : '🌙';
+  $('theme-toggle').setAttribute('aria-label', isDark ? T().themeToLight : T().themeToDark);
+}
+
 $('theme-toggle').addEventListener('click', () => {
   const isDark = document.body.classList.toggle('dark');
-  localStorage.setItem('av-theme', isDark ? 'dark' : 'light');
-  $('theme-toggle').textContent = isDark ? '☀️' : '🌙';
+  store.setItem('av-theme', isDark ? 'dark' : 'light');
+  syncTheme();
 });
-$('theme-toggle').textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
 
-// Sur GitHub Pages, lastModified = date du dernier déploiement : pratique pour vérifier qu'un push est en ligne.
-$('last-updated').textContent = 'Mis à jour le ' + new Date(document.lastModified).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
-
+// Messages courts : la zone reste dans la page (role=status) pour que chaque message soit lu.
 let toastTimer;
 function showToast(msg) {
   toast.textContent = msg;
-  toast.hidden = false;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { toast.hidden = true; }, 3200);
+  toastTimer = setTimeout(() => { toast.textContent = ''; }, 3200);
 }
 
+// Pendant l'analyse, le bouton garde le focus : aria-disabled plutôt que disabled,
+// sinon le focus tombe au début de la page.
 function setBtnLoading(btn, loading, label) {
-  btn.disabled = loading;
+  btn.dataset.loading = loading ? '1' : '';
+  btn.setAttribute('aria-disabled', String(loading));
   btn.querySelector('.btn-label').textContent = label;
   btn.querySelector('.btn-spinner').hidden = !loading;
 }
 
 function copyText(text) {
   return navigator.clipboard.writeText(text).catch(() => {
-    showToast('Copie impossible : sélectionne le texte à la main.');
+    showToast(T().copyFailed);
     throw new Error('clipboard');
   });
 }
 
 function flashCopied(btn) {
   const original = btn.textContent;
-  btn.textContent = '✓ Copié';
+  btn.textContent = `✓ ${T().copied}`;
   btn.classList.add('done');
+  showToast(T().copied);
   setTimeout(() => { btn.textContent = original; btn.classList.remove('done'); }, 1500);
+}
+
+// Après une étape, le focus va au titre de ce qui vient d'apparaître.
+function focusHeading(id) {
+  const heading = $(id);
+  heading.focus({ preventScroll: true });
+  heading.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
 }
 
 // Photos
 
-// La dropzone est un <label> relié au champ fichier : le clic ouvre déjà le sélecteur.
-// Il reste le clavier à gérer.
-dropzone.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' || e.key === ' ') {
-    e.preventDefault();
-    fileInput.click();
-  }
-});
+$('add-photos').addEventListener('click', () => fileInput.click());
 
 ['dragenter', 'dragover'].forEach(evt =>
   dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.add('drag'); })
@@ -309,7 +374,7 @@ fileInput.addEventListener('change', async () => {
 
 async function addPhotos(files) {
   const room = maxPhotos() - state.photos.length;
-  if (files.length > room) showToast(`Maximum ${maxPhotos()} photos`);
+  if (files.length > room) showToast(T().maxPhotos(maxPhotos()));
 
   let unreadable = 0;
   for (const file of files.slice(0, room)) {
@@ -317,7 +382,7 @@ async function addPhotos(files) {
     if (dataUrl) state.photos.push({ id: crypto.randomUUID(), dataUrl });
     else unreadable++;
   }
-  if (unreadable) showToast(`${unreadable} photo${unreadable > 1 ? 's' : ''} illisible${unreadable > 1 ? 's' : ''} (format non pris en charge ?)`);
+  if (unreadable) showToast(T().unreadable(unreadable));
   renderPreviews();
 }
 
@@ -340,7 +405,7 @@ function loadHeicLib() {
   return heicLib;
 }
 
-// Renvoie null si l'image reste illisible (fichier abîmé, format inconnu, HEIC hors ligne…).
+// Renvoie null si l'image reste illisible (fichier abîmé, format inconnu…).
 async function downscaleImage(file, maxSide) {
   const dataUrl = await drawScaled(file, maxSide);
   if (dataUrl || !isHeic(file)) return dataUrl;
@@ -375,20 +440,26 @@ function drawScaled(blob, maxSide) {
 }
 
 function renderPreviews() {
-  previews.innerHTML = '';
-  state.photos.forEach(p => {
+  previews.replaceChildren(...state.photos.map((p, i) => {
     const el = document.createElement('div');
     el.className = 'preview';
-    el.innerHTML = `
-      <img src="${p.dataUrl}" alt="" />
-      <button class="preview-remove" type="button" aria-label="Retirer cette photo">✕</button>
-    `;
-    el.querySelector('.preview-remove').addEventListener('click', () => {
+    const img = document.createElement('img');
+    img.src = p.dataUrl;
+    img.alt = '';
+    const remove = document.createElement('button');
+    remove.className = 'preview-remove';
+    remove.type = 'button';
+    remove.setAttribute('aria-label', T().removePhoto(i + 1));
+    remove.innerHTML = '<span aria-hidden="true">✕</span>';
+    remove.addEventListener('click', () => {
       state.photos = state.photos.filter(x => x.id !== p.id);
       renderPreviews();
+      // La photo retirée emporte le focus : on le rend à la suivante, ou au bouton d'ajout.
+      (previews.querySelectorAll('.preview-remove')[i] || previews.querySelector('.preview-remove:last-of-type') || $('add-photos')).focus();
     });
-    previews.appendChild(el);
-  });
+    el.append(img, remove);
+    return el;
+  }));
   analyzeBtn.disabled = state.photos.length === 0;
   updateAnalyzeBtnLabel();
   updateEstimate();
@@ -398,20 +469,20 @@ function renderPreviews() {
 
 function requireSetup() {
   if (currentSetup()) return true;
-  showToast('Ajoute ta clé API dans les paramètres');
-  openSettings();
+  showToast(T().needKey);
+  openSettings(analyzeBtn);
   return false;
 }
 
 analyzeBtn.addEventListener('click', async () => {
-  if (state.photos.length === 0 || !requireSetup()) return;
+  if (analyzeBtn.dataset.loading || state.photos.length === 0 || !requireSetup()) return;
 
   if (state.mode === 'bulk') {
     await runBulk();
     return;
   }
 
-  setBtnLoading(analyzeBtn, true, 'Analyse...');
+  setBtnLoading(analyzeBtn, true, T().analyzing);
   state.context = $('context-input').value.trim();
 
   const ctxLine = state.context ? `\n\nContexte donné par le vendeur : "${state.context}"` : '';
@@ -429,15 +500,20 @@ analyzeBtn.addEventListener('click', async () => {
   try {
     handleAIResponse(await callAI(state.conversation));
   } catch (err) {
-    showToast('Erreur : ' + err.message);
-    setBtnLoading(analyzeBtn, false, 'Analyser mes photos');
+    showToast(T().error(err.message));
+    setBtnLoading(analyzeBtn, false, T().analyze);
   }
 });
 
 // Mode une annonce / en lot
 
 const modeBtns = document.querySelectorAll('.mode-btn');
-const dropzoneSub = $('dropzone-sub');
+
+function applyModeTexts() {
+  const bulk = state.mode === 'bulk';
+  $('dropzone-sub').textContent = bulk ? T().dropSubBulk(MAX_PHOTOS_BULK) : T().dropSubSingle(MAX_PHOTOS_SINGLE);
+  $('context-hint').textContent = bulk ? T().contextHintBulk : T().contextHintSingle;
+}
 
 modeBtns.forEach(btn => {
   btn.addEventListener('click', () => {
@@ -448,34 +524,22 @@ modeBtns.forEach(btn => {
       b.classList.toggle('active', b.dataset.mode === mode);
       b.setAttribute('aria-pressed', String(b.dataset.mode === mode));
     });
-    if (mode === 'bulk') {
-      dropzoneSub.textContent = `Plusieurs articles à la fois — l'IA détecte chaque article (jusqu'à ${MAX_PHOTOS_BULK} photos)`;
-      $('context-hint').textContent = 'Info qui s\'applique à tous les articles, pour éviter que l\'IA pose des questions.';
-      $('context-input').placeholder = 'Ex : tous des livres en bon état, prix d\'achat ~10€, je veux vendre vite';
-    } else {
-      dropzoneSub.textContent = `ou clique pour parcourir — jusqu'à ${MAX_PHOTOS_SINGLE} photos`;
-      $('context-hint').textContent = 'Toute info utile que l\'IA ne peut pas deviner (taille, état réel, prix d\'achat...).';
-      $('context-input').placeholder = 'Ex : porté 3 fois, prix d\'achat 80€, je veux vendre vite';
-      // On repasse à 8 photos max : on garde les 8 premières.
-      if (state.photos.length > MAX_PHOTOS_SINGLE) {
-        state.photos = state.photos.slice(0, MAX_PHOTOS_SINGLE);
-        showToast(`Seules les ${MAX_PHOTOS_SINGLE} premières photos sont gardées`);
-        renderPreviews();
-      }
+    // On repasse à 8 photos max : on garde les 8 premières.
+    if (mode === 'single' && state.photos.length > MAX_PHOTOS_SINGLE) {
+      state.photos = state.photos.slice(0, MAX_PHOTOS_SINGLE);
+      showToast(T().keptFirst(MAX_PHOTOS_SINGLE));
+      renderPreviews();
     }
+    applyModeTexts();
     updateAnalyzeBtnLabel();
     updateEstimate();
   });
 });
 
 function updateAnalyzeBtnLabel() {
+  if (analyzeBtn.dataset.loading) return;
   const label = analyzeBtn.querySelector('.btn-label');
-  const n = state.photos.length;
-  if (state.mode === 'bulk') {
-    label.textContent = n > 0 ? `Détecter & générer (${n} photo${n > 1 ? 's' : ''})` : 'Générer les annonces';
-  } else {
-    label.textContent = 'Analyser mes photos';
-  }
+  label.textContent = state.mode === 'bulk' ? T().bulkGenerate(state.photos.length) : T().analyze;
 }
 
 $('context-input').addEventListener('input', updateEstimate);
@@ -494,13 +558,14 @@ async function runBulk() {
   state.context = $('context-input').value.trim();
   const total = state.photos.length;
 
-  uploadSection.style.display = 'none';
+  uploadSection.hidden = true;
   bulkSection.hidden = false;
-  bulkResults.innerHTML = '';
+  bulkResults.replaceChildren();
   bulkProgress.hidden = false;
   bulkActions.hidden = true;
-  bulkProgressText.textContent = `L'IA analyse ${total} photo${total > 1 ? 's' : ''} et regroupe les articles…`;
+  bulkProgressText.textContent = T().bulkWorking(total);
   bulkProgressFill.style.width = '15%';
+  focusHeading('bulk-heading');
 
   const ctxLine = state.context ? `\n\nContexte donné par le vendeur (s'applique à tous les articles) : "${state.context}"` : '';
   const intro = `Voici ${total} photos. Plusieurs photos peuvent montrer le MÊME article (sous différents angles, étiquettes, défauts...). Identifie chaque article distinct, regroupe les photos qui appartiennent au même article, et génère UNE annonce Vinted par article détecté.${ctxLine}`;
@@ -522,7 +587,7 @@ async function runBulk() {
     bulkProgressFill.style.width = '100%';
 
     const listings = Array.isArray(resp.listings) ? resp.listings : [];
-    if (listings.length === 0) throw new Error(resp.message || 'Aucun article détecté dans les photos');
+    if (listings.length === 0) throw new Error(resp.message || T().bulkNone);
 
     for (let i = 0; i < listings.length; i++) {
       const listing = listings[i];
@@ -537,122 +602,138 @@ async function runBulk() {
 
     bulkProgress.hidden = true;
     bulkActions.hidden = false;
-    showToast(`${listings.length} article${listings.length > 1 ? 's' : ''} détecté${listings.length > 1 ? 's' : ''} ✓`);
+    showToast(T().bulkFound(listings.length));
   } catch (err) {
     bulkProgress.hidden = true;
-    bulkResults.innerHTML = `<div class="bulk-item"><div class="bulk-item-head"><div class="bulk-item-info"><div class="bulk-item-title">Erreur</div><div class="bulk-item-meta">${escapeHtml(err.message)}</div></div></div></div>`;
+    const box = document.createElement('p');
+    box.className = 'bulk-error';
+    box.textContent = T().error(err.message);
+    bulkResults.replaceChildren(box);
     bulkActions.hidden = false;
-    showToast('Erreur : ' + err.message);
+    showToast(T().error(err.message));
   }
 }
 
+// Chaque article : un titre qui est un bouton (ouvre/ferme), le détail en dessous.
 function createBulkCard(photos, index) {
+  const n = index + 1;
   const el = document.createElement('div');
   el.className = 'bulk-item';
   el.innerHTML = `
     <div class="bulk-item-head">
-      <img class="bulk-item-thumb" src="${photos[0]?.dataUrl || ''}" alt="" />
-      <div class="bulk-item-info">
-        <div class="bulk-item-title">Article ${index + 1}</div>
-        <div class="bulk-item-meta">${photos.length} photo${photos.length > 1 ? 's' : ''}</div>
-      </div>
-      <span class="bulk-item-status"><span class="spinner-sm"></span></span>
-      <button class="bulk-item-delete" type="button" title="Supprimer cet article" aria-label="Supprimer cet article">✕</button>
+      <h3 class="bulk-item-heading">
+        <button class="bulk-item-toggle" type="button" aria-expanded="false" aria-controls="bulk-body-${n}">
+          <img class="bulk-item-thumb" src="${photos[0]?.dataUrl || ''}" alt="" />
+          <span class="bulk-item-info">
+            <span class="bulk-item-title">${escapeHtml(T().bulkItem(n))}</span>
+            <span class="bulk-item-meta">${escapeHtml(T().bulkPhotos(photos.length))}</span>
+          </span>
+          <span class="bulk-item-status"><span class="spinner-sm" aria-hidden="true"></span></span>
+        </button>
+      </h3>
+      <button class="bulk-item-delete" type="button"><span aria-hidden="true">✕</span></button>
     </div>
-    <div class="bulk-item-body"></div>
+    <div class="bulk-item-body" id="bulk-body-${n}"></div>
   `;
-  const head = el.querySelector('.bulk-item-head');
+  const toggle = el.querySelector('.bulk-item-toggle');
   const titleEl = el.querySelector('.bulk-item-title');
   const metaEl = el.querySelector('.bulk-item-meta');
   const statusEl = el.querySelector('.bulk-item-status');
   const bodyEl = el.querySelector('.bulk-item-body');
+  const del = el.querySelector('.bulk-item-delete');
+  del.setAttribute('aria-label', T().bulkDelete(n, T().bulkItem(n)));
 
-  el.querySelector('.bulk-item-delete').addEventListener('click', (e) => {
-    e.stopPropagation();
+  del.addEventListener('click', () => {
+    const next = el.nextElementSibling || el.previousElementSibling;
     el.remove();
+    (next ? next.querySelector('.bulk-item-toggle') : $('bulk-heading')).focus();
   });
 
-  head.addEventListener('click', () => {
-    if (bodyEl.children.length > 0) el.classList.toggle('open');
+  toggle.addEventListener('click', () => {
+    if (bodyEl.children.length === 0) return;
+    const open = el.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', String(open));
   });
 
   return {
     el,
     fillListing(l) {
       const hasWarn = Array.isArray(l.warnings) && l.warnings.filter(Boolean).length > 0;
-      const warnBadge = hasWarn ? '<span class="bulk-item-warn" title="Risque règles Vinted">⚠</span>' : '';
-      titleEl.innerHTML = `<span class="bulk-item-num">#${index + 1}</span> ${warnBadge} ${escapeHtml(l.title || `Article ${index + 1}`)}`;
-      metaEl.textContent = `${l.prices?.ideal || '—'} • ${l.details?.etat || '—'} • ${photos.length} photo${photos.length > 1 ? 's' : ''}`;
+      const title = l.title || T().bulkItem(n);
+      const warnBadge = hasWarn ? `<span class="bulk-item-warn" aria-hidden="true">⚠</span><span class="visually-hidden">${escapeHtml(T().bulkWarn)} : </span>` : '';
+      titleEl.innerHTML = `<span class="bulk-item-num">#${n}</span> ${warnBadge} ${escapeHtml(title)}`;
+      metaEl.textContent = `${l.prices?.ideal || '—'} • ${l.details?.etat || '—'} • ${T().bulkPhotos(photos.length)}`;
       statusEl.className = 'bulk-item-status done' + (hasWarn ? ' has-warn' : '');
-      statusEl.innerHTML = (hasWarn ? '⚠ ' : '✓ ') + '<span class="bulk-chevron">▾</span>';
+      statusEl.innerHTML = `<span aria-hidden="true">${hasWarn ? '⚠ ' : '✓ '}<span class="bulk-chevron">▾</span></span>`;
+      del.setAttribute('aria-label', T().bulkDelete(n, title));
       bodyEl.innerHTML = renderBulkBody(l, photos);
       bindBulkBodyActions(bodyEl, l);
     },
   };
 }
 
-const DETAIL_LABELS = {
-  marque: 'Marque', taille: 'Taille', etat: 'État', couleur: 'Couleur',
-  categorie: 'Catégorie', matiere: 'Matière', isbn: 'ISBN',
-};
+function detailsList(details) {
+  return Object.entries(T().details)
+    .filter(([k]) => details[k])
+    .map(([k, label]) => `<li><strong>${label}</strong>${escapeHtml(details[k])}</li>`).join('');
+}
+
+function pricesList(p) {
+  const t = T();
+  return [[t.priceIdeal, p.ideal], [t.priceFast, p.rapide], [t.priceMin, p.minimum]]
+    .map(([label, value]) => `<div class="price-cell"><dt class="price-cell-label">${label}</dt><dd class="price-cell-value">${escapeHtml(value || '—')}</dd></div>`)
+    .join('');
+}
+
+function warningsBox(warnings) {
+  return `<h4 class="result-warnings-head"><span aria-hidden="true">⚠ </span>${escapeHtml(T().warningsHead)}</h4>
+    <ul>${warnings.map(w => `<li>${escapeHtml(w)}</li>`).join('')}</ul>
+    <p class="result-warnings-foot">${escapeHtml(T().warningsFoot)}</p>`;
+}
 
 function renderBulkBody(l, photos) {
+  const t = T();
   const f = state.features;
-  const d = l.details || {};
-  const p = l.prices || {};
-  const tips = f.tips ? (l.tips || []).map(t => `<li>${escapeHtml(t)}</li>`).join('') : '';
-  const details = f.details ? Object.entries(DETAIL_LABELS)
-    .filter(([k]) => d[k])
-    .map(([k, label]) => `<li><strong>${label}</strong>${escapeHtml(d[k])}</li>`).join('') : '';
+  const tips = f.tips ? (l.tips || []).map(tip => `<li>${escapeHtml(tip)}</li>`).join('') : '';
+  const details = f.details ? detailsList(l.details || {}) : '';
 
   const thumbs = photos.length > 1
     ? `<div class="bulk-item-thumbs">${photos.map(ph => `<img src="${ph.dataUrl}" alt="">`).join('')}</div>`
     : '';
 
   const warnings = (f.warnings && Array.isArray(l.warnings)) ? l.warnings.filter(Boolean) : [];
-  const warningsHtml = warnings.length
-    ? `<div class="result-warnings">
-         <div class="result-warnings-head">⚠ Attention — règles Vinted</div>
-         <ul>${warnings.map(w => `<li>${escapeHtml(w)}</li>`).join('')}</ul>
-         <div class="result-warnings-foot">Risque de retrait par Vinted — à vérifier avant publication.</div>
-       </div>`
-    : '';
+  const warningsHtml = warnings.length ? `<div class="result-warnings">${warningsBox(warnings)}</div>` : '';
 
   return `
     ${thumbs}
     ${warningsHtml}
     <div class="result-block">
       <div class="result-block-head">
-        <span class="result-label">Titre</span>
-        <button class="copy-btn" type="button" data-bcopy="title">Copier</button>
+        <h4 class="result-label">${t.labelTitle}</h4>
+        <button class="copy-btn" type="button" data-bcopy="title" aria-label="${escapeHtml(t.copyTitle)}">${t.copy}</button>
       </div>
       <p class="result-title">${escapeHtml(l.title || '')}</p>
     </div>
     <div class="result-block">
       <div class="result-block-head">
-        <span class="result-label">Description</span>
-        <button class="copy-btn" type="button" data-bcopy="description">Copier</button>
+        <h4 class="result-label">${t.labelDescription}</h4>
+        <button class="copy-btn" type="button" data-bcopy="description" aria-label="${escapeHtml(t.copyDescription)}">${t.copy}</button>
       </div>
       <p class="result-description">${escapeHtml(l.description || '')}</p>
     </div>
-    ${details ? `<div class="result-block"><span class="result-label">Détails</span><ul class="result-details">${details}</ul></div>` : ''}
+    ${details ? `<div class="result-block"><h4 class="result-label">${t.labelDetails}</h4><ul class="result-details">${details}</ul></div>` : ''}
     ${f.prices ? `<div class="result-block">
-      <span class="result-label">Prix conseillés</span>
-      <div class="price-grid">
-        <div class="price-cell"><span class="price-cell-label">Idéal</span><span class="price-cell-value">${escapeHtml(p.ideal || '—')}</span></div>
-        <div class="price-cell"><span class="price-cell-label">Vente rapide</span><span class="price-cell-value">${escapeHtml(p.rapide || '—')}</span></div>
-        <div class="price-cell"><span class="price-cell-label">Minimum</span><span class="price-cell-value">${escapeHtml(p.minimum || '—')}</span></div>
-      </div>
+      <h4 class="result-label">${t.labelPrices}</h4>
+      <dl class="price-grid">${pricesList(l.prices || {})}</dl>
     </div>` : ''}
-    ${tips ? `<div class="result-block"><span class="result-label">Conseils</span><ul class="result-tips">${tips}</ul></div>` : ''}
-    <div class="result-actions"><button class="btn-ghost" type="button" data-bcopy="all">Copier toute l'annonce</button></div>
+    ${tips ? `<div class="result-block"><h4 class="result-label">${t.labelTips}</h4><ul class="result-tips">${tips}</ul></div>` : ''}
+    <div class="result-actions"><button class="btn-ghost" type="button" data-bcopy="all">${t.copyAll}</button></div>
   `;
 }
 
 function bindBulkBodyActions(bodyEl, listing) {
   bodyEl.querySelectorAll('[data-bcopy]').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
+    btn.addEventListener('click', () => {
       const what = btn.dataset.bcopy;
       const text = what === 'all' ? formatFullListing(listing)
         : what === 'title' ? listing.title
@@ -667,10 +748,10 @@ function formatFullListing(l) {
   const d = l.details || {};
   let out = `${l.title || ''}\n\n${l.description || ''}`;
   if (f.details) {
-    const lines = Object.entries(DETAIL_LABELS).filter(([k]) => d[k]).map(([k, label]) => `— ${label} : ${d[k]}`);
+    const lines = Object.entries(T().details).filter(([k]) => d[k]).map(([k, label]) => `— ${label} : ${d[k]}`);
     if (lines.length) out += '\n\n' + lines.join('\n');
   }
-  if (f.prices && l.prices?.ideal) out += `\n\nPrix : ${l.prices.ideal}`;
+  if (f.prices && l.prices?.ideal) out += `\n\n${T().fullListingPrice} : ${l.prices.ideal}`;
   return out;
 }
 
@@ -678,34 +759,35 @@ $('bulk-copy-all-btn').addEventListener('click', () => {
   const texts = [...bulkResults.querySelectorAll('.bulk-item')]
     .map(el => bulkListings.get(el))
     .filter(Boolean)
-    .map((l, i) => `━━━ Article ${i + 1} ━━━\n${l.title || ''}\n\n${l.description || ''}`);
-  if (texts.length === 0) { showToast('Aucune annonce à copier'); return; }
-  copyText(texts.join('\n\n\n')).then(() => showToast(`${texts.length} annonces copiées ✓`), () => {});
+    .map((l, i) => `━━━ ${T().bulkItem(i + 1)} ━━━\n${l.title || ''}\n\n${l.description || ''}`);
+  if (texts.length === 0) { showToast(T().nothingToCopy); return; }
+  copyText(texts.join('\n\n\n')).then(() => showToast(T().copiedListings(texts.length)), () => {});
 });
 
 function doRestart() {
   state.photos = [];
   state.conversation = [];
   state.lastListing = null;
+  state.lastPhotos = null;
   state.context = '';
   $('context-input').value = '';
   renderPreviews();
-  chatMessages.innerHTML = '';
+  chatMessages.replaceChildren();
   resultSection.hidden = true;
   chatSection.hidden = true;
   generateBtn.hidden = true;
-  bulkResults.innerHTML = '';
+  bulkResults.replaceChildren();
   bulkSection.hidden = true;
   bulkActions.hidden = true;
-  uploadSection.style.display = '';
-  setBtnLoading(analyzeBtn, false, 'Analyser mes photos');
+  uploadSection.hidden = false;
+  setBtnLoading(analyzeBtn, false, T().analyze);
   updateAnalyzeBtnLabel();
   analyzeBtn.disabled = true;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  focusHeading('photos-heading');
 }
 
 function isOnUploadView() {
-  return uploadSection.style.display !== 'none';
+  return !uploadSection.hidden;
 }
 
 // Hors de l'écran d'accueil, « retour » ramène au début au lieu de quitter l'app.
@@ -734,7 +816,7 @@ chatForm.addEventListener('submit', async (e) => {
 
 generateBtn.addEventListener('click', async () => {
   if (state.busy) return;
-  await sendUserMessage("Génère l'annonce maintenant avec ce que tu as.");
+  await sendUserMessage(T().generateNowMessage);
 });
 
 async function sendUserMessage(text) {
@@ -751,7 +833,7 @@ async function sendUserMessage(text) {
     thinking.remove();
     // Le message n'a pas eu de réponse : on le retire pour que l'utilisateur puisse le renvoyer.
     state.conversation.pop();
-    addBubble('ai', 'Erreur : ' + err.message);
+    addBubble('ai', T().error(err.message));
   } finally {
     state.busy = false;
   }
@@ -761,7 +843,7 @@ function addBubble(type, text = '') {
   const el = document.createElement('div');
   el.className = 'bubble ' + type;
   if (type === 'thinking') {
-    el.innerHTML = '<span></span><span></span><span></span>';
+    el.innerHTML = `<span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span><span class="visually-hidden">${escapeHtml(T().thinking)}</span>`;
   } else {
     el.textContent = text;
   }
@@ -771,36 +853,41 @@ function addBubble(type, text = '') {
 }
 
 function handleAIResponse(resp) {
-  if (isOnUploadView()) {
-    uploadSection.style.display = 'none';
+  const fromUpload = isOnUploadView();
+  if (fromUpload) {
+    uploadSection.hidden = true;
     chatSection.hidden = false;
-    setBtnLoading(analyzeBtn, false, 'Analyser mes photos');
+    setBtnLoading(analyzeBtn, false, T().analyze);
   }
 
   if (resp.action === 'generate' && resp.listing) {
-    renderListing(resp.listing, state.photos.map(p => p.dataUrl));
     chatSection.hidden = true;
     resultSection.hidden = false;
+    renderListing(resp.listing, state.photos.map(p => p.dataUrl));
     saveToHistory(resp.listing).catch(() => {});
   } else {
-    addBubble('ai', resp.message || 'Réponse inattendue, réessaie.');
+    addBubble('ai', resp.message || T().unexpected);
     generateBtn.hidden = resp.action !== 'ask';
+    if (fromUpload) focusHeading('chat-heading');
   }
 }
 
 // Résultat
 
-function renderListing(listing, photos = null) {
+function renderListing(listing, photos = null, moveFocus = true) {
+  const t = T();
   state.lastListing = listing;
+  state.lastPhotos = photos;
 
+  // Chaque photo est un bouton qui l'agrandit.
   const photosEl = $('r-photos');
   if (photos && photos.length) {
     photosEl.innerHTML = photos.map((src, i) =>
-      `<img class="result-photo" src="${escapeHtml(src)}" alt="Photo ${i + 1}" loading="lazy" />`
+      `<button type="button" class="result-photo-btn" aria-label="${escapeHtml(t.zoomPhoto(i + 1))}"><img class="result-photo" src="${escapeHtml(src)}" alt="${escapeHtml(t.photoAlt(i + 1))}" loading="lazy" /></button>`
     ).join('');
     photosEl.hidden = false;
   } else {
-    photosEl.innerHTML = '';
+    photosEl.replaceChildren();
     photosEl.hidden = true;
   }
 
@@ -808,35 +895,21 @@ function renderListing(listing, photos = null) {
   $('r-description').textContent = listing.description || '';
 
   const f = state.features;
-  const details = listing.details || {};
-  const detailsHtml = Object.entries(DETAIL_LABELS)
-    .filter(([k]) => details[k])
-    .map(([k, label]) => `<li><strong>${label}</strong>${escapeHtml(details[k])}</li>`)
-    .join('');
+  const detailsHtml = detailsList(listing.details || {});
   $('r-details').innerHTML = detailsHtml;
   $('r-details-block').hidden = !f.details || !detailsHtml;
 
   const prices = listing.prices || {};
-  $('r-prices').innerHTML = `
-    <div class="price-cell"><span class="price-cell-label">Idéal</span><span class="price-cell-value">${escapeHtml(prices.ideal || '—')}</span></div>
-    <div class="price-cell"><span class="price-cell-label">Vente rapide</span><span class="price-cell-value">${escapeHtml(prices.rapide || '—')}</span></div>
-    <div class="price-cell"><span class="price-cell-label">Minimum</span><span class="price-cell-value">${escapeHtml(prices.minimum || '—')}</span></div>
-  `;
+  $('r-prices').innerHTML = pricesList(prices);
   $('r-prices-block').hidden = !(f.prices && (prices.ideal || prices.rapide || prices.minimum));
 
   const tips = Array.isArray(listing.tips) ? listing.tips : [];
-  $('r-tips').innerHTML = tips.map(t => `<li>${escapeHtml(t)}</li>`).join('');
+  $('r-tips').innerHTML = tips.map(tip => `<li>${escapeHtml(tip)}</li>`).join('');
   $('r-tips-block').hidden = !(f.tips && tips.length);
 
   const warnings = (f.warnings && Array.isArray(listing.warnings)) ? listing.warnings.filter(Boolean) : [];
   const warnEl = $('r-warnings');
-  if (warnings.length) {
-    warnEl.innerHTML = `
-      <div class="result-warnings-head">⚠ Attention — règles Vinted</div>
-      <ul>${warnings.map(w => `<li>${escapeHtml(w)}</li>`).join('')}</ul>
-      <div class="result-warnings-foot">Ton annonce risque d'être retirée par Vinted. Vérifie avant de publier.</div>
-    `;
-  }
+  warnEl.innerHTML = warnings.length ? warningsBox(warnings) : '';
   warnEl.hidden = !warnings.length;
 
   // Seule l'annonce d'exemple a un lien source (photos d'un site marchand).
@@ -848,27 +921,25 @@ function renderListing(listing, photos = null) {
     srcBlock.hidden = true;
   }
 
-  resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (moveFocus) focusHeading('result-heading');
 }
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
+// Photo agrandie : une vraie fenêtre (Échap, bouton Fermer, le focus revient au bouton).
 document.addEventListener('click', (e) => {
-  const img = e.target.closest('.result-photo');
-  if (!img) return;
-  const box = document.createElement('div');
+  const btn = e.target.closest('.result-photo-btn');
+  if (!btn) return;
+  const img = btn.querySelector('img');
+  const box = document.createElement('dialog');
   box.className = 'photo-lightbox';
-  box.innerHTML = `<img src="${img.src}" alt="" />`;
-  const close = () => {
-    box.remove();
-    document.removeEventListener('keydown', onEsc);
-  };
-  const onEsc = (ev) => { if (ev.key === 'Escape') close(); };
-  box.addEventListener('click', close);
-  document.addEventListener('keydown', onEsc);
+  box.innerHTML = `<button type="button" class="lightbox-close">${escapeHtml(T().close)}</button><img src="${img.src}" alt="${escapeHtml(img.alt)}" />`;
+  box.addEventListener('close', () => { box.remove(); btn.focus(); });
+  box.addEventListener('click', (ev) => { if (ev.target === box || ev.target.closest('.lightbox-close')) box.close(); });
   document.body.appendChild(box);
+  box.showModal();
 });
 
 document.addEventListener('click', (e) => {
@@ -879,10 +950,77 @@ document.addEventListener('click', (e) => {
 });
 
 $('copy-all-btn').addEventListener('click', () => {
-  if (state.lastListing) copyText(formatFullListing(state.lastListing)).then(() => showToast('Annonce copiée ✓'), () => {});
+  if (state.lastListing) copyText(formatFullListing(state.lastListing)).then(() => showToast(T().copiedAll), () => {});
 });
 
 $('restart-btn').addEventListener('click', doRestart);
+
+// Fenêtres (paramètres, historique). Sur petit écran ce sont des fenêtres modales :
+// le focus y entre, y reste, et revient au bouton qui les a ouvertes. Sur grand écran
+// (≥ 1180 px) ce sont des panneaux toujours visibles, de simples régions.
+
+const panelLayout = matchMedia('(min-width: 1180px)');
+const modals = [$('settings-modal'), $('history-modal')];
+let openModal = null;
+let modalOpener = null;
+
+function syncModalRoles() {
+  for (const modal of modals) {
+    const card = modal.querySelector('.modal-card');
+    if (panelLayout.matches) {
+      card.setAttribute('role', 'region');
+      card.removeAttribute('aria-modal');
+    } else {
+      card.setAttribute('role', 'dialog');
+      card.setAttribute('aria-modal', 'true');
+    }
+  }
+}
+syncModalRoles();
+panelLayout.addEventListener('change', syncModalRoles);
+
+const FOCUSABLE = 'button:not([disabled]):not([hidden]), [href], input:not([disabled]), select, textarea, summary, [tabindex]:not([tabindex="-1"])';
+
+function showModal(modal, opener, focusEl) {
+  modal.hidden = false;
+  if (panelLayout.matches) {
+    (focusEl || modal.querySelector(FOCUSABLE))?.focus();
+    return;
+  }
+  openModal = modal;
+  modalOpener = opener || document.activeElement;
+  // Le reste de la page devient inerte pendant que la fenêtre est ouverte.
+  document.querySelectorAll('header, main, #tutorial-overlay').forEach(el => { el.inert = true; });
+  (focusEl || modal.querySelector(FOCUSABLE))?.focus();
+}
+
+function hideModal(modal) {
+  if (panelLayout.matches) return;
+  modal.hidden = true;
+  if (openModal !== modal) return;
+  openModal = null;
+  document.querySelectorAll('header, main, #tutorial-overlay').forEach(el => { el.inert = false; });
+  if (modalOpener && modalOpener.isConnected) modalOpener.focus();
+  modalOpener = null;
+}
+
+// Tab ne sort pas de la fenêtre ouverte.
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (openModal) hideModal(openModal);
+    else if (!tutorialOverlay.hidden) closeTutorial();
+    return;
+  }
+  if (e.key !== 'Tab' || !openModal) return;
+  const items = [...openModal.querySelectorAll(FOCUSABLE)].filter(el => el.offsetParent !== null);
+  if (!items.length) return;
+  const first = items[0];
+  const last = items[items.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
+
+modals.forEach(modal => modal.addEventListener('click', (e) => { if (e.target === modal) hideModal(modal); }));
 
 // Paramètres : une seule clé, le fournisseur est deviné à partir de son préfixe
 
@@ -892,15 +1030,8 @@ const keyStatus = $('key-status');
 const modelPicker = $('model-picker');
 const modelSelect = $('model-select');
 
-const KEY_PROBLEMS = {
-  empty: 'Claude, ChatGPT, Gemini ou Mistral : le fournisseur est reconnu tout seul.',
-  groq: 'Groq n\'est plus pris en charge : son modèle vision n\'accepte que 3 photos.',
-  openrouter: 'Les clés OpenRouter ne sont pas prises en charge. Utilise une clé Claude, ChatGPT, Gemini ou Mistral.',
-  unknown: 'Clé non reconnue. Vérifie que tu l\'as copiée en entier.',
-};
-
 $('key-links').innerHTML = Object.values(PROVIDERS)
-  .map(p => `<a href="${p.keyUrl}" target="_blank" rel="noopener">${p.label}</a>`)
+  .map(p => `<a href="${p.keyUrl}" target="_blank" rel="noopener noreferrer">${p.label}</a>`)
   .join(' · ');
 
 let shownProvider = null;
@@ -911,7 +1042,7 @@ function syncKeyStatus() {
   keyStatus.classList.toggle('error', !detected.ok && detected.reason !== 'empty');
 
   if (!detected.ok) {
-    keyStatus.textContent = KEY_PROBLEMS[detected.reason];
+    keyStatus.textContent = T().keyProblems[detected.reason];
     modelPicker.hidden = true;
     shownProvider = null;
     return;
@@ -920,9 +1051,9 @@ function syncKeyStatus() {
   const provider = PROVIDERS[detected.id];
   if (shownProvider !== detected.id) {
     modelSelect.innerHTML = provider.models
-      .map(m => `<option value="${m.id}">${m.label}</option>`)
+      .map(m => `<option value="${m.id}">${escapeHtml(modelLabel(m))}</option>`)
       .join('');
-    modelSelect.value = resolveModel(detected.id, localStorage.getItem('av-model'));
+    modelSelect.value = resolveModel(detected.id, store.getItem('av-model'));
     shownProvider = detected.id;
   }
   modelPicker.hidden = false;
@@ -935,56 +1066,55 @@ function syncKeyStatus() {
     textChars: buildSystemPrompt().length + 200,
     listings: 1,
   });
-  keyStatus.textContent = `✓ ${provider.label} reconnu · ${model.label} · ${formatEuro(eur)} par annonce de 4 photos`;
+  keyStatus.textContent = `✓ ${T().keyOk(provider.label, modelLabel(model), formatEuro(eur))}`;
 }
 
 apiKeyInput.addEventListener('input', syncKeyStatus);
 modelSelect.addEventListener('change', syncKeyStatus);
 
+// Des cases à cocher natives (role=switch), dessinées en interrupteurs : clavier et lecteurs d'écran inclus.
 function renderFeatureToggles() {
-  $('features-list').innerHTML = Object.entries(FEATURE_LABELS).map(([key, info]) => `
+  $('features-list').innerHTML = Object.entries(T().features).map(([key, [label, hint]]) => `
     <label class="feature-toggle">
-      <input type="checkbox" data-feature="${key}" ${state.features[key] ? 'checked' : ''} />
-      <span class="feature-toggle-track"><span class="feature-toggle-thumb"></span></span>
+      <input type="checkbox" role="switch" data-feature="${key}" aria-describedby="feature-hint-${key}" ${state.features[key] ? 'checked' : ''} />
+      <span class="feature-toggle-track" aria-hidden="true"><span class="feature-toggle-thumb"></span></span>
       <span class="feature-toggle-text">
-        <span class="feature-toggle-label">${info.label}</span>
-        <span class="feature-toggle-hint">${info.hint}</span>
+        <span class="feature-toggle-label">${label}</span>
+        <span class="feature-toggle-hint" id="feature-hint-${key}">${hint}</span>
       </span>
     </label>
   `).join('');
 }
 
 function fillSettings() {
-  apiKeyInput.value = localStorage.getItem('av-key') || '';
+  apiKeyInput.value = store.getItem('av-key') || '';
   shownProvider = null;
   syncKeyStatus();
   renderFeatureToggles();
 }
 
-function openSettings() {
+function openSettings(opener) {
   fillSettings();
-  settingsModal.hidden = false;
-  apiKeyInput.focus();
+  showModal(settingsModal, opener, apiKeyInput);
 }
 
-$('settings-toggle').addEventListener('click', openSettings);
-$('settings-close').addEventListener('click', () => { settingsModal.hidden = true; });
-settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) settingsModal.hidden = true; });
+$('settings-toggle').addEventListener('click', (e) => openSettings(e.currentTarget));
+$('settings-close').addEventListener('click', () => hideModal(settingsModal));
 
 $('settings-save').addEventListener('click', () => {
   const key = apiKeyInput.value.trim();
   const detected = detectProvider(key);
   if (key && !detected.ok) {
-    showToast(KEY_PROBLEMS[detected.reason]);
+    showToast(T().keyProblems[detected.reason]);
     apiKeyInput.focus();
     return;
   }
   if (key) {
-    localStorage.setItem('av-key', key);
-    localStorage.setItem('av-model', modelSelect.value);
+    store.setItem('av-key', key);
+    store.setItem('av-model', modelSelect.value);
   } else {
-    localStorage.removeItem('av-key');
-    localStorage.removeItem('av-model');
+    store.removeItem('av-key');
+    store.removeItem('av-model');
   }
 
   const features = { ...state.features };
@@ -994,31 +1124,36 @@ $('settings-save').addEventListener('click', () => {
   state.features = features;
   saveFeatures(features);
 
-  settingsModal.hidden = true;
-  showToast('Paramètres enregistrés');
+  hideModal(settingsModal);
+  showToast(T().saved);
   updateEstimate();
+  updatePrivacyNote();
 });
 
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    settingsModal.hidden = true;
-    historyModal.hidden = true;
-    closeTutorial();
-  }
+// Vie privée : tout ce que l'app garde est dans ce navigateur, et part d'un clic.
+$('erase-all').addEventListener('click', () => {
+  if (!confirm(T().eraseConfirm)) return;
+  ['av-key', 'av-model', 'av-features', 'av-history', 'av-demo-seeded', 'av-theme', 'av-tutorial-seen']
+    .forEach(k => store.removeItem(k));
+  state.features = loadFeatures();
+  state.history = [];
+  seedDemoListing();
+  fillSettings();
+  renderHistory();
+  updateEstimate();
+  updatePrivacyNote();
+  showToast(T().erased);
 });
 
-// Sur grand écran, les paramètres sont un panneau toujours visible : on le remplit dès le départ.
-fillSettings();
-
-// Tutoriel
+// Tutoriel : il ne s'ouvre plus tout seul, on le propose (bouton « Voir le tour » et « ? »).
 
 const TUTORIAL_STEPS = [
-  { target: '.hero',            emoji: '✦',  title: 'Bienvenue sur AutoVinted', text: 'Upload tes photos, l\'IA rédige ton annonce Vinted optimisée. Voici le tour en 30 secondes.', placement: 'bottom' },
-  { target: '.mode-toggle',     emoji: '🔀', title: 'Une annonce ou en lot',    text: '<strong>Une annonce</strong> — photos d\'un seul article.<br><strong>En lot</strong> — jusqu\'à 30 photos, l\'IA détecte les articles automatiquement.', placement: 'bottom' },
-  { target: '#dropzone',        emoji: '📸', title: 'Upload tes photos',        text: 'Glisse-dépose ici ou clique pour parcourir. 4 à 6 angles idéalement : face, dos, étiquette, défauts.', placement: 'bottom' },
-  { target: '#context-input',   emoji: '💬', title: 'Ajoute du contexte',       text: 'Infos que l\'IA ne peut pas deviner : taille réelle, prix d\'achat, état... Optionnel mais recommandé.', placement: 'top' },
-  { target: '#settings-toggle', emoji: '⚙',  title: 'Ta clé API',               text: 'Colle une clé <strong>Claude, ChatGPT, Gemini ou Mistral</strong> : le fournisseur est reconnu tout seul. Elle reste uniquement dans ton navigateur.', placement: 'bottom' },
-  { target: '#history-toggle',  emoji: '⌛', title: 'Historique',               text: 'Retrouve toutes tes annonces ici. <strong>Un exemple Clarks est déjà disponible</strong> pour voir à quoi ressemble un résultat !', placement: 'bottom' },
+  { target: '.hero',            emoji: '✦',  placement: 'bottom' },
+  { target: '.mode-toggle',     emoji: '🔀', placement: 'bottom' },
+  { target: '#dropzone',        emoji: '📸', placement: 'bottom' },
+  { target: '#context-input',   emoji: '💬', placement: 'top' },
+  { target: '#settings-toggle', emoji: '⚙',  placement: 'bottom' },
+  { target: '#history-toggle',  emoji: '⌛', placement: 'bottom' },
 ];
 
 const tutorialOverlay = $('tutorial-overlay');
@@ -1028,15 +1163,18 @@ const tutorialTipDots = $('tutorial-tip-dots');
 const tutorialTipPrev = $('tutorial-tip-prev');
 const tutorialTipNext = $('tutorial-tip-next');
 let tutorialStep = 0;
+let tutorialOpener = null;
 
-TUTORIAL_STEPS.forEach((step, i) => {
-  const dot = document.createElement('button');
-  dot.className = 'tutorial-tip-dot';
-  dot.type = 'button';
-  dot.setAttribute('aria-label', `Étape ${i + 1} : ${step.title}`);
-  dot.addEventListener('click', () => goToStep(i));
-  tutorialTipDots.appendChild(dot);
-});
+function buildTutorialDots() {
+  tutorialTipDots.replaceChildren(...TUTORIAL_STEPS.map((step, i) => {
+    const dot = document.createElement('button');
+    dot.className = 'tutorial-tip-dot';
+    dot.type = 'button';
+    dot.setAttribute('aria-label', T().step(i + 1, T().steps[i][0]));
+    dot.addEventListener('click', () => goToStep(i));
+    return dot;
+  }));
+}
 
 function positionTutorial(target, placement) {
   const rect = target.getBoundingClientRect();
@@ -1068,20 +1206,24 @@ function positionTutorial(target, placement) {
 function goToStep(i) {
   tutorialStep = Math.max(0, Math.min(TUTORIAL_STEPS.length - 1, i));
   const step = TUTORIAL_STEPS[tutorialStep];
+  const [title, text] = T().steps[tutorialStep];
 
-  tutorialTipDots.querySelectorAll('.tutorial-tip-dot').forEach((d, idx) =>
-    d.classList.toggle('active', idx === tutorialStep)
-  );
+  tutorialTipDots.querySelectorAll('.tutorial-tip-dot').forEach((d, idx) => {
+    d.classList.toggle('active', idx === tutorialStep);
+    if (idx === tutorialStep) d.setAttribute('aria-current', 'step');
+    else d.removeAttribute('aria-current');
+  });
   $('tutorial-tip-emoji').textContent = step.emoji;
-  $('tutorial-tip-title').textContent = step.title;
-  $('tutorial-tip-text').innerHTML = step.text;
+  $('tutorial-tip-title').textContent = title;
+  $('tutorial-tip-text').innerHTML = text;
   tutorialTipPrev.hidden = tutorialStep === 0;
-  tutorialTipNext.textContent = tutorialStep === TUTORIAL_STEPS.length - 1 ? 'Commencer ✦' : 'Suivant →';
+  const last = tutorialStep === TUTORIAL_STEPS.length - 1;
+  tutorialTipNext.innerHTML = `${escapeHtml(last ? T().start : T().next)} <span aria-hidden="true">${last ? '✦' : '→'}</span>`;
 
   // Sur grand écran les boutons du haut sont cachés : on montre les panneaux latéraux à la place.
   let selector = step.target;
   let placement = step.placement;
-  if (window.matchMedia('(min-width: 1180px)').matches) {
+  if (panelLayout.matches) {
     if (selector === '#settings-toggle') { selector = '#settings-modal .modal-card'; placement = 'left'; }
     else if (selector === '#history-toggle') { selector = '#history-modal .modal-card'; placement = 'right'; }
   }
@@ -1092,35 +1234,46 @@ function goToStep(i) {
   }
 }
 
-function openTutorial() {
+function openTutorial(opener) {
+  tutorialOpener = opener || document.activeElement;
   tutorialOverlay.hidden = false;
-  tutorialOverlay.removeAttribute('aria-hidden');
+  document.querySelectorAll('header, main').forEach(el => { el.inert = true; });
   goToStep(0);
+  tutorialTipNext.focus();
 }
+
 function closeTutorial() {
+  if (tutorialOverlay.hidden) return;
   tutorialOverlay.hidden = true;
-  tutorialOverlay.setAttribute('aria-hidden', 'true');
-  localStorage.setItem('av-tutorial-seen', '1');
+  document.querySelectorAll('header, main').forEach(el => { el.inert = false; });
+  store.setItem('av-tutorial-seen', '1');
+  if (tutorialOpener && tutorialOpener.isConnected) tutorialOpener.focus();
 }
+
+// Tab reste dans la bulle du tour.
+tutorialTooltip.addEventListener('keydown', (e) => {
+  if (e.key !== 'Tab') return;
+  const items = [...tutorialTooltip.querySelectorAll('button:not([hidden])')];
+  const first = items[0];
+  const last = items[items.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
 
 tutorialTipPrev.addEventListener('click', () => goToStep(tutorialStep - 1));
 tutorialTipNext.addEventListener('click', () => {
   if (tutorialStep === TUTORIAL_STEPS.length - 1) closeTutorial();
   else goToStep(tutorialStep + 1);
 });
-$('tutorial-toggle').addEventListener('click', openTutorial);
+$('tutorial-toggle').addEventListener('click', (e) => openTutorial(e.currentTarget));
+$('tour-btn').addEventListener('click', (e) => openTutorial(e.currentTarget));
 $('tutorial-tip-close').addEventListener('click', closeTutorial);
-
-if (!localStorage.getItem('av-tutorial-seen')) {
-  setTimeout(openTutorial, 350);
-}
 
 // Historique
 
 const historyModal = $('history-modal');
-$('history-toggle').addEventListener('click', () => { renderHistory(); historyModal.hidden = false; });
-$('history-close').addEventListener('click', () => { historyModal.hidden = true; });
-historyModal.addEventListener('click', (e) => { if (e.target === historyModal) historyModal.hidden = true; });
+$('history-toggle').addEventListener('click', (e) => { renderHistory(); showModal(historyModal, e.currentTarget); });
+$('history-close').addEventListener('click', () => hideModal(historyModal));
 
 $('history-clear').addEventListener('click', () => {
   // L'exemple Clarks reste : c'est la seule façon de voir un résultat sans clé API.
@@ -1128,11 +1281,11 @@ $('history-clear').addEventListener('click', () => {
   state.history = demoEntry ? [demoEntry] : [];
   persistHistory();
   if (!demoEntry) {
-    localStorage.removeItem('av-demo-seeded');
+    store.removeItem('av-demo-seeded');
     seedDemoListing();
   }
   renderHistory();
-  showToast('Historique effacé');
+  showToast(T().historyCleared);
 });
 
 function compressImage(dataUrl, maxSize, quality) {
@@ -1159,7 +1312,7 @@ const HISTORY_PHOTO_QUALITY = 0.6;
 // localStorage est limité (~5 Mo) : si ça déborde, on sacrifie d'abord les photos
 // des plus vieilles annonces, puis les annonces elles-mêmes.
 function persistHistory() {
-  const write = () => localStorage.setItem('av-history', JSON.stringify(state.history));
+  const write = () => store.setItem('av-history', JSON.stringify(state.history));
   try { write(); return; } catch { /* quota dépassé */ }
   for (let i = state.history.length - 1; i >= 0; i--) {
     if (state.history[i].photos?.length) {
@@ -1200,21 +1353,21 @@ function renderHistory() {
   const list = $('history-list');
   const entries = state.history.filter(h => h && h.listing);
   if (entries.length === 0) {
-    list.innerHTML = '<p class="history-empty">Aucune annonce pour l\'instant</p>';
+    list.innerHTML = `<p class="history-empty">${escapeHtml(T().historyEmpty)}</p>`;
     $('history-clear').hidden = true;
     return;
   }
   $('history-clear').hidden = false;
   list.innerHTML = entries.map(h => {
-    const dateStr = new Date(h.date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+    const dateStr = new Date(h.date).toLocaleDateString(lang, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
     const thumbHtml = h.thumbnail
       ? `<img class="history-thumb" src="${escapeHtml(h.thumbnail)}" alt="" />`
-      : '<div class="history-thumb-placeholder">👟</div>';
-    const badge = h.isDemo ? '<span class="history-item-badge">Exemple</span>' : '';
+      : '<span class="history-thumb-placeholder" aria-hidden="true">👟</span>';
+    const badge = h.isDemo ? `<span class="history-item-badge">${escapeHtml(T().example)}</span>` : '';
     return `<button type="button" class="history-item" data-id="${escapeHtml(h.id)}">
       ${thumbHtml}
       <span class="history-item-info">
-        <span class="history-item-title">${escapeHtml(h.listing.title || '(sans titre)')}</span>
+        <span class="history-item-title">${escapeHtml(h.listing.title || T().untitled)}</span>
         <span class="history-item-date">${dateStr}</span>
         ${badge}
       </span>
@@ -1225,12 +1378,12 @@ function renderHistory() {
     el.addEventListener('click', () => {
       const item = state.history.find(h => h.id === el.dataset.id);
       if (!item) return;
-      historyModal.hidden = true;
-      uploadSection.style.display = 'none';
+      hideModal(historyModal);
+      uploadSection.hidden = true;
       chatSection.hidden = true;
       bulkSection.hidden = true;
-      renderListing(item.listing, item.photos);
       resultSection.hidden = false;
+      renderListing(item.listing, item.photos);
     });
   });
 }
@@ -1246,7 +1399,7 @@ const DEMO_PHOTOS = [
 ];
 
 function seedDemoListing() {
-  if (localStorage.getItem('av-demo-seeded') === DEMO_ID && state.history.some(h => h.id === DEMO_ID)) return;
+  if (store.getItem('av-demo-seeded') === DEMO_ID && state.history.some(h => h.id === DEMO_ID)) return;
   state.history = state.history.filter(h => !h.isDemo);
   state.history.push({
     id: DEMO_ID,
@@ -1268,8 +1421,8 @@ function seedDemoListing() {
     },
   });
   persistHistory();
-  localStorage.setItem('av-demo-seeded', DEMO_ID);
+  store.setItem('av-demo-seeded', DEMO_ID);
 }
 
 seedDemoListing();
-renderHistory();
+applyLang();
