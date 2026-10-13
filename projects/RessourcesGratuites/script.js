@@ -1,214 +1,303 @@
-const { filterResources, countWith, parseHash, buildHash } = window.RGCore;
-const { categories, resources } = RESOURCES_DATA;
+const RG = window.RGCore;
+const { families, categories, licenses, resources, checked } = RESOURCES_DATA;
+const ctx = RG.makeContext(RESOURCES_DATA);
 
-let selectedCats = new Set();
-let lang = localStorage.getItem('lang') === 'en' ? 'en' : 'fr';
+// En navigation privée, localStorage peut lever une erreur : la page doit marcher quand même.
+const store = {
+  get(key) { try { return localStorage.getItem(key); } catch { return null; } },
+  set(key, value) { try { localStorage.setItem(key, value); } catch { /* rien à garder */ } },
+};
+
+let lang = store.get('lang') === 'en' ? 'en' : 'fr';
+let state = RG.parseHash(location.hash, ctx);
 
 const i18n = {
   fr: {
     title: 'Ressources Gratuites — Design & Création',
     h1: 'Ressources Gratuites',
-    heroSub: 'Une encyclopédie d\'outils et ressources pour designers & créateurs',
+    heroSub: 'Des ressources vraiment gratuites pour designers et créateurs, avec la licence de chacune',
+    back: 'Retour',
+    switchLang: 'Switch to English',
+    searchLabel: 'Rechercher une ressource',
+    searchPlaceholder: 'Police manuscrite, texture papier, bruitage…',
+    familiesLabel: 'Familles',
+    subcatsLabel: 'Sous-catégories',
+    licensesLabel: 'Licences',
+    all: 'Tout',
+    noAccount: 'Sans compte',
+    account: 'Compte requis',
+    guideTitle: 'Comment lire les badges ?',
+    guideNote: 'Une licence peut changer : relis toujours celle du site avant de t\'en servir pour un client.',
+    reset: 'Tout effacer',
     empty: 'Aucune ressource trouvée',
     visit: 'Visiter →',
-    cats: {
-      images: 'Images', polices: 'Polices', icones: 'Icônes', illustrations: 'Illustrations',
-      couleurs: 'Couleurs', design: 'Design', sons: 'Sons', musiques: 'Musiques',
-      mockups: 'Mockups', jeux: 'Jeux Vidéos', web: 'Web', video: 'Vidéo',
-      textures: 'Textures', brushes: 'Brushes', png: 'PNG', ia: 'Outils IA',
-      outils: 'Outils', tutos: 'Tutos', inspi: 'Inspiration', motion: 'Motion Design',
-      '3d': '3D Assets', opensource: 'Open Source', 'ai-skills': 'Skills IA',
-    },
+    count: n => n === 0 ? 'Aucune ressource' : n === 1 ? '1 ressource' : `${n} ressources`,
+    checked: d => `Licences vérifiées le ${d}.`,
+    credits: 'Icônes : <a href="https://openmoji.org" target="_blank" rel="noopener noreferrer">OpenMoji</a>, sous licence <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>. Polices : Basteleur (Keussel, Velvetyne) et Coconat (Sara Lavazza, Collletttivo), sous licence SIL OFL.',
   },
   en: {
     title: 'Free Resources — Design & Creation',
     h1: 'Free Resources',
-    heroSub: 'An encyclopedia of tools and resources for designers & creators',
+    heroSub: 'Truly free resources for designers and creators, each with its license',
+    back: 'Back',
+    switchLang: 'Passer en français',
+    searchLabel: 'Search a resource',
+    searchPlaceholder: 'Script font, paper texture, sound effect…',
+    familiesLabel: 'Families',
+    subcatsLabel: 'Subcategories',
+    licensesLabel: 'Licenses',
+    all: 'All',
+    noAccount: 'No account',
+    account: 'Account needed',
+    guideTitle: 'How to read the badges?',
+    guideNote: 'A license can change: always reread the site\'s own license before using it for a client.',
+    reset: 'Clear all',
     empty: 'No resource found',
     visit: 'Visit →',
-    cats: {
-      images: 'Images', polices: 'Fonts', icones: 'Icons', illustrations: 'Illustrations',
-      couleurs: 'Colors', design: 'Design', sons: 'Sounds', musiques: 'Music',
-      mockups: 'Mockups', jeux: 'Video Games', web: 'Web', video: 'Video',
-      textures: 'Textures', brushes: 'Brushes', png: 'PNG', ia: 'AI Tools',
-      outils: 'Tools', tutos: 'Tutorials', inspi: 'Inspiration', motion: 'Motion Design',
-      '3d': '3D Assets', opensource: 'Open Source', 'ai-skills': 'AI Skills',
-    },
+    count: n => n === 0 ? 'No resources' : n === 1 ? '1 resource' : `${n} resources`,
+    checked: d => `Licenses checked on ${d}.`,
+    credits: 'Icons: <a href="https://openmoji.org" target="_blank" rel="noopener noreferrer">OpenMoji</a>, under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>. Fonts: Basteleur (Keussel, Velvetyne) and Coconat (Sara Lavazza, Collletttivo), under the SIL OFL.',
   },
 };
 
-// Emojis dessinés par OpenMoji (même style partout), avec l'emoji système en secours.
+const t = () => i18n[lang];
+const $ = id => document.getElementById(id);
+const el = (tag, className, text) => {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text != null) node.textContent = text;
+  return node;
+};
 
-// Quelques glyphes n'existent pas chez OpenMoji : on prend le plus proche.
-const OPENMOJI_FALLBACKS = { '✦': '✨' };
-
-function openmojiUrl(emoji) {
-  const code = [...(OPENMOJI_FALLBACKS[emoji] || emoji)]
+// Icônes OpenMoji copiées dans icons/ (tools/openmoji-icons.mjs) ; l'emoji du système en secours.
+function iconCode(emoji) {
+  return [...emoji]
     .map(c => c.codePointAt(0))
     .filter(cp => cp !== 0xFE0F) // OpenMoji nomme ses fichiers sans le sélecteur de variante
     .map(cp => cp.toString(16).toUpperCase().padStart(4, '0'))
     .join('-');
-  return `https://cdn.jsdelivr.net/npm/openmoji@latest/color/svg/${code}.svg`;
 }
 
-function emojiImage(emoji, className) {
-  const img = document.createElement('img');
-  img.className = className;
-  img.src = openmojiUrl(emoji);
+function icon(emoji, className) {
+  const img = el('img', className);
+  img.src = `icons/${iconCode(emoji)}.svg`;
   img.alt = '';
-  img.setAttribute('aria-hidden', 'true');
+  img.width = img.height = 56;
+  img.loading = 'lazy';
+  img.decoding = 'async';
   img.addEventListener('error', () => {
-    const span = document.createElement('span');
-    span.className = `${className} ${className}-fallback`;
+    const span = el('span', `${className} icon-fallback`, emoji);
     span.setAttribute('aria-hidden', 'true');
-    span.textContent = emoji;
     img.replaceWith(span);
   }, { once: true });
   return img;
 }
 
-// "🖼️ Images" → "🖼️"
-function leadingEmoji(label) {
-  const m = label.match(/^([^\p{L}\p{N}\s]+)\s/u);
-  return m ? m[1] : '';
-}
-
-function catLabel(id) {
-  return i18n[lang].cats[id] || categories.find(c => c.id === id)?.label || id;
-}
+const label = item => item[lang];
+const catById = new Map(categories.map(c => [c.id, c]));
+const licenseById = new Map(licenses.map(l => [l.id, l]));
 
 // Langue
 
-const FLAG_GB = '<svg viewBox="0 0 24 16" shape-rendering="crispEdges" aria-hidden="true">'
-  + '<rect width="24" height="16" fill="#012169"/>'
-  + '<rect x="0" y="6" width="24" height="4" fill="#ffffff"/>'
-  + '<rect x="10" y="0" width="4" height="16" fill="#ffffff"/>'
-  + '<rect x="0" y="7" width="24" height="2" fill="#C8102E"/>'
-  + '<rect x="11" y="0" width="2" height="16" fill="#C8102E"/>'
-  + '</svg>';
-const FLAG_FR = '<svg viewBox="0 0 24 16" shape-rendering="crispEdges" aria-hidden="true">'
-  + '<rect x="0" y="0" width="8" height="16" fill="#0055A4"/>'
-  + '<rect x="8" y="0" width="8" height="16" fill="#F5F5F5"/>'
-  + '<rect x="16" y="0" width="8" height="16" fill="#EF4135"/>'
-  + '</svg>';
+const FLAG_GB = '<svg viewBox="0 0 24 16" shape-rendering="crispEdges"><rect width="24" height="16" fill="#012169"/><rect y="6" width="24" height="4" fill="#fff"/><rect x="10" width="4" height="16" fill="#fff"/><rect y="7" width="24" height="2" fill="#C8102E"/><rect x="11" width="2" height="16" fill="#C8102E"/></svg>';
+const FLAG_FR = '<svg viewBox="0 0 24 16" shape-rendering="crispEdges"><rect width="8" height="16" fill="#0055A4"/><rect x="8" width="8" height="16" fill="#F5F5F5"/><rect x="16" width="8" height="16" fill="#EF4135"/></svg>';
 
 function applyLang() {
-  const t = i18n[lang];
-  document.title = t.title;
+  const tr = t();
+  document.title = tr.title;
   document.documentElement.lang = lang;
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    if (t[el.dataset.i18n]) el.textContent = t[el.dataset.i18n];
-  });
+  document.querySelectorAll('[data-i18n]').forEach(node => { node.textContent = tr[node.dataset.i18n]; });
+  document.querySelectorAll('[data-i18n-label]').forEach(node => node.setAttribute('aria-label', tr[node.dataset.i18nLabel]));
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(node => { node.placeholder = tr[node.dataset.i18nPlaceholder]; });
+  document.querySelectorAll('[data-i18n-html]').forEach(node => { node.innerHTML = tr[node.dataset.i18nHtml]; });
 
   // Le drapeau montre la langue vers laquelle on bascule.
-  document.getElementById('lang-flag').innerHTML = lang === 'fr' ? FLAG_GB : FLAG_FR;
-  const label = lang === 'fr' ? 'Switch to English' : 'Passer en français';
-  const btn = document.getElementById('lang-toggle');
-  btn.title = label;
-  btn.setAttribute('aria-label', label);
+  $('lang-flag').innerHTML = lang === 'fr' ? FLAG_GB : FLAG_FR;
+  $('lang-toggle').setAttribute('aria-label', tr.switchLang);
+
+  const date = new Date(`${checked}T12:00:00`).toLocaleDateString(lang, { day: 'numeric', month: 'long', year: 'numeric' });
+  $('checked').textContent = tr.checked(date);
+
+  buildGuide();
+  cards.clear();
 }
 
-document.getElementById('lang-toggle').addEventListener('click', () => {
+$('lang-toggle').addEventListener('click', () => {
   lang = lang === 'fr' ? 'en' : 'fr';
-  localStorage.setItem('lang', lang);
+  store.set('lang', lang);
   applyLang();
   render();
 });
 
-// Catégories
+// Badges de licence
 
-const categoriesEl = document.getElementById('categories');
-
-categories.forEach(cat => {
-  const btn = document.createElement('button');
-  btn.type = 'button';
-  btn.className = 'cat-btn';
-  btn.dataset.cat = cat.id;
-  const emoji = leadingEmoji(cat.label);
-  if (emoji) btn.append(emojiImage(emoji, 'pixel-emoji-inline'));
-  const label = document.createElement('span');
-  label.className = 'cat-label';
-  const count = document.createElement('span');
-  count.className = 'cat-count';
-  btn.append(label, count);
-  btn.addEventListener('click', () => {
-    if (selectedCats.has(cat.id)) selectedCats.delete(cat.id);
-    else selectedCats.add(cat.id);
-    render();
-  });
-  categoriesEl.append(btn);
-});
-
-function updateCategories() {
-  categoriesEl.querySelectorAll('.cat-btn').forEach(btn => {
-    const id = btn.dataset.cat;
-    const active = selectedCats.has(id);
-    const count = countWith(resources, selectedCats, id);
-    btn.classList.toggle('active', active);
-    btn.setAttribute('aria-pressed', String(active));
-    btn.querySelector('.cat-label').textContent = catLabel(id);
-    btn.querySelector('.cat-count').textContent = count || '';
-    btn.style.opacity = count === 0 ? '0.3' : '';
-  });
+function licenseBadge(id, withName) {
+  const lic = licenseById.get(id);
+  const badge = el('span', `badge badge-${id}`);
+  badge.append(el('span', 'badge-seal'), el('span', 'badge-label', label(lic)));
+  if (withName) badge.title = label(lic.hint);
+  return badge;
 }
 
-// Cartes
+function buildGuide() {
+  const list = $('guide-list');
+  list.replaceChildren();
+  for (const lic of licenses) {
+    const dt = el('dt');
+    dt.append(licenseBadge(lic.id));
+    list.append(dt, el('dd', null, label(lic.hint)));
+  }
+}
 
-const gridEl = document.getElementById('grid');
-const emptyEl = document.getElementById('empty');
+// Boutons de filtre
 
-function createCard(r, index) {
-  const card = document.createElement('a');
-  card.className = 'card';
+function chip(className, text, onClick) {
+  const btn = el('button', className);
+  btn.type = 'button';
+  btn.append(el('span', 'chip-label', text), el('span', 'chip-count'));
+  btn.addEventListener('click', onClick);
+  return btn;
+}
+
+function setChip(btn, active, count) {
+  btn.classList.toggle('active', active);
+  btn.setAttribute('aria-pressed', String(active));
+  btn.querySelector('.chip-count').textContent = count;
+  btn.classList.toggle('is-empty', count === 0 && !active);
+}
+
+function toggleIn(set, id) {
+  const next = new Set(set);
+  if (!next.delete(id)) next.add(id);
+  return next;
+}
+
+function update(patch, animate = true) {
+  state = { ...state, ...patch };
+  render(animate);
+}
+
+// Les boutons sont créés une fois (par langue, ou par famille pour les sous-catégories) puis mis à jour :
+// les recréer à chaque clic ferait perdre sa place à qui navigue au clavier.
+const built = { lang: null, family: null };
+
+function buildFilters() {
+  if (built.lang !== lang) {
+    $('families').replaceChildren(...[{ id: '', emoji: '✨', fr: t().all, en: t().all }, ...families].map(fam => {
+      const btn = chip('family', label(fam), () => update({ family: state.family === fam.id ? '' : fam.id, cats: new Set() }));
+      btn.prepend(icon(fam.emoji, 'family-icon'));
+      btn.dataset.family = fam.id;
+      return btn;
+    }));
+    $('licenses').replaceChildren(...licenses.map(lic => {
+      const btn = chip(`license-btn badge-${lic.id}`, label(lic), () => update({ licenses: toggleIn(state.licenses, lic.id) }));
+      btn.prepend(el('span', 'badge-seal'));
+      btn.dataset.license = lic.id;
+      btn.title = label(lic.hint);
+      return btn;
+    }));
+  }
+  if (built.lang !== lang || built.family !== state.family) {
+    const subs = categories.filter(c => c.family === state.family);
+    // Une famille d'une seule sous-catégorie n'a rien à affiner.
+    $('subcats').hidden = subs.length < 2;
+    $('subcats').replaceChildren(...subs.map(cat => {
+      const btn = chip('cat-btn', label(cat), () => update({ cats: toggleIn(state.cats, cat.id) }));
+      btn.dataset.cat = cat.id;
+      return btn;
+    }));
+  }
+  built.lang = lang;
+  built.family = state.family;
+}
+
+function updateFilters() {
+  buildFilters();
+  for (const btn of $('families').children) {
+    const id = btn.dataset.family;
+    setChip(btn, state.family === id, RG.countFamily(resources, state, ctx, lang, id));
+  }
+  for (const btn of $('subcats').children) {
+    const id = btn.dataset.cat;
+    setChip(btn, state.cats.has(id), RG.countCat(resources, state, ctx, lang, id));
+  }
+  for (const btn of $('licenses').children) {
+    const id = btn.dataset.license;
+    setChip(btn, state.licenses.has(id), RG.countLicense(resources, state, ctx, lang, id));
+  }
+  const noAccount = $('no-account');
+  noAccount.classList.toggle('active', state.noAccount);
+  noAccount.setAttribute('aria-pressed', String(state.noAccount));
+}
+
+$('no-account').addEventListener('click', () => update({ noAccount: !state.noAccount }));
+
+const search = $('search');
+search.value = state.query;
+// Pendant la frappe, pas d'animation de distribution : les cartes clignoteraient à chaque lettre.
+search.addEventListener('input', () => update({ query: search.value }, false));
+
+function reset() {
+  search.value = '';
+  update(RG.emptyState());
+  // Le bouton cliqué vient de disparaître : on rend la main à la recherche.
+  search.focus();
+}
+document.querySelectorAll('#reset, [data-reset]').forEach(btn => btn.addEventListener('click', reset));
+
+// Cartes, gardées en mémoire par langue : filtrer ne les reconstruit pas.
+
+const cards = new Map();
+
+function createCard(r) {
+  const card = el('a', 'card');
   card.href = r.url;
   card.target = '_blank';
   card.rel = 'noopener noreferrer';
   card.dataset.cats = r.cats.join(',');
-  // Décalage plafonné : sur une grande grille, les dernières cartes n'attendent pas une seconde.
-  card.style.animationDelay = `${Math.min(index, 8) * 20}ms`;
+  card.dataset.license = r.license;
 
-  const top = document.createElement('div');
-  top.className = 'card-top';
-  const tags = document.createElement('div');
-  tags.className = 'card-tags';
-  for (const id of r.cats) {
-    const cat = categories.find(c => c.id === id);
-    if (!cat) continue;
-    const tag = document.createElement('span');
-    tag.className = 'card-tag';
-    tag.textContent = catLabel(id);
-    tags.append(tag);
-  }
-  top.append(emojiImage(r.emoji, 'card-emoji'), tags);
+  const top = el('div', 'card-top');
+  const tags = el('div', 'card-tags');
+  for (const id of r.cats) tags.append(el('span', 'card-tag', label(catById.get(id))));
+  top.append(icon(r.emoji, 'card-emoji'), tags);
 
-  const name = document.createElement('div');
-  name.className = 'card-name';
-  name.textContent = r.name;
+  const footer = el('div', 'card-footer');
+  const legal = el('div', 'card-legal');
+  legal.append(licenseBadge(r.license, true), el('span', 'license-name', r.licenseName));
+  if (r.account) legal.append(el('span', 'account-tag', t().account));
+  footer.append(legal, el('span', 'card-visit', t().visit));
 
-  const desc = document.createElement('div');
-  desc.className = 'card-desc';
-  desc.textContent = r.desc;
-
-  const footer = document.createElement('div');
-  footer.className = 'card-footer';
-  const visit = document.createElement('span');
-  visit.className = 'card-visit';
-  visit.textContent = i18n[lang].visit;
-  footer.append(visit);
-
-  card.append(top, name, desc, footer);
+  card.append(top, el('h2', 'card-name', r.name), el('p', 'card-desc', r.desc[lang]), footer);
   return card;
 }
 
-function render() {
-  const filtered = filterResources(resources, selectedCats);
-  updateCategories();
-  history.replaceState(null, '', buildHash(selectedCats) || location.pathname + location.search);
-
-  gridEl.replaceChildren(...filtered.map(createCard));
-  emptyEl.hidden = filtered.length > 0;
+function cardFor(r) {
+  if (!cards.has(r)) cards.set(r, createCard(r));
+  return cards.get(r);
 }
 
-selectedCats = parseHash(location.hash, categories.map(c => c.id));
+function render(animate = true) {
+  const filtered = RG.filterResources(resources, state, ctx, lang);
+  updateFilters();
+
+  const hash = RG.buildHash(state);
+  history.replaceState(null, '', hash || location.pathname + location.search);
+
+  const grid = $('grid');
+  grid.classList.toggle('dealing', animate);
+  grid.replaceChildren(...filtered.map((r, i) => {
+    const card = cardFor(r);
+    // Décalage plafonné : sur une grande grille, les dernières cartes n'attendent pas.
+    card.style.animationDelay = `${Math.min(i, 8) * 20}ms`;
+    return card;
+  }));
+
+  $('count').textContent = t().count(filtered.length);
+  // L'écran vide a déjà son propre bouton.
+  $('reset').hidden = !hash || filtered.length === 0;
+  $('empty').hidden = filtered.length > 0;
+}
+
 applyLang();
 render();

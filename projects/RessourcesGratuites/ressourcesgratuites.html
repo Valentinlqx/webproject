@@ -2,40 +2,77 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ressources Gratuites — Design & Création</title>
-  <meta name="description" content="Une encyclopédie d'outils et ressources gratuites pour designers & créateurs — polices, icônes, images, sons, mockups et plus." />
+  <meta name="description" content="Des ressources vraiment gratuites pour designers et créateurs (polices, icônes, photos, sons, 3D…), avec la licence de chacune." />
   <meta property="og:title" content="Ressources Gratuites — Design & Création" />
-  <meta property="og:description" content="Une encyclopédie d'outils et ressources gratuites pour designers & créateurs." />
+  <meta property="og:description" content="Des ressources vraiment gratuites pour designers et créateurs, avec la licence de chacune." />
   <meta property="og:type" content="website" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="preload" href="fonts/Basteleur-Bold.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="style.css?v=2" />
 </head>
 <body>
 
   <div class="page-panel">
 
-  <header>
-    <a href="../../index.html" class="back-btn" title="Retour" aria-label="Retour">&lt;</a>
-    <div class="header-controls">
-      <button class="lang-toggle" id="lang-toggle" type="button" title="Switch to English" aria-label="Switch to English">
-        <span class="lang-flag" id="lang-flag" aria-hidden="true"></span>
-      </button>
-    </div>
-    <div class="hero">
-      <h1 data-i18n="h1">Ressources Gratuites</h1>
-      <p class="hero-sub" data-i18n="heroSub">Une encyclopédie d'outils et ressources pour designers & créateurs</p>
-    </div>
-  </header>
+    <header>
+      <a href="../../index.html" class="back-btn" data-i18n-label="back" aria-label="Retour">
+        <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M8 1 3 6l5 5" /></svg>
+      </a>
+      <div class="header-controls">
+        <button class="lang-toggle" id="lang-toggle" type="button" aria-label="Switch to English">
+          <span class="lang-flag" id="lang-flag" aria-hidden="true"></span>
+        </button>
+      </div>
+      <div class="hero">
+        <h1 data-i18n="h1">Ressources Gratuites</h1>
+        <p class="hero-sub" data-i18n="heroSub">Des ressources vraiment gratuites pour designers et créateurs, avec la licence de chacune</p>
+      </div>
+    </header>
 
-  <main>
-    <div class="categories" id="categories" role="group" aria-label="Catégories"></div>
-    <div class="grid" id="grid"></div>
-    <div class="empty-state" id="empty" hidden>
-      <span>🔍</span>
-      <p data-i18n="empty">Aucune ressource trouvée</p>
-    </div>
-  </main>
+    <main>
+      <div class="search">
+        <label class="visually-hidden" for="search" data-i18n="searchLabel">Rechercher une ressource</label>
+        <svg class="search-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 1a5.5 5.5 0 0 1 4.4 8.8l4 4-1.1 1.1-4-4A5.5 5.5 0 1 1 6.5 1Zm0 2a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z" /></svg>
+        <input id="search" type="search" autocomplete="off" spellcheck="false" data-i18n-placeholder="searchPlaceholder" placeholder="Police manuscrite, texture papier, bruitage…" />
+      </div>
+
+      <nav class="families" id="families" data-i18n-label="familiesLabel" aria-label="Familles"></nav>
+      <div class="subcats" id="subcats" role="group" data-i18n-label="subcatsLabel" aria-label="Sous-catégories" hidden></div>
+
+      <div class="filters">
+        <div class="licenses" id="licenses" role="group" data-i18n-label="licensesLabel" aria-label="Licences"></div>
+        <button class="toggle" id="no-account" type="button" aria-pressed="false">
+          <span class="toggle-box" aria-hidden="true"></span>
+          <span data-i18n="noAccount">Sans compte</span>
+        </button>
+      </div>
+
+      <details class="guide" id="guide">
+        <summary data-i18n="guideTitle">Comment lire les badges ?</summary>
+        <dl class="guide-list" id="guide-list"></dl>
+        <p class="guide-note" data-i18n="guideNote">Une licence peut changer : relis toujours celle du site avant de t'en servir pour un client.</p>
+      </details>
+
+      <div class="results-bar">
+        <p class="results-count" id="count" aria-live="polite"></p>
+        <button class="reset" id="reset" type="button" data-i18n="reset" hidden>Tout effacer</button>
+      </div>
+
+      <div class="grid" id="grid"></div>
+
+      <div class="empty-state" id="empty" hidden>
+        <span aria-hidden="true">?</span>
+        <p data-i18n="empty">Aucune ressource trouvée</p>
+        <button class="reset" type="button" data-reset data-i18n="reset">Tout effacer</button>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <p id="checked"></p>
+      <p data-i18n-html="credits">Icônes : <a href="https://openmoji.org" target="_blank" rel="noopener noreferrer">OpenMoji</a>, sous licence <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>. Polices : Basteleur (Keussel, Velvetyne) et Coconat (Sara Lavazza, Collletttivo), sous licence SIL OFL.</p>
+    </footer>
 
   </div>
 
