@@ -4,7 +4,8 @@ export default defineConfig({
   testDir: 'tests/e2e',
   fullyParallel: true,
   reporter: 'list',
-  use: { baseURL: 'http://localhost:4173' },
+  // Le site suit la langue du navigateur : les tests partent d'un navigateur français.
+  use: { baseURL: 'http://localhost:4173', locale: 'fr-FR' },
   webServer: {
     command: 'node tests/serve.mjs',
     url: 'http://localhost:4173/',

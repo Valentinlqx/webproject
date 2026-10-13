@@ -62,3 +62,13 @@ Chaque ressource porte aussi `licenseName`, le nom exact (« Unsplash License »
 - `localStorage` protégé (navigation privée).
 - `rg-core.js` : filtres, recherche, compteurs, URL ; testé sous Node.
 - Tests de données : licence connue, `licenseName`, descriptions FR et EN, sous-catégories existantes, URLs https uniques, icône présente.
+
+## Tout le site (ajouté le même jour)
+
+Valentin veut tout le site (accueil, AutoVinted, Ressources Gratuites) très accessible, adapté à tous les appareils, pour le public le plus large et le plus éthique possible. Ses choix :
+
+- Accessibilité : WCAG 2.2 niveau AA (= RGAA) partout.
+- Animations de fond de Ressources Gratuites : un bouton pause, retenu d'une visite à l'autre ; coupées d'office si l'appareil demande moins de mouvement.
+- Éthique : zéro pistage et rien d'extérieur (polices, icônes, scripts hébergés sur le site) ; vie privée claire pour AutoVinted (où partent les photos, où reste la clé, bouton pour tout effacer) ; sobriété (RGESN).
+- Langues : tout le site en français et en anglais, langue retenue d'une page à l'autre, langue du navigateur par défaut.
+- Mentions légales : pas cochées. Signalé : obligatoires en France pour un site pro (LCEN).

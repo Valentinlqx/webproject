@@ -8,7 +8,9 @@ const store = {
   set(key, value) { try { localStorage.setItem(key, value); } catch { /* rien à garder */ } },
 };
 
-let lang = store.get('lang') === 'en' ? 'en' : 'fr';
+// La langue choisie vaut pour tout le site ; sans choix, celle du navigateur.
+const browserLang = ((navigator.languages && navigator.languages[0]) || navigator.language || '').toLowerCase();
+let lang = ['fr', 'en'].includes(store.get('lang')) ? store.get('lang') : browserLang.startsWith('fr') ? 'fr' : 'en';
 let state = RG.parseHash(location.hash, ctx);
 
 const i18n = {
@@ -18,6 +20,7 @@ const i18n = {
     heroSub: 'Des ressources vraiment gratuites pour designers et créateurs, avec la licence de chacune',
     back: 'Retour',
     switchLang: 'Switch to English',
+    pauseMotion: 'Mettre le fond en pause',
     searchLabel: 'Rechercher une ressource',
     searchPlaceholder: 'Police manuscrite, texture papier, bruitage…',
     familiesLabel: 'Familles',
@@ -41,6 +44,7 @@ const i18n = {
     heroSub: 'Truly free resources for designers and creators, each with its license',
     back: 'Back',
     switchLang: 'Passer en français',
+    pauseMotion: 'Pause the background',
     searchLabel: 'Search a resource',
     searchPlaceholder: 'Script font, paper texture, sound effect…',
     familiesLabel: 'Families',
@@ -127,6 +131,20 @@ $('lang-toggle').addEventListener('click', () => {
   store.set('lang', lang);
   applyLang();
   render();
+});
+
+// Fond animé : on peut l'arrêter (WCAG 2.2.2), et le choix est retenu.
+
+const motionBtn = $('motion-toggle');
+function applyMotion(off) {
+  document.documentElement.classList.toggle('motion-off', off);
+  motionBtn.setAttribute('aria-pressed', String(off));
+}
+applyMotion(store.get('motion') === 'off');
+motionBtn.addEventListener('click', () => {
+  const off = !document.documentElement.classList.contains('motion-off');
+  store.set('motion', off ? 'off' : 'on');
+  applyMotion(off);
 });
 
 // Badges de licence

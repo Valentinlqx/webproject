@@ -178,7 +178,8 @@ header {
 }
 
 .back-btn,
-.lang-toggle {
+.lang-toggle,
+.motion-toggle {
   position: relative;
   background: var(--bg-card);
   border: var(--pixel) solid var(--border-dark);
@@ -203,7 +204,8 @@ header {
 
 /* Cadre intérieur, comme sur les cartes */
 .back-btn::before,
-.lang-toggle::before {
+.lang-toggle::before,
+.motion-toggle::before {
   content: '';
   position: absolute;
   inset: 4px;
@@ -234,6 +236,28 @@ header {
   display: block;
   width: 100%;
   height: 100%;
+}
+
+/* Pause : carte bleue, droite */
+.motion-toggle {
+  background: var(--chip);
+  color: var(--cream);
+  box-shadow:
+    inset 0 -4px 0 rgba(0, 0, 0, 0.22),
+    var(--pixel) var(--pixel) 0 var(--border-dark),
+    calc(var(--pixel) * 2) calc(var(--pixel) * 2) 0 var(--gold);
+}
+.motion-toggle svg { width: 16px; height: 16px; fill: currentColor; }
+.motion-toggle .icon-play,
+.motion-off .motion-toggle .icon-pause { display: none; }
+.motion-off .motion-toggle .icon-play { display: block; }
+.motion-toggle:active { transform: translate(var(--pixel), var(--pixel)); box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.22); }
+.motion-toggle:focus-visible { outline: 3px solid var(--gold); outline-offset: 4px; }
+
+/* Fond arrêté à la demande */
+.motion-off body::before,
+.motion-off::after {
+  animation-play-state: paused;
 }
 
 /* Retour : carte rouge penchée à gauche */
@@ -1037,7 +1061,7 @@ main {
 
   .header-controls { top: var(--s-3); right: var(--s-3); gap: var(--s-1); }
   .back-btn        { top: var(--s-3); left:  var(--s-3); }
-  .back-btn, .lang-toggle { width: 44px; height: 54px; }
+  .back-btn, .lang-toggle, .motion-toggle { width: 44px; height: 54px; }
 
   .card        { padding: var(--s-4); }
   .card-emoji  { width: 48px; height: 48px; }
@@ -1072,6 +1096,8 @@ main {
     animation: none !important;
     transform: none !important;
   }
+
+  .motion-toggle { display: none; }
 
   .card:hover,
   .card:hover .card-emoji,

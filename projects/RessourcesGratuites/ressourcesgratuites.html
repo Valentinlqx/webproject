@@ -11,6 +11,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>" />
   <link rel="preload" href="fonts/Basteleur-Bold.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="style.css?v=2" />
+  <script>try { if (localStorage.getItem('motion') === 'off') document.documentElement.classList.add('motion-off'); } catch {}</script>
 </head>
 <body>
 
@@ -21,6 +22,10 @@
         <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M8 1 3 6l5 5" /></svg>
       </a>
       <div class="header-controls">
+        <button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false" data-i18n-label="pauseMotion" aria-label="Mettre le fond en pause">
+          <svg class="icon-pause" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2h2v8H3zM7 2h2v8H7z" /></svg>
+          <svg class="icon-play" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7-4.5z" /></svg>
+        </button>
         <button class="lang-toggle" id="lang-toggle" type="button" aria-label="Switch to English">
           <span class="lang-flag" id="lang-flag" aria-hidden="true"></span>
         </button>

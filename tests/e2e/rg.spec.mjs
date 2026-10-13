@@ -142,6 +142,14 @@ test("le bouton de langue traduit aussi les descriptions, et s'en souvient", asy
   await expect(page.locator('h1')).toHaveText('Free Resources');
 });
 
+test.describe('navigateur anglais', () => {
+  test.use({ locale: 'en-US' });
+  test('sans choix enregistré, la page suit la langue du navigateur', async ({ page }) => {
+    await page.goto(PAGES.rg);
+    await expect(page.locator('h1')).toHaveText('Free Resources');
+  });
+});
+
 test('les icônes viennent du site, pas d\'un autre serveur', async ({ page }) => {
   const outside = [];
   page.on('request', r => { if (!r.url().startsWith('http://localhost')) outside.push(r.url()); });
@@ -163,6 +171,24 @@ test('la page marche même si le navigateur refuse localStorage', async ({ page 
   await page.click('#lang-toggle');
   await expect(page.locator('h1')).toHaveText('Free Resources');
   expect(errors).toEqual([]);
+});
+
+test('le bouton pause arrête le fond, et le choix est retenu', async ({ page }) => {
+  await page.goto(PAGES.rg);
+  const playState = () => page.evaluate(() => getComputedStyle(document.body, '::before').animationPlayState);
+  expect(await playState()).toBe('running');
+  await page.click('#motion-toggle');
+  await expect(page.locator('#motion-toggle')).toHaveAttribute('aria-pressed', 'true');
+  expect(await playState()).toBe('paused');
+  await page.reload();
+  expect(await playState()).toBe('paused');
+});
+
+test("si l'appareil demande moins de mouvement, rien ne bouge et le bouton pause disparaît", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto(PAGES.rg);
+  await expect(page.locator('#motion-toggle')).toBeHidden();
+  expect(await page.evaluate(() => getComputedStyle(document.body, '::before').animationName)).toBe('none');
 });
 
 test("le retour mène à l'accueil", async ({ page }) => {
