@@ -242,3 +242,30 @@ test('à 360 px, aucun libellé ne déborde de son bouton', async ({ page }) => 
     bs.filter(b => b.scrollWidth > b.clientWidth + 1).map(b => b.textContent.trim()));
   expect(overflowing).toEqual([]);
 });
+
+test("un lien d'évitement mène directement aux résultats", async ({ page }) => {
+  await page.goto(PAGES.rg);
+  await page.keyboard.press('Tab');
+  const skip = page.locator('.skip-link');
+  await expect(skip).toBeFocused();
+  await expect(skip).toBeInViewport();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#grid')).toBeFocused();
+});
+
+test('le compteur d\'une licence choisie reste lisible', async ({ page }) => {
+  await page.goto(PAGES.rg + '#l=cc0');
+  const count = page.locator('.license-btn[data-license="cc0"] .chip-count');
+  const { color, background } = await count.evaluate(el => ({
+    color: getComputedStyle(el).color, background: getComputedStyle(el).backgroundColor }));
+  expect(color).not.toBe(background);
+});
+
+test.describe('sans JavaScript', () => {
+  test.use({ javaScriptEnabled: false });
+  test('la page explique pourquoi elle est vide, sans filtres morts', async ({ page }) => {
+    await page.goto(PAGES.rg);
+    await expect(page.locator('.noscript')).toBeVisible();
+    await expect(page.locator('#search')).toBeHidden();
+  });
+});

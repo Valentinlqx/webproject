@@ -23,6 +23,8 @@
 }
 
 :root {
+  /* Barres de défilement et champs natifs en sombre, comme la page. */
+  color-scheme: dark;
   --bg-card:       #fbf1d3;
   --bg-card-2:     #f0e1c0;
   --bg-input:      #2a040c;
@@ -357,7 +359,8 @@ header {
 .last-updated {
   margin: calc(var(--s-2) * -1) 0 var(--s-4);
   font-size: 14px;
-  color: var(--cream-deep);
+  color: var(--cream);
+  text-shadow: 1px 1px 0 var(--border-dark);
 }
 
 .hero-sub {
@@ -598,6 +601,12 @@ main {
   outline-offset: 3px;
 }
 
+/* Choisi : une coche en plus de la couleur, pour qui distingue mal les couleurs. */
+.cat-btn.active .chip-label::before,
+.license-btn.active .chip-label::before {
+  content: '✓ ' / '';
+}
+
 /* Un bouton qui ne donnerait rien : pointillés, mais texte toujours lisible. */
 .is-empty { border-style: dashed; box-shadow: none; }
 
@@ -663,7 +672,7 @@ main {
   box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.25), 2px 2px 0 var(--border-dark), 0 0 0 2px var(--cream);
 }
 .license-btn.active .badge-seal { background: var(--cream); }
-.license-btn.active .chip-count { background: var(--border-dark); }
+.license-btn.active .chip-count { background: var(--border-dark); color: var(--cream); }
 
 @media (hover: hover) and (pointer: fine) {
   .license-btn:not(.active):hover { transform: translateY(-2px); }
@@ -709,6 +718,9 @@ main {
 }
 
 .guide summary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
   width: fit-content;
   margin: 0 auto;
   padding: 6px 4px;
@@ -1082,7 +1094,7 @@ main {
 
 /* Téléphones étroits : les libellés passent à la ligne au lieu de déborder. */
 @media (max-width: 400px) {
-  .family .chip-label { font-size: 11px; letter-spacing: -0.3px; }
+  .family .chip-label { font-size: 11px; letter-spacing: -0.3px; overflow-wrap: anywhere; hyphens: auto; min-width: 0; }
   .license-btn .chip-label { min-width: 0; overflow-wrap: anywhere; }
   .license-btn .chip-count { flex-shrink: 0; }
 }
@@ -1092,6 +1104,47 @@ main {
   .family .chip-label { font-size: 10.5px; letter-spacing: -0.3px; }
   .family-icon { width: 30px; height: 30px; }
   .license-btn .chip-count { display: none; }
+}
+
+/* Lien d'évitement : invisible jusqu'à ce qu'on y arrive au clavier. */
+.skip-link {
+  position: absolute;
+  top: var(--s-2);
+  left: 50%;
+  z-index: 10;
+  padding: 10px 16px;
+  background: var(--gold);
+  color: var(--border-dark);
+  border: var(--pixel) solid var(--border-dark);
+  font-family: 'Basteleur', serif;
+  font-weight: 700;
+  transform: translate(-50%, -200%);
+}
+.skip-link:focus { transform: translate(-50%, 0); outline: 3px solid var(--cream); }
+
+.hero h1 { overflow-wrap: anywhere; hyphens: auto; }
+
+.noscript {
+  margin: 0 auto var(--s-6);
+  max-width: 720px;
+  padding: var(--s-4);
+  background: var(--bg-card);
+  color: var(--text);
+  border: var(--pixel) solid var(--border-dark);
+  text-align: center;
+}
+.no-js .search, .no-js .families, .no-js .filters, .no-js .guide, .no-js .results-bar { display: none; }
+
+/* Couleurs forcées (contraste élevé de Windows) : l'état choisi ne peut plus passer par la couleur. */
+@media (forced-colors: active) {
+  [aria-pressed="true"] {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+    border-color: HighlightText;
+  }
+  .toggle.active .toggle-box { background: CanvasText; }
+  .badge-seal { forced-color-adjust: none; }
 }
 
 /* Moins d'animations si le système le demande */
