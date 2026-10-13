@@ -352,6 +352,12 @@ header {
   overflow-wrap: balance;
 }
 
+.last-updated {
+  margin: calc(var(--s-2) * -1) 0 var(--s-4);
+  font-size: 14px;
+  color: var(--cream-deep);
+}
+
 .hero-sub {
   font-family: 'Coconat', Georgia, serif;
   font-weight: 400;

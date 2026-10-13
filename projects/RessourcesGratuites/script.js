@@ -36,6 +36,7 @@ const i18n = {
     visit: 'Visiter →',
     count: n => n === 0 ? 'Aucune ressource' : n === 1 ? '1 ressource' : `${n} ressources`,
     checked: d => `Licences vérifiées le ${d}.`,
+    updated: d => `Mis à jour le ${d}`,
     credits: 'Icônes : <a href="https://openmoji.org" target="_blank" rel="noopener noreferrer">OpenMoji</a>, sous licence <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>. Polices : Basteleur (Keussel, Velvetyne) et Coconat (Sara Lavazza, Collletttivo), sous licence SIL OFL.',
   },
   en: {
@@ -60,6 +61,7 @@ const i18n = {
     visit: 'Visit →',
     count: n => n === 0 ? 'No resources' : n === 1 ? '1 resource' : `${n} resources`,
     checked: d => `Licenses checked on ${d}.`,
+    updated: d => `Updated on ${d}`,
     credits: 'Icons: <a href="https://openmoji.org" target="_blank" rel="noopener noreferrer">OpenMoji</a>, under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>. Fonts: Basteleur (Keussel, Velvetyne) and Coconat (Sara Lavazza, Collletttivo), under the SIL OFL.',
   },
 };
@@ -121,6 +123,9 @@ function applyLang() {
 
   const date = new Date(`${checked}T12:00:00`).toLocaleDateString(lang, { day: 'numeric', month: 'long', year: 'numeric' });
   $('checked').textContent = tr.checked(date);
+  // Comme AutoVinted : GitHub Pages date la page de sa dernière mise en ligne.
+  const updated = new Date(document.lastModified);
+  $('last-updated').textContent = tr.updated(updated.toLocaleString(lang, { dateStyle: 'long', timeStyle: 'short' }));
 
   buildGuide();
   cards.clear();

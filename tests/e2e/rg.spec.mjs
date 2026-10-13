@@ -122,6 +122,13 @@ test('le mini-guide explique chaque badge', async ({ page }) => {
   await expect(page.locator('#guide-list dd').first()).toBeVisible();
 });
 
+test('la date de dernière mise à jour est affichée sous le titre', async ({ page }) => {
+  await page.goto(PAGES.rg);
+  await expect(page.locator('#last-updated')).toContainText(/Mis à jour le .*\d{4}/);
+  await page.click('#lang-toggle');
+  await expect(page.locator('#last-updated')).toContainText(/Updated on .*\d{4}/);
+});
+
 test('les cartes ouvrent le site dans un nouvel onglet', async ({ page }) => {
   await page.goto(PAGES.rg);
   const first = page.locator('.card').first();
