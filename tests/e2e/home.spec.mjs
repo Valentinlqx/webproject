@@ -7,7 +7,7 @@ test.beforeEach(async ({ page }) => {
 test('un texte en haut, puis les projets', async ({ page }) => {
   await expect(page.locator('h1')).toHaveText('Valentin L.');
   await expect(page.locator('.intro')).toBeVisible();
-  await expect(page.locator('section h2')).toHaveText(['Projets web', 'Projets design', 'Contact']);
+  await expect(page.locator('section h2')).toHaveText(['Projets web', 'Projets design']);
 });
 
 test('les projets web sont les deux outils, et ils existent', async ({ page, request }) => {
@@ -28,8 +28,8 @@ test('chaque projet a son image', async ({ page }) => {
   expect(box.height / box.width).toBeCloseTo(4 / 3, 1);
 });
 
-test('contact par e-mail uniquement', async ({ page }) => {
-  await expect(page.locator('a[href^="mailto:"]')).toHaveCount(1);
+test('pas de contact ni de réseaux sociaux', async ({ page }) => {
+  await expect(page.locator('a[href^="mailto:"]')).toHaveCount(0);
   const hrefs = await page.locator('a').evaluateAll(as => as.map(a => a.getAttribute('href')));
   const social = /instagram|linkedin|behance|twitter|x\.com|facebook|tiktok|github|dribbble/i;
   expect(hrefs.filter(h => social.test(h))).toEqual([]);
