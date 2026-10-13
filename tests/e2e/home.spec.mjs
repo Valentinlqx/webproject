@@ -4,20 +4,28 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/');
 });
 
-test('présente Valentin avec un emplacement pour la photo', async ({ page }) => {
+test('un texte en haut, puis les projets', async ({ page }) => {
   await expect(page.locator('h1')).toHaveText('Valentin L.');
-  await expect(page.locator('.portrait')).toBeVisible();
-  await expect(page.locator('main')).toContainText('Graphiste indépendant');
+  await expect(page.locator('.intro')).toBeVisible();
+  await expect(page.locator('section h2')).toHaveText(['Projets web', 'Projets design', 'Contact']);
 });
 
-test('liste exactement les deux projets, et ils existent', async ({ page, request }) => {
-  const links = page.locator('.projects a');
+test('les projets web sont les deux outils, et ils existent', async ({ page, request }) => {
+  const links = page.locator('section:has(#web) a.tile');
   await expect(links).toHaveCount(2);
-  await expect(links.nth(0)).toContainText('Ressources Gratuites');
-  await expect(links.nth(1)).toContainText('AutoVinted');
+  await expect(links.nth(0)).toContainText('AutoVinted');
+  await expect(links.nth(1)).toContainText('Ressources Gratuites');
   for (const href of await links.evaluateAll(as => as.map(a => a.href))) {
     expect((await request.get(href)).status(), href).toBe(200);
   }
+});
+
+test('chaque projet a son image', async ({ page }) => {
+  const tiles = page.locator('.tile');
+  expect(await tiles.count()).toBeGreaterThan(2);
+  await expect(page.locator('.tile .thumb')).toHaveCount(await tiles.count());
+  const box = await page.locator('.thumb').first().boundingBox();
+  expect(box.height / box.width).toBeCloseTo(4 / 3, 1);
 });
 
 test('contact par e-mail uniquement', async ({ page }) => {
