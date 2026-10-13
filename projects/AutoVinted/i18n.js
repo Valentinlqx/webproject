@@ -158,7 +158,7 @@ window.AV_TEXT = {
       ['Ajoute tes photos', 'Bouton ou glisser-déposer. Idéalement 4 à 6 angles : face, dos, étiquette, défauts.'],
       ['Ajoute du contexte', 'Ce que l\'IA ne peut pas deviner : taille réelle, prix d\'achat, état… Optionnel mais utile.'],
       ['Ta clé API', 'Colle une clé <strong>Claude, ChatGPT, Gemini ou Mistral</strong> : le fournisseur est reconnu tout seul. Elle reste dans ton navigateur.'],
-      ['Historique', 'Tes annonces sont gardées ici. <strong>Un exemple (mocassins Clarks)</strong> montre à quoi ressemble un résultat.'],
+      ['Historique', 'Tes annonces sont gardées ici. <strong>Une annonce d\'exemple</strong> montre à quoi ressemble un résultat.'],
     ],
 
     // Dit à l'IA d'écrire l'annonce dans la langue de l'interface.
@@ -322,7 +322,7 @@ window.AV_TEXT = {
       ['Add your photos', 'Button or drag and drop. Ideally 4 to 6 angles: front, back, label, flaws.'],
       ['Add some context', 'What AI can\'t guess: real size, price paid, condition… Optional but useful.'],
       ['Your API key', 'Paste a <strong>Claude, ChatGPT, Gemini or Mistral</strong> key: the provider is recognised automatically. It stays in your browser.'],
-      ['History', 'Your listings are kept here. <strong>An example (Clarks loafers)</strong> shows what a result looks like.'],
+      ['History', 'Your listings are kept here. <strong>An example listing</strong> shows what a result looks like.'],
     ],
 
     listingLanguage: 'LANGUE : écris "title", "description", les valeurs de "details", "tips", "warnings" et "message" en anglais.',

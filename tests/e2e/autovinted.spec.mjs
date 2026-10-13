@@ -3,7 +3,7 @@ import path from 'node:path';
 import { PAGES, WIDTHS, collectErrors } from './pages.mjs';
 import { axeViolations } from './a11y.mjs';
 
-const PHOTO = path.resolve('projects/AutoVinted/demo/clarks-1.jpg');
+const PHOTO = path.resolve('tests/fixtures/photo-1.jpg');
 
 function claudeReply(payload) {
   return {
@@ -35,7 +35,8 @@ test('un seul champ : le fournisseur est reconnu en tapant la clé', async ({ pa
 
   await key.fill('sk-ant-api03-test');
   await expect(status).toContainText('Claude');
-  await expect(page.locator('#model-select option').first()).toHaveAttribute('value', 'claude-opus-5');
+  // Le modèle par défaut est le moins cher.
+  await expect(page.locator('#model-select option').first()).toHaveAttribute('value', 'claude-haiku-4-5');
 
   await key.fill('AIzaSyTest');
   await expect(status).toContainText('Gemini');
@@ -102,7 +103,7 @@ test('parcours complet avec Claude (API simulée)', async ({ page }) => {
   await page.click('#analyze-btn');
 
   await expect(page.locator('#r-title')).toHaveText("Veste en jean Levi's");
-  expect(sent.model).toBe('claude-opus-5');
+  expect(sent.model).toBe('claude-haiku-4-5');
   expect(sent.messages[0].content.some(p => p.type === 'image')).toBe(true);
   expect(errors).toEqual([]);
 });
@@ -131,7 +132,7 @@ test('en lot, « copier toutes les annonces » copie les vrais titres', async ({
   })));
 
   await page.click('.mode-btn[data-mode="bulk"]');
-  await page.setInputFiles('#file-input', [PHOTO, path.resolve('projects/AutoVinted/demo/clarks-2.jpg')]);
+  await page.setInputFiles('#file-input', [PHOTO, path.resolve('tests/fixtures/photo-2.jpg')]);
   await page.click('#analyze-btn');
   await expect(page.locator('.bulk-item')).toHaveCount(2);
   await page.click('#bulk-copy-all-btn');

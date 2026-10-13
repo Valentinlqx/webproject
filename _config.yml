@@ -1,0 +1,13 @@
+# GitHub Pages ne met en ligne que le site : pas les outils de travail.
+exclude:
+  - docs
+  - tests
+  - tools
+  - node_modules
+  - package.json
+  - package-lock.json
+  - skills-lock.json
+  - playwright.config.mjs
+  - test-results
+  - playwright-report
+  - projects/RessourcesGratuites/aajouter.txt

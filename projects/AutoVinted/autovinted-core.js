@@ -5,15 +5,17 @@
 
   // Prix en dollars pour 1M de tokens, relevés le 2026-09-26.
   // Le premier modèle de chaque liste est celui utilisé par défaut.
+  // Le premier modèle de chaque liste est celui par défaut : le moins cher, qui suffit
+  // presque toujours pour décrire un article (moins cher et moins d'énergie).
   const PROVIDERS = {
     anthropic: {
       label: 'Claude',
       keyUrl: 'https://console.anthropic.com/settings/keys',
       imageTokens: 1300,
       models: [
-        { id: 'claude-opus-5', label: 'Claude Opus 5', in: 5, out: 25 },
-        { id: 'claude-sonnet-5', label: 'Claude Sonnet 5', in: 2, out: 10 },
         { id: 'claude-haiku-4-5', label: 'Claude Haiku 4.5', tag: 'eco', in: 1, out: 5 },
+        { id: 'claude-sonnet-5', label: 'Claude Sonnet 5', in: 2, out: 10 },
+        { id: 'claude-opus-5', label: 'Claude Opus 5', tag: 'strongest', in: 5, out: 25 },
       ],
     },
     openai: {
@@ -21,8 +23,8 @@
       keyUrl: 'https://platform.openai.com/api-keys',
       imageTokens: 425,
       models: [
-        { id: 'gpt-6-sol', label: 'GPT-6 Sol', in: 2, out: 10 },
         { id: 'gpt-6-luna', label: 'GPT-6 Luna', tag: 'eco', in: 0.1, out: 0.5 },
+        { id: 'gpt-6-sol', label: 'GPT-6 Sol', in: 2, out: 10 },
         { id: 'gpt-6-astra', label: 'GPT-6 Astra', tag: 'strongest', in: 10, out: 50 },
       ],
     },
@@ -31,8 +33,8 @@
       keyUrl: 'https://aistudio.google.com/app/apikey',
       imageTokens: 258,
       models: [
-        { id: 'gemini-3.8-flash', label: 'Gemini 3.8 Flash', in: 0.75, out: 3.75 },
         { id: 'gemini-3.5-flash-lite', label: 'Gemini 3.5 Flash-Lite', tag: 'eco', in: 0.3, out: 2.5 },
+        { id: 'gemini-3.8-flash', label: 'Gemini 3.8 Flash', in: 0.75, out: 3.75 },
       ],
     },
     mistral: {
@@ -40,8 +42,8 @@
       keyUrl: 'https://console.mistral.ai/api-keys/',
       imageTokens: 1000,
       models: [
-        { id: 'mistral-medium-latest', label: 'Mistral Medium', in: 1.5, out: 7.5 },
         { id: 'mistral-small-latest', label: 'Mistral Small', tag: 'eco', in: 0.15, out: 0.6 },
+        { id: 'mistral-medium-latest', label: 'Mistral Medium', in: 1.5, out: 7.5 },
       ],
     },
   };

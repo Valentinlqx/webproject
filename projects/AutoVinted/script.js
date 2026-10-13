@@ -1277,7 +1277,7 @@ $('history-toggle').addEventListener('click', (e) => { renderHistory(); showModa
 $('history-close').addEventListener('click', () => hideModal(historyModal));
 
 $('history-clear').addEventListener('click', () => {
-  // L'exemple Clarks reste : c'est la seule façon de voir un résultat sans clé API.
+  // L'annonce d'exemple reste : c'est la seule façon de voir un résultat sans clé API.
   const demoEntry = state.history.find(h => h.isDemo);
   state.history = demoEntry ? [demoEntry] : [];
   persistHistory();
@@ -1391,34 +1391,28 @@ function renderHistory() {
 
 // Annonce d'exemple, pour voir un résultat sans clé API
 
-const DEMO_ID = 'demo-clarks-craftmaster-v4';
-const DEMO_PHOTOS = [
-  'demo/clarks-1.jpg',
-  'demo/clarks-2.jpg',
-  'demo/clarks-3.jpg',
-  'demo/clarks-4.jpg',
-];
+const DEMO_ID = 'demo-text-v5';
 
+// Exemple sans photos pour l'instant : les anciennes venaient d'un site marchand, sans droit
+// de réutilisation. Des photos libres (CC0) viendront les remplacer.
 function seedDemoListing() {
   if (store.getItem('av-demo-seeded') === DEMO_ID && state.history.some(h => h.id === DEMO_ID)) return;
   state.history = state.history.filter(h => !h.isDemo);
   state.history.push({
     id: DEMO_ID,
-    date: '2026-05-01T09:00:00.000Z',
+    date: '2026-10-13T09:00:00.000Z',
     isDemo: true,
-    thumbnail: 'demo/clarks-thumb.jpg', // 104 px : la photo entière pèse 74 Ko pour une vignette de 52 px
-    photos: DEMO_PHOTOS,
+    thumbnail: null,
+    photos: [],
     listing: {
-      title: 'Mocassins Clarks × Walk in Paris Craftmaster — Cuir Bordeaux',
-      description: 'Superbes penny loafers en collaboration exclusive Walk in Paris × Clarks Craftmaster. Cuir pleine fleur bordeaux profond, doublure intérieure verte, semelle noire. Coupe classique intemporelle, parfaits habillés ou casual chic.\n\n#Clarks #WalkInParis #Craftmaster #PennyLoafer #Mocassins #Loafer #CuirVeritable #Bordeaux #Chaussures #MadeInEngland #ClassiqueChic #Workwear #SmartCasual #Vintage #CapsuleWardrobe',
-      details: { marque: 'Clarks × Walk in Paris', categorie: 'Chaussures', couleur: 'Bordeaux', etat: 'Neuf avec étiquettes', matiere: 'Cuir pleine fleur' },
-      prices: { ideal: '115 €', rapide: '95 €', minimum: '80 €' },
+      title: 'Veste en jean bleu délavé, coupe droite, taille M',
+      description: 'Veste en jean classique, bleu délavé, coupe droite. Boutons métal, deux poches poitrine. Portée quelques fois, très bon état : pas de tache ni d\'accroc.\n\n#vestejean #denim #jean #vintage #basique #mi-saison',
+      details: { taille: 'M', categorie: 'Vestes', couleur: 'Bleu délavé', etat: 'Très bon état', matiere: 'Coton' },
+      prices: { ideal: '25 €', rapide: '18 €', minimum: '15 €' },
       tips: [
-        'Mesure la semelle intérieure (en cm) — les pointures Clarks varient et ça rassure les acheteurs.',
-        'Ajoute une photo portée si possible, les chaussures se vendent bien mieux avec la coupe visible.',
-        'Précise si la boîte d\'origine est disponible — ça peut justifier un prix légèrement plus élevé.',
+        'Ajoute une photo portée : on voit la coupe.',
+        'Donne la largeur d\'épaules et la longueur du dos en cm.',
       ],
-      sourceLink: 'https://walkinparis.com/en/products/walk-in-paris-x-clarks-craft-james-lo-bordeaux',
     },
   });
   persistHistory();
