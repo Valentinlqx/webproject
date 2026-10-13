@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { PAGES, collectErrors } from './pages.mjs';
+import { PAGES, WIDTHS, collectErrors } from './pages.mjs';
+import { axeViolations } from './a11y.mjs';
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
@@ -202,4 +203,42 @@ test("le retour mène à l'accueil", async ({ page }) => {
   await page.goto(PAGES.rg);
   await page.click('.back-btn');
   await expect(page.locator('h1')).toHaveText('Valentin L.');
+});
+
+for (const [what, hash] of [['au départ', ''], ['famille et licence choisies', '#f=son&l=cc0'], ['recherche', '#q=papier']]) {
+  test(`aucune erreur d'accessibilité AA (${what})`, async ({ page }) => {
+    await page.goto(PAGES.rg + hash);
+    await page.locator('#guide summary').click();
+    expect(await axeViolations(page)).toEqual([]);
+  });
+}
+
+for (const width of WIDTHS) {
+  test(`aucune erreur d'accessibilité AA @${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto(PAGES.rg + '#f=visuels');
+    expect(await axeViolations(page)).toEqual([]);
+  });
+}
+
+test("la page suit un changement d'adresse (lien partagé, bouton précédent)", async ({ page }) => {
+  await page.goto(PAGES.rg + '#f=son');
+  await page.evaluate(() => { location.hash = '#f=typo'; });
+  await expect(page.locator('.family[data-family="typo"]')).toHaveAttribute('aria-pressed', 'true');
+  for (const cats of await page.locator('.card').evaluateAll(cs => cs.map(c => c.dataset.cats))) {
+    expect(cats).toMatch(/polices|outils-typo/);
+  }
+});
+
+test("une carte a un nom court qui dit qu'elle ouvre un nouvel onglet", async ({ page }) => {
+  await page.goto(PAGES.rg);
+  await expect(page.locator('.card').first()).toHaveAccessibleName(/^\S.* \(nouvel onglet\)$/);
+});
+
+test('à 360 px, aucun libellé ne déborde de son bouton', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 900 });
+  await page.goto(PAGES.rg + '#f=apprendre');
+  const overflowing = await page.locator('.family, .cat-btn, .license-btn, .toggle').evaluateAll(bs =>
+    bs.filter(b => b.scrollWidth > b.clientWidth + 1).map(b => b.textContent.trim()));
+  expect(overflowing).toEqual([]);
 });

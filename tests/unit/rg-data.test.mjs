@@ -2,6 +2,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import vm from 'node:vm';
+import { createRequire } from 'node:module';
+
+const { iconCode } = createRequire(import.meta.url)('../../projects/RessourcesGratuites/rg-core.js');
 
 // resources.js est un script de navigateur (const RESOURCES_DATA = …) : on l'exécute dans un bac à sable.
 const dir = new URL('../../projects/RessourcesGratuites/', import.meta.url);
@@ -91,9 +94,7 @@ test('chaque sous-catégorie et chaque licence sert au moins une fois', () => {
 });
 
 test('chaque icône est copiée dans icons/ (npm run icons)', () => {
-  const code = e => [...e].map(c => c.codePointAt(0)).filter(cp => cp !== 0xFE0F)
-    .map(cp => cp.toString(16).toUpperCase().padStart(4, '0')).join('-');
   const emojis = new Set(['✨', ...families.map(f => f.emoji), ...resources.map(r => r.emoji)]);
-  const missing = [...emojis].filter(e => !existsSync(new URL(`icons/${code(e)}.svg`, dir)));
+  const missing = [...emojis].filter(e => !existsSync(new URL(`icons/${iconCode(e)}.svg`, dir)));
   assert.deepEqual(missing, []);
 });

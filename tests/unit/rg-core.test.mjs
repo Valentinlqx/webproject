@@ -6,6 +6,11 @@ const require = createRequire(import.meta.url);
 const rg = require('../../projects/RessourcesGratuites/rg-core.js');
 
 const data = {
+  families: [
+    { id: 'visuels', fr: 'Visuels', en: 'Visuals' },
+    { id: 'son', fr: 'Son', en: 'Sound' },
+    { id: '3d', fr: '3D & Jeux', en: '3D & Games' },
+  ],
   categories: [
     { id: 'photos', family: 'visuels', fr: 'Photos', en: 'Photos' },
     { id: 'icones', family: 'visuels', fr: 'Icônes', en: 'Icons' },
@@ -69,6 +74,21 @@ test('la recherche ignore accents et majuscules, et lit la langue choisie', () =
   assert.deepEqual(names(rg.filterResources(resources, state({ query: 'resolution' }), ctx, 'en')), ['Unsplash']);
   assert.deepEqual(names(rg.filterResources(resources, state({ query: 'libre total' }), ctx, 'fr')), ['Freesound', 'Poly Haven']);
   assert.deepEqual(names(rg.filterResources(resources, state({ query: 'gpl' }), ctx, 'fr')), ['Blender']);
+});
+
+test('la recherche trouve les familles, plie œ, et ne cherche que des débuts de mots', () => {
+  assert.deepEqual(names(rg.filterResources(resources, state({ query: 'visuels' }), ctx, 'fr')), ['Unsplash', 'Phosphor', 'Poly Haven']);
+  assert.deepEqual(names(rg.filterResources(resources, state({ query: 'son' }), ctx, 'fr')), ['Freesound']);
+  assert.deepEqual(names(rg.filterResources(resources, state({ query: 'oeuvre' }), ctx, 'fr')), []);
+  const met = { name: 'The Met', cats: ['photos'], license: 'cc0', licenseName: 'CC0', account: false,
+    desc: { fr: 'Œuvres du domaine public.', en: 'Public domain works.' } };
+  assert.deepEqual(names(rg.filterResources([met], state({ query: 'oeuvres' }), ctx, 'fr')), ['The Met']);
+  assert.deepEqual(names(rg.filterResources(resources, state({ query: 'resolution' }), ctx, 'en')), ['Unsplash']);
+});
+
+test("le nom d'icône suit OpenMoji", () => {
+  assert.equal(rg.iconCode('🖼️'), '1F5BC');
+  assert.equal(rg.iconCode('🧑‍🎨'), '1F9D1-200D-1F3A8');
 });
 
 test('chaque mot de la recherche doit se trouver', () => {

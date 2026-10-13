@@ -2,6 +2,9 @@
 // et seulement celles-là. À relancer après avoir ajouté ou changé un emoji : npm run icons
 import { readFileSync, readdirSync, copyFileSync, mkdirSync, rmSync, existsSync } from 'node:fs';
 import vm from 'node:vm';
+import { createRequire } from 'node:module';
+
+const { iconCode: nameOf } = createRequire(import.meta.url)('../projects/RessourcesGratuites/rg-core.js');
 
 const page = new URL('../projects/RessourcesGratuites/', import.meta.url);
 const source = new URL('../node_modules/openmoji/color/svg/', import.meta.url);
@@ -12,8 +15,6 @@ vm.runInNewContext(`${readFileSync(new URL('resources.js', page), 'utf8')};this.
 const { families, resources } = sandbox.data;
 
 const hex = cps => cps.map(cp => cp.toString(16).toUpperCase().padStart(4, '0')).join('-');
-// Même nom que iconCode() dans script.js : sans le sélecteur de variante FE0F.
-const nameOf = emoji => hex([...emoji].map(c => c.codePointAt(0)).filter(cp => cp !== 0xFE0F));
 
 // « ✨ » sert à l'onglet « Tout ».
 const emojis = new Set(['✨', ...families.map(f => f.emoji), ...resources.map(r => r.emoji)]);

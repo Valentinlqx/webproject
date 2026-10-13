@@ -35,6 +35,8 @@
   --gold:          #f3c53c;
   --gold-deep:     #b8932e;
   --mult:          #fe5f55;
+  /* Rouge plus profond pour le texte et les fonds sous du texte : contraste AA (5,1:1 et plus). */
+  --mult-deep:     #b3261e;
   --chip:          #4e96d7;
   --money:         #56a86c;
   --joker:         #a064c9;
@@ -241,7 +243,7 @@ header {
 /* Pause : carte bleue, droite */
 .motion-toggle {
   background: var(--chip);
-  color: var(--cream);
+  color: var(--border-dark);
   box-shadow:
     inset 0 -4px 0 rgba(0, 0, 0, 0.22),
     var(--pixel) var(--pixel) 0 var(--border-dark),
@@ -266,7 +268,7 @@ header {
   top: var(--s-4);
   left: var(--s-4);
   z-index: 3;
-  background: var(--mult);
+  background: var(--mult-deep);
   color: var(--cream);
   transform: rotate(-2deg);
   box-shadow:
@@ -340,7 +342,7 @@ header {
 .hero h1 {
   font-family: 'Basteleur', serif;
   font-weight: 700;
-  font-size: clamp(44px, 7.5vw, 84px);
+  font-size: clamp(36px, 7.5vw, 84px);
   line-height: 1.02;
   letter-spacing: 0;
   color: var(--gold);
@@ -349,7 +351,7 @@ header {
     3px 3px 0 var(--mult),
     6px 6px 0 var(--border-dark);
   word-break: normal;
-  overflow-wrap: balance;
+  text-wrap: balance;
 }
 
 .last-updated {
@@ -487,7 +489,7 @@ main {
   min-width: 30px;
   padding: 3px 7px;
   background: var(--chip);
-  color: var(--cream);
+  color: var(--border-dark);
   border: 2px solid var(--border-dark);
   border-radius: var(--radius-pill);
   font-size: 12px;
@@ -505,7 +507,7 @@ main {
 }
 
 .family.active {
-  background: var(--mult);
+  background: var(--mult-deep);
   color: var(--cream);
   transform: translateY(-14px) rotate(0deg);
   box-shadow:
@@ -560,7 +562,7 @@ main {
   min-width: 26px;
   padding: 3px 7px;
   background: var(--chip);
-  color: var(--cream);
+  color: var(--border-dark);
   border: 2px solid var(--border-dark);
   border-radius: var(--radius-pill);
   font-size: 12px;
@@ -569,7 +571,7 @@ main {
 }
 
 .cat-btn.active {
-  background: var(--mult);
+  background: var(--mult-deep);
   color: var(--cream);
   box-shadow:
     inset 0 -3px 0 rgba(0, 0, 0, 0.35),
@@ -596,8 +598,8 @@ main {
   outline-offset: 3px;
 }
 
-/* Un bouton qui ne donnerait rien s'efface sans disparaître. */
-.is-empty { opacity: 0.35; }
+/* Un bouton qui ne donnerait rien : pointillés, mais texte toujours lisible. */
+.is-empty { border-style: dashed; box-shadow: none; }
 
 /* Licences : des sceaux comme sur les cartes du jeu */
 
@@ -720,8 +722,8 @@ main {
   cursor: pointer;
 }
 .guide summary::-webkit-details-marker { display: none; }
-.guide summary::before { content: '+ '; }
-.guide[open] summary::before { content: '− '; }
+.guide summary::before { content: '+ ' / ''; }
+.guide[open] summary::before { content: '− ' / ''; }
 
 .guide-list {
   display: grid;
@@ -767,7 +769,7 @@ main {
 .reset {
   min-height: 44px;
   padding: 8px 14px;
-  background: var(--mult);
+  background: var(--mult-deep);
   color: var(--cream);
   border: var(--pixel) solid var(--border-dark);
   border-radius: var(--radius-pip);
@@ -826,7 +828,7 @@ main {
 
   .card:hover .card-emoji  { transform: rotate(-6deg) scale(1.1); }
   .card:hover .card-visit  { transform: translateX(4px); color: var(--border-dark); }
-  .card:hover .card-name   { color: var(--mult); }
+  .card:hover .card-name   { color: var(--mult-deep); }
 }
 
 .card:active {
@@ -952,7 +954,7 @@ main {
   line-height: 1.2;
   letter-spacing: 0.4px;
   text-transform: uppercase;
-  color: var(--mult);
+  color: var(--mult-deep);
   white-space: nowrap;
   transition: transform 0.1s steps(2);
 }
@@ -1076,6 +1078,13 @@ main {
 
   .empty-state { font-size: 22px; }
   .site-footer { padding: 0 var(--s-4) var(--s-8); }
+}
+
+/* Téléphones étroits : les libellés passent à la ligne au lieu de déborder. */
+@media (max-width: 400px) {
+  .family .chip-label { font-size: 11px; letter-spacing: -0.3px; }
+  .license-btn .chip-label { min-width: 0; overflow-wrap: anywhere; }
+  .license-btn .chip-count { flex-shrink: 0; }
 }
 
 /* Très petits écrans : les compteurs des licences ne tiennent plus à côté du libellé. */

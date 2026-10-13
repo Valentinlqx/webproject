@@ -2074,6 +2074,606 @@ const RESOURCES_DATA = {
       "licenseName": "Sonniss GDC License",
       "account": false,
       "desc": {"fr":"Packs annuels de plusieurs Go d'effets sonores, usage commercial sans crédit, revente interdite.","en":"Yearly multi-GB sound effect bundles, commercial use without credit, no reselling the sounds."}
+    },
+    {
+      "name": "Blender",
+      "url": "https://www.blender.org/",
+      "emoji": "🧊",
+      "cats": ["logiciels","3d","motion"],
+      "license": "opensource",
+      "licenseName": "GPL",
+      "account": false,
+      "desc": {"fr":"Logiciel 3D complet : modélisation, sculpture, animation, rendu, montage et compositing.","en":"Full 3D suite: modeling, sculpting, animation, rendering, video editing and compositing."}
+    },
+    {
+      "name": "DaVinci Resolve",
+      "url": "https://www.blackmagicdesign.com/products/davinciresolve",
+      "emoji": "🎬",
+      "cats": ["logiciels","motion"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Montage, étalonnage, effets et son, sans filigrane. Export limité à l'UHD 60 i/s.","en":"Editing, color grading, effects and audio with no watermark. Export capped at UHD 60 fps."}
+    },
+    {
+      "name": "Kdenlive",
+      "url": "https://kdenlive.org/",
+      "emoji": "🎞",
+      "cats": ["logiciels","motion"],
+      "license": "opensource",
+      "licenseName": "GPL-3.0",
+      "account": false,
+      "desc": {"fr":"Logiciel de montage vidéo multipiste de KDE, pour Windows, macOS et Linux.","en":"Multitrack video editor from KDE, for Windows, macOS and Linux."}
+    },
+    {
+      "name": "Shotcut",
+      "url": "https://shotcut.org/",
+      "emoji": "✂",
+      "cats": ["logiciels","motion"],
+      "license": "opensource",
+      "licenseName": "GPL-3.0",
+      "account": false,
+      "desc": {"fr":"Logiciel de montage vidéo multiplateforme, qui lit la plupart des formats sans conversion.","en":"Cross-platform video editor that opens most formats without converting them first."}
+    },
+    {
+      "name": "Synfig Studio",
+      "url": "https://www.synfig.org/",
+      "emoji": "🦋",
+      "cats": ["logiciels","motion"],
+      "license": "opensource",
+      "licenseName": "GPL-3.0",
+      "account": false,
+      "desc": {"fr":"Animation 2D vectorielle avec interpolation automatique entre les images clés et squelettes.","en":"2D vector animation with automatic tweening between keyframes and bone rigging."}
+    },
+    {
+      "name": "OpenToonz",
+      "url": "https://opentoonz.github.io/e/",
+      "emoji": "🖍",
+      "cats": ["logiciels","motion"],
+      "license": "opensource",
+      "licenseName": "BSD-3-Clause",
+      "account": false,
+      "desc": {"fr":"Logiciel d'animation 2D dérivé de Toonz, utilisé par le studio Ghibli, avec ses outils de scan.","en":"2D animation software based on Toonz, used by Studio Ghibli, with its scanning tools."}
+    },
+    {
+      "name": "Pencil2D",
+      "url": "https://www.pencil2d.org/",
+      "emoji": "✏",
+      "cats": ["logiciels","motion"],
+      "license": "opensource",
+      "licenseName": "GPL-2.0",
+      "account": false,
+      "desc": {"fr":"Animation 2D image par image, en dessin bitmap ou vectoriel, simple à prendre en main.","en":"Frame-by-frame 2D animation in bitmap or vector drawing, easy to pick up."}
+    },
+    {
+      "name": "lottie-web",
+      "url": "https://github.com/airbnb/lottie-web",
+      "emoji": "🧩",
+      "cats": ["web","motion"],
+      "license": "opensource",
+      "licenseName": "MIT",
+      "account": false,
+      "desc": {"fr":"Bibliothèque JavaScript qui lit sur le web les animations After Effects exportées en JSON.","en":"JavaScript library that plays After Effects animations exported as JSON on the web."}
+    },
+    {
+      "name": "LottieFiles",
+      "url": "https://lottiefiles.com/free-animations",
+      "emoji": "🎈",
+      "cats": ["motion","web"],
+      "license": "pro",
+      "licenseName": "Lottie Simple License",
+      "account": true,
+      "desc": {"fr":"Animations Lottie gratuites, usage commercial sans crédit. Revente des fichiers seuls interdite.","en":"Free Lottie animations, commercial use without credit. Reselling the files as is is not allowed."}
+    },
+    {
+      "name": "Mixamo",
+      "url": "https://www.mixamo.com/",
+      "emoji": "🕺",
+      "cats": ["3d","jeux"],
+      "license": "pro",
+      "licenseName": "Adobe ToS",
+      "account": true,
+      "desc": {"fr":"Personnages 3D et animations, avec rigging automatique. Compte Adobe gratuit obligatoire.","en":"3D characters and animations with automatic rigging. A free Adobe account is required."}
+    },
+    {
+      "name": "Poly Pizza",
+      "url": "https://poly.pizza/",
+      "emoji": "🍕",
+      "cats": ["3d","jeux"],
+      "license": "mixte",
+      "licenseName": "CC0 / CC BY",
+      "account": false,
+      "desc": {"fr":"Plus de 10 000 modèles 3D low poly en GLB et OBJ, sous CC0 ou CC BY selon le modèle.","en":"Over 10,000 low-poly 3D models in GLB and OBJ, under CC0 or CC BY depending on the model."}
+    },
+    {
+      "name": "KayKit",
+      "url": "https://kaylousberg.itch.io/",
+      "emoji": "🏰",
+      "cats": ["jeux","3d"],
+      "license": "cc0",
+      "licenseName": "CC0",
+      "account": false,
+      "desc": {"fr":"Packs de modèles 3D low poly pour jeux, sous CC0, à prix libre avec téléchargement gratuit.","en":"Low-poly 3D model packs for games under CC0, pay what you want with a free download."}
+    },
+    {
+      "name": "Game-icons.net",
+      "url": "https://game-icons.net/",
+      "emoji": "⚔",
+      "cats": ["icones","jeux"],
+      "license": "credit",
+      "licenseName": "CC BY 3.0",
+      "account": false,
+      "desc": {"fr":"Plus de 4 000 icônes de jeu en SVG et PNG, personnalisables en ligne. Crédit de l'auteur requis.","en":"Over 4,000 game icons in SVG and PNG, customizable online. Credit to the author is required."}
+    },
+    {
+      "name": "Lospec",
+      "url": "https://lospec.com/palette-list",
+      "emoji": "👾",
+      "cats": ["couleurs","jeux"],
+      "license": "outil",
+      "licenseName": "Free",
+      "account": false,
+      "desc": {"fr":"Base de palettes pour le pixel art, avec tags, nombre de couleurs et export pour les logiciels.","en":"Database of pixel art palettes, with tags, color counts and exports for drawing apps."}
+    },
+    {
+      "name": "LDtk",
+      "url": "https://ldtk.io/",
+      "emoji": "🗺",
+      "cats": ["jeux","logiciels"],
+      "license": "opensource",
+      "licenseName": "MIT",
+      "account": false,
+      "desc": {"fr":"Éditeur de niveaux 2D pour jeux, par un développeur de Dead Cells, avec export JSON.","en":"2D level editor for games, made by a Dead Cells developer, with JSON export."}
+    },
+    {
+      "name": "Godot Engine",
+      "url": "https://godotengine.org/",
+      "emoji": "🤖",
+      "cats": ["jeux","logiciels"],
+      "license": "opensource",
+      "licenseName": "MIT",
+      "account": false,
+      "desc": {"fr":"Moteur de jeu 2D et 3D, sans redevance : les jeux créés appartiennent à leur auteur.","en":"2D and 3D game engine with no royalties: the games you make belong to you."}
+    },
+    {
+      "name": "LMMS",
+      "url": "https://lmms.io/",
+      "emoji": "🎹",
+      "cats": ["logiciels","musique"],
+      "license": "opensource",
+      "licenseName": "GPL-2.0",
+      "account": false,
+      "desc": {"fr":"Logiciel de composition musicale avec séquenceur, synthés intégrés et prise en charge VST.","en":"Music production software with a sequencer, built-in synths and VST support."}
+    },
+    {
+      "name": "jsfxr",
+      "url": "https://sfxr.me/",
+      "emoji": "💥",
+      "cats": ["effets","jeux"],
+      "license": "opensource",
+      "licenseName": "Unlicense",
+      "account": false,
+      "desc": {"fr":"Générateur en ligne de bruitages rétro pour jeux (sauts, tirs, pièces), export en WAV.","en":"Online generator of retro game sound effects (jumps, shots, coins), with WAV export."}
+    },
+    {
+      "name": "ChipTone",
+      "url": "https://sfbgames.itch.io/chiptone",
+      "emoji": "🕹",
+      "cats": ["effets","jeux"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Outil en ligne de bruitages rétro. Les sons créés sont sous CC0, usage commercial sans crédit.","en":"Online retro sound effects tool. Sounds you make are CC0, commercial use without credit."}
+    },
+    {
+      "name": "Soundimage.org",
+      "url": "https://soundimage.org/",
+      "emoji": "🎼",
+      "cats": ["musique","effets"],
+      "license": "credit",
+      "licenseName": "Custom",
+      "account": false,
+      "desc": {"fr":"Milliers de musiques et ambiances d'Eric Matyas, usage commercial avec crédit obligatoire.","en":"Thousands of music tracks and soundscapes by Eric Matyas, commercial use with credit required."}
+    },
+    {
+      "name": "BBC Sound Effects",
+      "url": "https://sound-effects.bbcrewind.co.uk/",
+      "emoji": "📻",
+      "cats": ["effets"],
+      "license": "perso",
+      "licenseName": "RemArc",
+      "account": false,
+      "desc": {"fr":"Plus de 33 000 bruitages des archives de la BBC, gratuits pour un usage perso ou éducatif.","en":"Over 33,000 sound effects from the BBC archive, free for personal or educational use."}
+    },
+    {
+      "name": "Prelinger Archives",
+      "url": "https://archive.org/details/prelinger",
+      "emoji": "📽",
+      "cats": ["footage"],
+      "license": "mixte",
+      "licenseName": "Public domain / CC",
+      "account": false,
+      "desc": {"fr":"Milliers de films publicitaires, éducatifs et industriels, en majorité dans le domaine public.","en":"Thousands of advertising, educational and industrial films, mostly in the public domain."}
+    },
+    {
+      "name": "ESA/Hubble",
+      "url": "https://esahubble.org/images/",
+      "emoji": "🔭",
+      "cats": ["photos","footage"],
+      "license": "credit",
+      "licenseName": "CC BY 4.0",
+      "account": false,
+      "desc": {"fr":"Images et vidéos du télescope Hubble, avec le crédit « ESA/Hubble » obligatoire.","en":"Images and videos from the Hubble telescope, with the credit \"ESA/Hubble\" required."}
+    },
+    {
+      "name": "GSAP",
+      "url": "https://gsap.com/",
+      "emoji": "🚀",
+      "cats": ["web","motion"],
+      "license": "outil",
+      "licenseName": "GSAP Standard License",
+      "account": false,
+      "desc": {"fr":"Bibliothèque JavaScript d'animation, plugins compris. Interdite dans un outil concurrent de Webflow.","en":"JavaScript animation library, plugins included. Not allowed in a tool competing with Webflow."}
+    },
+    {
+      "name": "Anime.js",
+      "url": "https://animejs.com/",
+      "emoji": "🎢",
+      "cats": ["web","motion"],
+      "license": "opensource",
+      "licenseName": "MIT",
+      "account": false,
+      "desc": {"fr":"Bibliothèque JavaScript légère pour animer CSS, SVG, attributs DOM et objets JS.","en":"Lightweight JavaScript library to animate CSS, SVG, DOM attributes and JS objects."}
+    },
+    {
+      "name": "p5.js",
+      "url": "https://p5js.org/",
+      "emoji": "🖌",
+      "cats": ["web","tutos"],
+      "license": "opensource",
+      "licenseName": "LGPL-2.1",
+      "account": false,
+      "desc": {"fr":"Bibliothèque JavaScript de code créatif pour dessiner et animer dans le navigateur, avec tutos.","en":"Creative coding JavaScript library to draw and animate in the browser, with tutorials."}
+    },
+    {
+      "name": "Uiverse",
+      "url": "https://uiverse.io/",
+      "emoji": "🌌",
+      "cats": ["web"],
+      "license": "pro",
+      "licenseName": "MIT",
+      "account": false,
+      "desc": {"fr":"Plus de 3 000 éléments d'interface en HTML et CSS (boutons, loaders, cartes), à copier.","en":"Over 3,000 UI elements in HTML and CSS (buttons, loaders, cards) to copy and paste."}
+    },
+    {
+      "name": "SVGOMG",
+      "url": "https://jakearchibald.github.io/svgomg/",
+      "emoji": "🗜",
+      "cats": ["en-ligne","web"],
+      "license": "opensource",
+      "licenseName": "MIT",
+      "account": false,
+      "desc": {"fr":"Optimise et allège les fichiers SVG dans le navigateur, avec aperçu avant et après.","en":"Optimizes and shrinks SVG files in the browser, with a before and after preview."}
+    },
+    {
+      "name": "Laws of UX",
+      "url": "https://lawsofux.com/",
+      "emoji": "⚖",
+      "cats": ["tutos"],
+      "license": "perso",
+      "licenseName": "CC BY-NC-ND 4.0",
+      "account": false,
+      "desc": {"fr":"Les grands principes de psychologie appliqués à l'UX, expliqués en une page chacun.","en":"Key psychology principles applied to UX, each explained on its own page."}
+    },
+    {
+      "name": "web.dev Learn",
+      "url": "https://web.dev/learn",
+      "emoji": "📘",
+      "cats": ["tutos","web"],
+      "license": "credit",
+      "licenseName": "CC BY 4.0",
+      "account": false,
+      "desc": {"fr":"Cours gratuits de Google sur le CSS, le design web, l'accessibilité et les images.","en":"Free courses from Google on CSS, web design, accessibility and images."}
+    },
+    {
+      "name": "The Book of Shaders",
+      "url": "https://thebookofshaders.com/",
+      "emoji": "📙",
+      "cats": ["tutos","web"],
+      "license": "outil",
+      "licenseName": "Free",
+      "account": false,
+      "desc": {"fr":"Guide pas à pas des fragment shaders GLSL, avec des exemples modifiables dans la page.","en":"Step-by-step guide to GLSL fragment shaders, with examples you can edit on the page."}
+    },
+    {
+      "name": "Openverse",
+      "url": "https://openverse.org/",
+      "emoji": "🔍",
+      "cats": ["photos","illustrations","effets"],
+      "license": "mixte",
+      "licenseName": "CC / PD",
+      "account": false,
+      "desc": {"fr":"Moteur de recherche d'images et de sons sous licence Creative Commons, avec filtre usage commercial.","en":"Search engine for Creative Commons and public domain images and audio, with a commercial-use filter."}
+    },
+    {
+      "name": "Flickr Commons",
+      "url": "https://www.flickr.com/commons",
+      "emoji": "📷",
+      "cats": ["photos"],
+      "license": "cc0",
+      "licenseName": "No known restrictions",
+      "account": false,
+      "desc": {"fr":"Photos d'archives de musées et bibliothèques publiées sans restriction de droit d'auteur connue.","en":"Archive photos from museums and libraries, published with no known copyright restrictions."}
+    },
+    {
+      "name": "Library of Congress — Free to Use and Reuse",
+      "url": "https://www.loc.gov/free-to-use/",
+      "emoji": "🏛️",
+      "cats": ["photos","illustrations"],
+      "license": "cc0",
+      "licenseName": "Public domain",
+      "account": false,
+      "desc": {"fr":"Affiches, cartes, photos et estampes de la Bibliothèque du Congrès, libres de réutilisation.","en":"Posters, maps, photos and prints from the Library of Congress, free to use and reuse."}
+    },
+    {
+      "name": "Art Institute of Chicago — Open Access",
+      "url": "https://www.artic.edu/collection?is_public_domain=1",
+      "emoji": "🖼️",
+      "cats": ["illustrations"],
+      "license": "cc0",
+      "licenseName": "CC0",
+      "account": false,
+      "desc": {"fr":"Œuvres du domaine public de l'Art Institute of Chicago en haute définition, sous CC0.","en":"Public domain artworks from the Art Institute of Chicago in high resolution, under CC0."}
+    },
+    {
+      "name": "Rijksmuseum — Collection",
+      "url": "https://www.rijksmuseum.nl/en/collection",
+      "emoji": "🎨",
+      "cats": ["illustrations"],
+      "license": "cc0",
+      "licenseName": "CC0",
+      "account": false,
+      "desc": {"fr":"Peintures, gravures et objets du Rijksmuseum du domaine public, téléchargeables en haute définition.","en":"Public domain paintings, prints and objects from the Rijksmuseum, downloadable in high resolution."}
+    },
+    {
+      "name": "Paris Musées Collections",
+      "url": "https://www.parismuseescollections.paris.fr/",
+      "emoji": "🗼",
+      "cats": ["illustrations","photos"],
+      "license": "cc0",
+      "licenseName": "CC0",
+      "account": false,
+      "desc": {"fr":"Œuvres des musées de la Ville de Paris en CC0 ; seules les œuvres du domaine public sont en haute définition.","en":"Works from the Paris city museums under CC0; only public domain works come in high resolution."}
+    },
+    {
+      "name": "Cleveland Museum of Art — Open Access",
+      "url": "https://www.clevelandart.org/open-access",
+      "emoji": "🏺",
+      "cats": ["illustrations","3d"],
+      "license": "cc0",
+      "licenseName": "CC0",
+      "account": false,
+      "desc": {"fr":"Œuvres du domaine public du musée de Cleveland en CC0, images et modèles 3D compris.","en":"Public domain works from the Cleveland Museum of Art under CC0, including images and 3D models."}
+    },
+    {
+      "name": "Old Book Illustrations",
+      "url": "https://www.oldbookillustrations.com/",
+      "emoji": "📚",
+      "cats": ["illustrations"],
+      "license": "cc0",
+      "licenseName": "Public domain",
+      "account": false,
+      "desc": {"fr":"Gravures de livres anciens du domaine public, bien numérisées et classées par artiste et thème.","en":"Public domain engravings from old books, cleanly scanned and sorted by artist and subject."}
+    },
+    {
+      "name": "Public Domain Vectors",
+      "url": "https://publicdomainvectors.org/",
+      "emoji": "✏️",
+      "cats": ["illustrations"],
+      "license": "cc0",
+      "licenseName": "CC0",
+      "account": false,
+      "desc": {"fr":"Cliparts vectoriels envoyés par la communauté et placés dans le domaine public (CC0).","en":"Community-made vector cliparts released into the public domain (CC0)."}
+    },
+    {
+      "name": "FreeSVG",
+      "url": "https://freesvg.org/",
+      "emoji": "📐",
+      "cats": ["illustrations"],
+      "license": "cc0",
+      "licenseName": "CC0",
+      "account": false,
+      "desc": {"fr":"Images SVG du domaine public, téléchargeables aussi en PNG, sans compte.","en":"Public domain SVG images, also downloadable as PNG, no account needed."}
+    },
+    {
+      "name": "Manypixels Gallery",
+      "url": "https://www.manypixels.co/gallery",
+      "emoji": "🧑‍🎨",
+      "cats": ["illustrations"],
+      "license": "pro",
+      "licenseName": "Site license",
+      "account": false,
+      "desc": {"fr":"Illustrations vectorielles recolorables, utilisables sans crédit ; interdit de les redistribuer en packs.","en":"Recolorable vector illustrations usable without credit; redistributing them as packs is not allowed."}
+    },
+    {
+      "name": "3dicons",
+      "url": "https://3dicons.co/",
+      "emoji": "🧊",
+      "cats": ["icones","3d"],
+      "license": "cc0",
+      "licenseName": "CC0",
+      "account": false,
+      "desc": {"fr":"Icônes 3D en CC0 dans plusieurs styles et angles, avec les fichiers sources Blender.","en":"3D icons under CC0 in several styles and angles, with the Blender source files."}
+    },
+    {
+      "name": "Pictogrammers (Material Design Icons)",
+      "url": "https://pictogrammers.com/library/mdi/",
+      "emoji": "🏠",
+      "cats": ["icones","web"],
+      "license": "pro",
+      "licenseName": "Apache 2.0",
+      "account": false,
+      "desc": {"fr":"Material Design Icons : des milliers d'icônes d'interface open source, dont beaucoup de niche.","en":"Material Design Icons: thousands of open source UI icons, many of them for niche topics."}
+    },
+    {
+      "name": "Fluent UI System Icons",
+      "url": "https://github.com/microsoft/fluentui-system-icons",
+      "emoji": "🪟",
+      "cats": ["icones"],
+      "license": "pro",
+      "licenseName": "MIT",
+      "account": false,
+      "desc": {"fr":"Icônes d'interface de Microsoft sous licence MIT, en version contour et pleine, plusieurs tailles.","en":"Microsoft's UI icons under the MIT license, in outline and filled styles and several sizes."}
+    },
+    {
+      "name": "IconPark",
+      "url": "https://iconpark.oceanengine.com/",
+      "emoji": "🎡",
+      "cats": ["icones"],
+      "license": "pro",
+      "licenseName": "Apache 2.0",
+      "account": false,
+      "desc": {"fr":"Icônes open source de ByteDance en quatre styles, réglables avant l'export en SVG ou PNG.","en":"Open source icons by ByteDance in four styles, adjustable before SVG or PNG export."}
+    },
+    {
+      "name": "Bunny Fonts",
+      "url": "https://fonts.bunny.net/",
+      "emoji": "🐰",
+      "cats": ["polices","web"],
+      "license": "pro",
+      "licenseName": "SIL OFL",
+      "account": false,
+      "desc": {"fr":"Les polices de Google Fonts servies par un CDN européen qui ne collecte pas les données des visiteurs.","en":"Google Fonts' typefaces served from a European CDN that does not log visitor data."}
+    },
+    {
+      "name": "Fontsource",
+      "url": "https://fontsource.org/",
+      "emoji": "📦",
+      "cats": ["polices","web"],
+      "license": "pro",
+      "licenseName": "SIL OFL",
+      "account": false,
+      "desc": {"fr":"Polices libres en paquets npm pour les auto-héberger dans un projet web.","en":"Open source fonts packaged on npm to self-host them in a web project."}
+    },
+    {
+      "name": "Badass Libre Fonts by Womxn",
+      "url": "https://www.design-research.be/by-womxn/",
+      "emoji": "✊",
+      "cats": ["polices"],
+      "license": "mixte",
+      "licenseName": "OFL / GPL / CC",
+      "account": false,
+      "desc": {"fr":"Polices libres dessinées par des femmes, surtout sous OFL, avec un lien vers chaque créatrice.","en":"Libre fonts designed by women, mostly under the OFL, with a link to each designer."}
+    },
+    {
+      "name": "Bye Bye Binary — Typothèque",
+      "url": "https://typotheque.genderfluid.space/",
+      "emoji": "⚧",
+      "cats": ["polices"],
+      "license": "mixte",
+      "licenseName": "OFL / CC BY-NC-SA",
+      "account": false,
+      "desc": {"fr":"Polices post-binaires pour l'écriture inclusive en français ; licence à lire pour chaque fonte.","en":"Post-binary fonts for gender-inclusive French writing; read each font's license before use."}
+    },
+    {
+      "name": "FontSpace",
+      "url": "https://www.fontspace.com/",
+      "emoji": "🔤",
+      "cats": ["polices"],
+      "license": "mixte",
+      "licenseName": "Variable",
+      "account": false,
+      "desc": {"fr":"Polices gratuites de créateurs indépendants ; beaucoup sont réservées à l'usage personnel.","en":"Free fonts from independent designers; many are for personal use only."}
+    },
+    {
+      "name": "cgbookcase",
+      "url": "https://www.cgbookcase.com/",
+      "emoji": "🧱",
+      "cats": ["textures","3d"],
+      "license": "cc0",
+      "licenseName": "CC0",
+      "account": false,
+      "desc": {"fr":"Textures PBR en CC0 jusqu'en 4K, financées par les dons, sans compte.","en":"CC0 PBR textures up to 4K, funded by donations, no account needed."}
+    },
+    {
+      "name": "ShareTextures",
+      "url": "https://www.sharetextures.com/",
+      "emoji": "🌿",
+      "cats": ["textures","3d"],
+      "license": "pro",
+      "licenseName": "Custom CC0",
+      "account": false,
+      "desc": {"fr":"Textures PBR, modèles 3D et atlas de feuillage gratuits ; redistribution interdite.","en":"Free PBR textures, 3D models and foliage atlases; redistributing them is not allowed."}
+    },
+    {
+      "name": "The Base Mesh",
+      "url": "https://www.thebasemesh.com/",
+      "emoji": "🧍",
+      "cats": ["3d"],
+      "license": "cc0",
+      "licenseName": "CC0",
+      "account": false,
+      "desc": {"fr":"Plus de 1000 maillages de base en CC0 à l'échelle réelle, en OBJ, FBX et GLB.","en":"Over 1,000 real-scale base meshes under CC0, in OBJ, FBX and GLB."}
+    },
+    {
+      "name": "Three D Scans",
+      "url": "https://threedscans.com/",
+      "emoji": "🗿",
+      "cats": ["3d"],
+      "license": "cc0",
+      "licenseName": "No copyright claimed",
+      "account": false,
+      "desc": {"fr":"Scans 3D de sculptures de musées, publiés par l'artiste sans revendiquer de droit d'auteur.","en":"3D scans of museum sculptures, published by the artist without claiming copyright."}
+    },
+    {
+      "name": "NASA 3D Resources",
+      "url": "https://science.nasa.gov/3d-resources/",
+      "emoji": "🚀",
+      "cats": ["3d"],
+      "license": "cc0",
+      "licenseName": "Public domain",
+      "account": false,
+      "desc": {"fr":"Modèles 3D de satellites, sondes et astres de la NASA, libres selon les règles médias de la NASA.","en":"NASA 3D models of spacecraft, probes and planets, free under NASA's media usage guidelines."}
+    },
+    {
+      "name": "David Revoy Krita brushes",
+      "url": "https://www.davidrevoy.com/article1060/krita-brushes-2025-01-bundle/show",
+      "emoji": "🖌️",
+      "cats": ["brushes"],
+      "license": "mixte",
+      "licenseName": "CC0 / CC BY 4.0",
+      "account": false,
+      "desc": {"fr":"Brosses Krita du peintre David Revoy ; la licence (CC0 ou CC BY) change d'un pack à l'autre.","en":"Krita brushes by painter David Revoy; the license (CC0 or CC BY) changes from one bundle to the next."}
+    },
+    {
+      "name": "Leonardo",
+      "url": "https://leonardocolor.io/",
+      "emoji": "🌈",
+      "cats": ["couleurs","en-ligne"],
+      "license": "opensource",
+      "licenseName": "Apache 2.0",
+      "account": false,
+      "desc": {"fr":"Outil d'Adobe pour créer des couleurs d'interface qui respectent un contraste WCAG choisi.","en":"Adobe tool to build UI colors that meet a chosen WCAG contrast ratio."}
+    },
+    {
+      "name": "Sanzo Wada — A Dictionary of Color Combinations",
+      "url": "https://sanzo-wada.dmbk.io/",
+      "emoji": "🎎",
+      "cats": ["couleurs","inspi"],
+      "license": "outil",
+      "licenseName": "Free",
+      "account": false,
+      "desc": {"fr":"Les combinaisons de couleurs du livre de Sanzo Wada, à copier avec leurs codes couleur.","en":"The color combinations from Sanzo Wada's book, ready to copy with their color codes."}
+    },
+    {
+      "name": "Pattern Monster",
+      "url": "https://pattern.monster/",
+      "emoji": "👹",
+      "cats": ["textures","en-ligne"],
+      "license": "opensource",
+      "licenseName": "MIT",
+      "account": false,
+      "desc": {"fr":"Générateur de motifs SVG répétables : couleurs, trait, angle et échelle, export en SVG ou PNG.","en":"Repeating SVG pattern generator: colors, stroke, angle and scale, exported as SVG or PNG."}
     }
   ]
 };

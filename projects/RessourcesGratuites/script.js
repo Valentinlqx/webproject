@@ -19,6 +19,7 @@ const i18n = {
     heroSub: 'Des ressources vraiment gratuites pour designers et créateurs, avec la licence de chacune',
     back: 'Retour',
     switchLang: 'Switch to English',
+    newTab: '(nouvel onglet)',
     pauseMotion: 'Mettre le fond en pause',
     searchLabel: 'Rechercher une ressource',
     searchPlaceholder: 'Police manuscrite, texture papier, bruitage…',
@@ -44,6 +45,7 @@ const i18n = {
     heroSub: 'Truly free resources for designers and creators, each with its license',
     back: 'Back',
     switchLang: 'Passer en français',
+    newTab: '(new tab)',
     pauseMotion: 'Pause the background',
     searchLabel: 'Search a resource',
     searchPlaceholder: 'Script font, paper texture, sound effect…',
@@ -75,17 +77,9 @@ const el = (tag, className, text) => {
 };
 
 // Icônes OpenMoji copiées dans icons/ (tools/openmoji-icons.mjs) ; l'emoji du système en secours.
-function iconCode(emoji) {
-  return [...emoji]
-    .map(c => c.codePointAt(0))
-    .filter(cp => cp !== 0xFE0F) // OpenMoji nomme ses fichiers sans le sélecteur de variante
-    .map(cp => cp.toString(16).toUpperCase().padStart(4, '0'))
-    .join('-');
-}
-
 function icon(emoji, className) {
   const img = el('img', className);
-  img.src = `icons/${iconCode(emoji)}.svg`;
+  img.src = `icons/${RG.iconCode(emoji)}.svg`;
   img.alt = '';
   img.width = img.height = 56;
   img.loading = 'lazy';
@@ -99,8 +93,6 @@ function icon(emoji, className) {
 }
 
 const label = item => item[lang];
-const catById = new Map(categories.map(c => [c.id, c]));
-const licenseById = new Map(licenses.map(l => [l.id, l]));
 
 // Langue
 
@@ -118,7 +110,9 @@ function applyLang() {
 
   // Le drapeau montre la langue vers laquelle on bascule.
   $('lang-flag').innerHTML = lang === 'fr' ? FLAG_GB : FLAG_FR;
-  $('lang-toggle').setAttribute('aria-label', tr.switchLang);
+  const switchLabel = $('lang-label');
+  switchLabel.textContent = tr.switchLang;
+  switchLabel.lang = lang === 'fr' ? 'en' : 'fr';
 
   const date = new Date(`${checked}T12:00:00`).toLocaleDateString(lang, { day: 'numeric', month: 'long', year: 'numeric' });
   $('checked').textContent = tr.checked(date);
@@ -153,11 +147,10 @@ motionBtn.addEventListener('click', () => {
 
 // Badges de licence
 
-function licenseBadge(id, withName) {
-  const lic = licenseById.get(id);
+function licenseBadge(id) {
+  const lic = ctx.licenseById.get(id);
   const badge = el('span', `badge badge-${id}`);
   badge.append(el('span', 'badge-seal'), el('span', 'badge-label', label(lic)));
-  if (withName) badge.title = label(lic.hint);
   return badge;
 }
 
@@ -272,7 +265,11 @@ document.querySelectorAll('#reset, [data-reset]').forEach(btn => btn.addEventLis
 const cards = new Map();
 
 function createCard(r) {
+  const id = `r${resources.indexOf(r)}`;
   const card = el('a', 'card');
+  // Nom court pour les lecteurs d'écran : le site, et le fait qu'il s'ouvre dans un nouvel onglet.
+  card.setAttribute('aria-labelledby', `${id}-name ${id}-tab`);
+  card.setAttribute('aria-describedby', `${id}-desc ${id}-legal`);
   card.href = r.url;
   card.target = '_blank';
   card.rel = 'noopener noreferrer';
@@ -281,22 +278,41 @@ function createCard(r) {
 
   const top = el('div', 'card-top');
   const tags = el('div', 'card-tags');
-  for (const id of r.cats) tags.append(el('span', 'card-tag', label(catById.get(id))));
+  for (const id of r.cats) tags.append(el('span', 'card-tag', label(ctx.catById.get(id))));
   top.append(icon(r.emoji, 'card-emoji'), tags);
 
   const footer = el('div', 'card-footer');
   const legal = el('div', 'card-legal');
-  legal.append(licenseBadge(r.license, true), el('span', 'license-name', r.licenseName));
+  legal.id = `${id}-legal`;
+  legal.append(licenseBadge(r.license), el('span', 'license-name', r.licenseName));
   if (r.account) legal.append(el('span', 'account-tag', t().account));
-  footer.append(legal, el('span', 'card-visit', t().visit));
+  const visit = el('span', 'card-visit', t().visit);
+  visit.setAttribute('aria-hidden', 'true');
+  const tab = el('span', 'visually-hidden', t().newTab);
+  tab.id = `${id}-tab`;
+  footer.append(legal, visit, tab);
 
-  card.append(top, el('h2', 'card-name', r.name), el('p', 'card-desc', r.desc[lang]), footer);
+  const name = el('h2', 'card-name', r.name);
+  name.id = `${id}-name`;
+  const desc = el('p', 'card-desc', r.desc[lang]);
+  desc.id = `${id}-desc`;
+  card.append(top, name, desc, footer);
   return card;
 }
 
 function cardFor(r) {
   if (!cards.has(r)) cards.set(r, createCard(r));
   return cards.get(r);
+}
+
+// Le nombre de résultats est lu par les lecteurs d'écran : pendant la frappe,
+// on attend une pause pour ne pas l'annoncer à chaque lettre.
+let countTimer;
+function showCount(n, now) {
+  clearTimeout(countTimer);
+  const write = () => { $('count').textContent = t().count(n); };
+  if (now) write();
+  else countTimer = setTimeout(write, 400);
 }
 
 function render(animate = true) {
@@ -315,11 +331,18 @@ function render(animate = true) {
     return card;
   }));
 
-  $('count').textContent = t().count(filtered.length);
+  showCount(filtered.length, animate);
   // L'écran vide a déjà son propre bouton.
   $('reset').hidden = !hash || filtered.length === 0;
   $('empty').hidden = filtered.length > 0;
 }
+
+// Un lien partagé ouvert dans un onglet déjà sur la page, ou le bouton « précédent ».
+addEventListener('hashchange', () => {
+  state = RG.parseHash(location.hash, ctx);
+  search.value = state.query;
+  render();
+});
 
 applyLang();
 render();

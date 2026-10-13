@@ -6,8 +6,8 @@ export const PAGES = {
 
 export const WIDTHS = [320, 375, 768, 1440];
 
-// Erreurs JS + fichiers locaux manquants. Les CDN externes (emojis OpenMoji)
-// sont ignorés pour que les tests passent aussi hors ligne.
+// Erreurs JS + fichiers locaux manquants. Les ressources chargées hors du site
+// (les clés d'IA d'AutoVinted, par exemple) sont ignorées pour que les tests passent hors ligne.
 export function collectErrors(page) {
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));

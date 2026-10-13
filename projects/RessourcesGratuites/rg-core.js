@@ -7,31 +7,37 @@
   }
 
   // Ce qui ne dépend que des données : on le calcule une fois.
-  function makeContext({ categories, licenses, legacyCats = {} }) {
+  function makeContext({ families = [], categories, licenses, legacyCats = {} }) {
     return {
       familyOf: new Map(categories.map(c => [c.id, c.family])),
+      familyById: new Map(families.map(f => [f.id, f])),
       catById: new Map(categories.map(c => [c.id, c])),
       licenseById: new Map(licenses.map(l => [l.id, l])),
       legacyCats,
+      searchCache: new WeakMap(),
     };
   }
 
-  // « Icônes » et « icones » doivent se trouver l'un l'autre.
+  // « Icônes » trouve « icones », « œuvre » trouve « oeuvre ». La ponctuation devient des espaces,
+  // pour qu'un mot cherché puisse commencer après un tiret (« High-resolution »).
   function normalize(text) {
-    return text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+    return text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
+      .replace(/œ/g, 'oe').replace(/æ/g, 'ae')
+      .replace(/[^\p{L}\p{N}]+/gu, ' ');
   }
 
-  const searchCache = new WeakMap();
-
+  // Nom, description, licence, sous-catégories et familles, dans la langue affichée.
   function searchText(r, ctx, lang) {
-    let byLang = searchCache.get(r);
-    if (!byLang) searchCache.set(r, byLang = {});
+    let byLang = ctx.searchCache.get(r);
+    if (!byLang) ctx.searchCache.set(r, byLang = {});
     if (!byLang[lang]) {
       const license = ctx.licenseById.get(r.license);
-      byLang[lang] = normalize([
+      const families = new Set(r.cats.map(id => ctx.familyOf.get(id)));
+      byLang[lang] = ` ${normalize([
         r.name, r.desc[lang], r.licenseName, license && license[lang],
         ...r.cats.map(id => ctx.catById.get(id)?.[lang]),
-      ].filter(Boolean).join(' '));
+        ...[...families].map(id => ctx.familyById.get(id)?.[lang]),
+      ].filter(Boolean).join(' '))} `;
     }
     return byLang[lang];
   }
@@ -43,7 +49,8 @@
     if (s.noAccount && r.account) return false;
     if (words.length) {
       const text = searchText(r, ctx, lang);
-      if (!words.every(w => text.includes(w))) return false;
+      // Chaque mot cherché doit commencer un mot : « son » ne trouve pas « sont ».
+      if (!words.every(w => text.includes(` ${w}`))) return false;
     }
     return true;
   }
@@ -64,6 +71,15 @@
 
   function countLicense(resources, s, ctx, lang, licenseId) {
     return filterResources(resources, { ...s, licenses: new Set([licenseId]) }, ctx, lang).length;
+  }
+
+  // Nom du fichier d'icône OpenMoji : codes en hexadécimal, sans le sélecteur de variante FE0F.
+  function iconCode(emoji) {
+    return [...emoji]
+      .map(c => c.codePointAt(0))
+      .filter(cp => cp !== 0xFE0F)
+      .map(cp => cp.toString(16).toUpperCase().padStart(4, '0'))
+      .join('-');
   }
 
   // « #f=visuels&c=photos,icones&l=cc0,pro&nc=1&q=papier »
@@ -111,7 +127,7 @@
   }
 
   const api = {
-    emptyState, makeContext, normalize, filterResources,
+    emptyState, makeContext, normalize, iconCode, filterResources,
     countFamily, countCat, countLicense, buildHash, parseHash,
   };
 
