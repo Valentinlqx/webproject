@@ -2,7 +2,6 @@
 const texts = {
   fr: {
     title: 'Valentin L. — Graphiste indépendant',
-    intro: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     web: 'Projets web',
     design: 'Projets design',
     avDesc: 'Des photos à l’annonce Vinted, rédigée par l’IA.',
@@ -11,7 +10,6 @@ const texts = {
   },
   en: {
     title: 'Valentin L. — Freelance graphic designer',
-    intro: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     web: 'Web projects',
     design: 'Design projects',
     avDesc: 'From photos to a Vinted listing, written by AI.',
