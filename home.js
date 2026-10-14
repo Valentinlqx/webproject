@@ -1,7 +1,7 @@
 // Accueil en français ou en anglais. Sans JavaScript, la page reste en français.
 const texts = {
   fr: {
-    title: 'Valentin L. — Graphiste indépendant',
+    title: 'Vlqx — Graphiste indépendant',
     web: 'Projets web',
     design: 'Projets design',
     avDesc: 'Des photos à l’annonce Vinted, rédigée par l’IA.',
@@ -11,7 +11,7 @@ const texts = {
     next: 'Projets suivants',
   },
   en: {
-    title: 'Valentin L. — Freelance graphic designer',
+    title: 'Vlqx — Freelance graphic designer',
     web: 'Web projects',
     design: 'Design projects',
     avDesc: 'From photos to a Vinted listing, written by AI.',

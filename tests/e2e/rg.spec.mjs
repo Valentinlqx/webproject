@@ -202,7 +202,7 @@ test("si l'appareil demande moins de mouvement, rien ne bouge et le bouton pause
 test("le retour mène à l'accueil", async ({ page }) => {
   await page.goto(PAGES.rg);
   await page.click('.back-btn');
-  await expect(page.locator('h1')).toHaveText('Valentin L.');
+  await expect(page.locator('h1')).toHaveText('Vlqx');
 });
 
 for (const [what, hash] of [['au départ', ''], ['famille et licence choisies', '#f=son&l=cc0'], ['recherche', '#q=papier']]) {

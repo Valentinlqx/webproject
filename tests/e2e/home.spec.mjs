@@ -7,7 +7,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('le nom en haut, puis les projets', async ({ page }) => {
-  await expect(page.locator('h1')).toHaveText('Valentin L.');
+  await expect(page.locator('h1')).toHaveText('Vlqx');
   await expect(page.locator('.intro')).toHaveCount(0);
   await expect(page.locator('section h2')).toHaveText(['Projets web', 'Projets design']);
 });
