@@ -185,15 +185,6 @@ h2 {
   transition: transform 240ms ease-out;
 }
 
-.thumb-empty {
-  display: flex;
-  align-items: flex-end;
-  height: 100%;
-  padding: 0.5rem 0.625rem;
-  font-size: 0.75rem;
-  color: var(--muted);
-}
-
 .tile-name {
   display: block;
   font-size: 1rem;
