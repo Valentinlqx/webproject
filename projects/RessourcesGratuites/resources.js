@@ -2674,6 +2674,26 @@ const RESOURCES_DATA = {
       "licenseName": "MIT",
       "account": false,
       "desc": {"fr":"Générateur de motifs SVG répétables : couleurs, trait, angle et échelle, export en SVG ou PNG.","en":"Repeating SVG pattern generator: colors, stroke, angle and scale, exported as SVG or PNG."}
+    },
+    {
+      "name": "Doory",
+      "url": "https://doory.art/",
+      "emoji": "🚪",
+      "cats": ["en-ligne"],
+      "license": "opensource",
+      "licenseName": "Open source",
+      "account": false,
+      "desc": {"fr":"Outil de design en ligne, gratuit et sans inscription : posts, présentations, affiches, logos. Code ouvert.","en":"Free online design tool, no sign-up: social posts, slides, posters, logos. Open source."}
+    },
+    {
+      "name": "Free iPhone Mockup",
+      "url": "https://www.freeiphonemockup.com/",
+      "emoji": "📱",
+      "cats": ["mockups"],
+      "license": "mixte",
+      "licenseName": "À vérifier / To check",
+      "account": false,
+      "desc": {"fr":"Mockups d’iPhone gratuits. Licence non vérifiée : à lire sur le site avant un usage pro.","en":"Free iPhone mockups. License not verified: read it on the site before commercial use."}
     }
   ]
 };
