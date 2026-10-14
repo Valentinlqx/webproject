@@ -1,7 +1,7 @@
 // Données de la page. Pour ajouter un site : une entrée dans « resources » (règles dans tests/unit/rg-data.test.mjs),
 // puis « npm run icons » si son emoji est nouveau.
 const RESOURCES_DATA = {
-  "checked": "2026-10-13",
+  "checked": "2026-10-14",
   "families": [
     {"id":"visuels","emoji":"🖼️","fr":"Visuels","en":"Visuals"},
     {"id":"typo","emoji":"🔤","fr":"Typo","en":"Type"},
@@ -2694,6 +2694,306 @@ const RESOURCES_DATA = {
       "licenseName": "À vérifier / To check",
       "account": false,
       "desc": {"fr":"Mockups d’iPhone gratuits. Licence non vérifiée : à lire sur le site avant un usage pro.","en":"Free iPhone mockups. License not verified: read it on the site before commercial use."}
+    },
+    {
+      "name": "WordPress Photo Directory",
+      "url": "https://wordpress.org/photos/",
+      "emoji": "📷",
+      "cats": ["photos"],
+      "license": "cc0",
+      "licenseName": "CC0",
+      "account": false,
+      "desc": {"fr":"Photos partagées par la communauté WordPress, toutes relues à la main avant publication.","en":"Photos shared by the WordPress community, each one reviewed by hand before it goes live."}
+    },
+    {
+      "name": "LibreShot",
+      "url": "https://libreshot.com/",
+      "emoji": "📸",
+      "cats": ["photos"],
+      "license": "cc0",
+      "licenseName": "CC0",
+      "account": false,
+      "desc": {"fr":"Photos d'un seul photographe, en haute résolution : nature, villes et objets du quotidien.","en":"Photos by a single photographer in high resolution: nature, cities and everyday objects."}
+    },
+    {
+      "name": "NYPL Digital Collections",
+      "url": "https://digitalcollections.nypl.org/",
+      "emoji": "🏛️",
+      "cats": ["photos","illustrations"],
+      "license": "cc0",
+      "licenseName": "Public domain",
+      "account": false,
+      "desc": {"fr":"Des centaines de milliers de cartes, gravures et photos de la bibliothèque de New York.","en":"Hundreds of thousands of maps, prints and photos from the New York Public Library."}
+    },
+    {
+      "name": "Artvee",
+      "url": "https://artvee.com/",
+      "emoji": "🖼️",
+      "cats": ["illustrations","inspi"],
+      "license": "cc0",
+      "licenseName": "Public domain",
+      "account": false,
+      "desc": {"fr":"Peintures, affiches et illustrations anciennes du domaine public, rangées par style et par artiste.","en":"Old paintings, posters and illustrations in the public domain, sorted by style and artist."}
+    },
+    {
+      "name": "Magdeleine",
+      "url": "https://magdeleine.co/",
+      "emoji": "🌄",
+      "cats": ["photos"],
+      "license": "mixte",
+      "licenseName": "CC0, CC BY",
+      "account": false,
+      "desc": {"fr":"Une photo choisie chaque jour, à filtrer par couleur ou par licence.","en":"One hand-picked photo a day, with filters by colour and by license."}
+    },
+    {
+      "name": "Openclipart",
+      "url": "https://openclipart.org/",
+      "emoji": "✂️",
+      "cats": ["illustrations"],
+      "license": "cc0",
+      "licenseName": "CC0",
+      "account": false,
+      "desc": {"fr":"Plus de 150 000 cliparts vectoriels du domaine public, à télécharger en SVG.","en":"Over 150,000 public domain vector cliparts, downloadable as SVG."}
+    },
+    {
+      "name": "Bioicons",
+      "url": "https://bioicons.com/",
+      "emoji": "🧬",
+      "cats": ["icones","illustrations"],
+      "license": "mixte",
+      "licenseName": "CC0, CC BY, MIT",
+      "account": false,
+      "desc": {"fr":"Icônes de science et de laboratoire en SVG, pour schémas et affiches.","en":"Science and lab icons in SVG, for diagrams and posters."}
+    },
+    {
+      "name": "Humbleicons",
+      "url": "https://humbleicons.com/",
+      "emoji": "🙂",
+      "cats": ["icones"],
+      "license": "pro",
+      "licenseName": "MIT",
+      "account": false,
+      "desc": {"fr":"Icônes au trait, sobres et neutres, prévues pour les interfaces.","en":"Plain, neutral line icons made for interfaces."}
+    },
+    {
+      "name": "Mono Icons",
+      "url": "https://icons.mono.company/",
+      "emoji": "⚫",
+      "cats": ["icones"],
+      "license": "pro",
+      "licenseName": "MIT",
+      "account": false,
+      "desc": {"fr":"Un jeu d’icônes simples et régulières, en SVG ou en police.","en":"A set of simple, consistent icons, as SVG or as a font."}
+    },
+    {
+      "name": "Weather Icons",
+      "url": "https://erikflowers.github.io/weather-icons/",
+      "emoji": "⛅",
+      "cats": ["icones"],
+      "license": "pro",
+      "licenseName": "SIL OFL",
+      "account": false,
+      "desc": {"fr":"Plus de 200 icônes de météo et de ciel, en police ou en SVG.","en":"Over 200 weather and sky icons, as a font or as SVG."}
+    },
+    {
+      "name": "Xelu Controller Prompts",
+      "url": "https://thoseawesomeguys.com/prompts/",
+      "emoji": "🎮",
+      "cats": ["icones","jeux"],
+      "license": "cc0",
+      "licenseName": "CC0",
+      "account": false,
+      "desc": {"fr":"Boutons de manettes et touches de clavier dessinés pour les jeux vidéo.","en":"Controller buttons and keyboard keys drawn for video games."}
+    },
+    {
+      "name": "Unminus",
+      "url": "https://www.unminus.com/",
+      "emoji": "🎵",
+      "cats": ["musique"],
+      "license": "pro",
+      "licenseName": "Unminus License",
+      "account": false,
+      "desc": {"fr":"Musique d'artistes indépendants, sans crédit obligatoire, même pour un usage commercial.","en":"Music by independent artists, no credit required, commercial use included."}
+    },
+    {
+      "name": "Texture Ninja",
+      "url": "https://texture.ninja/",
+      "emoji": "🧱",
+      "cats": ["textures"],
+      "license": "cc0",
+      "licenseName": "CC0",
+      "account": false,
+      "desc": {"fr":"Milliers de photos de textures : murs, sols, métal, bois, peinture écaillée.","en":"Thousands of texture photos: walls, floors, metal, wood, peeling paint."}
+    },
+    {
+      "name": "JangaFX Free VDB",
+      "url": "https://jangafx.com/software/embergen/download/free-vdb-animations",
+      "emoji": "💨",
+      "cats": ["3d","motion"],
+      "license": "cc0",
+      "licenseName": "CC0",
+      "account": false,
+      "desc": {"fr":"Animations de fumée, de feu et d’explosions en VDB, prêtes pour Blender.","en":"Smoke, fire and explosion animations as VDB, ready for Blender."}
+    },
+    {
+      "name": "FontLibrary",
+      "url": "https://fontlibrary.org/",
+      "emoji": "🔤",
+      "cats": ["polices"],
+      "license": "pro",
+      "licenseName": "SIL OFL, CC0",
+      "account": false,
+      "desc": {"fr":"Polices libres classées par style, avec leurs fichiers source.","en":"Libre fonts sorted by style, with their source files."}
+    },
+    {
+      "name": "HTML5 UP",
+      "url": "https://html5up.net/",
+      "emoji": "🖥️",
+      "cats": ["web"],
+      "license": "credit",
+      "licenseName": "CC BY 3.0",
+      "account": false,
+      "desc": {"fr":"Modèles de sites responsives, gratuits à condition de citer le site.","en":"Responsive site templates, free as long as you credit the site."}
+    },
+    {
+      "name": "Start Bootstrap",
+      "url": "https://startbootstrap.com/",
+      "emoji": "🧩",
+      "cats": ["web"],
+      "license": "opensource",
+      "licenseName": "MIT",
+      "account": false,
+      "desc": {"fr":"Modèles de sites et de tableaux de bord construits avec Bootstrap.","en":"Site and dashboard templates built with Bootstrap."}
+    },
+    {
+      "name": "Bootswatch",
+      "url": "https://bootswatch.com/",
+      "emoji": "🎨",
+      "cats": ["web"],
+      "license": "opensource",
+      "licenseName": "MIT",
+      "account": false,
+      "desc": {"fr":"Thèmes prêts à poser sur Bootstrap pour changer tout son style en une ligne.","en":"Ready-made Bootstrap themes that change its whole look in one line."}
+    },
+    {
+      "name": "Graphite",
+      "url": "https://graphite.rs/",
+      "emoji": "✏️",
+      "cats": ["logiciels"],
+      "license": "opensource",
+      "licenseName": "Apache-2.0",
+      "account": false,
+      "desc": {"fr":"Éditeur vectoriel et d’images à nœuds, dans le navigateur, encore en développement.","en":"Node-based vector and image editor in the browser, still in development."}
+    },
+    {
+      "name": "Glyphr Studio",
+      "url": "https://www.glyphrstudio.com/",
+      "emoji": "🅰️",
+      "cats": ["outils-typo","en-ligne"],
+      "license": "opensource",
+      "licenseName": "GPL-3.0",
+      "account": false,
+      "desc": {"fr":"Dessiner sa propre police dans le navigateur, pensé pour débuter.","en":"Draw your own font in the browser, made for beginners."}
+    },
+    {
+      "name": "FontForge",
+      "url": "https://fontforge.org/",
+      "emoji": "🔠",
+      "cats": ["outils-typo","logiciels"],
+      "license": "opensource",
+      "licenseName": "GPL-3.0",
+      "account": false,
+      "desc": {"fr":"Logiciel complet pour créer et modifier des polices OpenType et TrueType.","en":"Full software to create and edit OpenType and TrueType fonts."}
+    },
+    {
+      "name": "Scribus",
+      "url": "https://www.scribus.net/",
+      "emoji": "📰",
+      "cats": ["logiciels"],
+      "license": "opensource",
+      "licenseName": "GPL-2.0",
+      "account": false,
+      "desc": {"fr":"Mise en page pour le print : magazines, affiches, brochures, export PDF prêt à imprimer.","en":"Print layout: magazines, posters, brochures, print-ready PDF export."}
+    },
+    {
+      "name": "Darktable",
+      "url": "https://www.darktable.org/",
+      "emoji": "🌗",
+      "cats": ["logiciels"],
+      "license": "opensource",
+      "licenseName": "GPL-3.0",
+      "account": false,
+      "desc": {"fr":"Développement de photos RAW et gestion de photothèque, comme Lightroom.","en":"RAW photo development and library management, like Lightroom."}
+    },
+    {
+      "name": "RawTherapee",
+      "url": "https://rawtherapee.com/",
+      "emoji": "🎞️",
+      "cats": ["logiciels"],
+      "license": "opensource",
+      "licenseName": "GPL-3.0",
+      "account": false,
+      "desc": {"fr":"Développement de photos RAW avec des réglages fins de couleur et de détail.","en":"RAW photo development with fine colour and detail controls."}
+    },
+    {
+      "name": "Hydrogen",
+      "url": "https://hydrogen-music.org/",
+      "emoji": "🥁",
+      "cats": ["logiciels","musique"],
+      "license": "opensource",
+      "licenseName": "GPL-2.0",
+      "account": false,
+      "desc": {"fr":"Boîte à rythmes à motifs pour composer des pistes de batterie.","en":"Pattern-based drum machine to build drum tracks."}
+    },
+    {
+      "name": "Poline",
+      "url": "https://meodai.github.io/poline/",
+      "emoji": "🌈",
+      "cats": ["couleurs"],
+      "license": "opensource",
+      "licenseName": "MIT",
+      "account": false,
+      "desc": {"fr":"Génère des palettes en dégradé à partir de quelques couleurs repères.","en":"Builds gradient palettes from a few anchor colours."}
+    },
+    {
+      "name": "Utopia",
+      "url": "https://utopia.fyi/",
+      "emoji": "📐",
+      "cats": ["web","outils-typo"],
+      "license": "outil",
+      "licenseName": "Outil gratuit",
+      "account": false,
+      "desc": {"fr":"Calcule des tailles de texte et d’espaces qui s’adaptent à l’écran.","en":"Works out text and spacing sizes that scale with the screen."}
+    },
+    {
+      "name": "Fontello",
+      "url": "https://fontello.com/",
+      "emoji": "🔣",
+      "cats": ["icones","web"],
+      "license": "opensource",
+      "licenseName": "MIT (icônes : licence de chaque jeu)",
+      "account": false,
+      "desc": {"fr":"Crée sa propre police d'icônes en piochant dans plusieurs jeux libres.","en":"Build your own icon font by picking from several open icon sets."}
+    },
+    {
+      "name": "MyPaint",
+      "url": "https://www.mypaint.app/",
+      "emoji": "🖌️",
+      "cats": ["logiciels"],
+      "license": "opensource",
+      "licenseName": "GPL-2.0",
+      "account": false,
+      "desc": {"fr":"Peinture numérique sur une toile sans fin, pensée pour la tablette graphique.","en":"Digital painting on an endless canvas, made for drawing tablets."}
+    },
+    {
+      "name": "OpenShot",
+      "url": "https://www.openshot.org/",
+      "emoji": "🎬",
+      "cats": ["logiciels"],
+      "license": "opensource",
+      "licenseName": "GPL-3.0",
+      "account": false,
+      "desc": {"fr":"Montage vidéo simple : timeline, images clés, fond vert et titres.","en":"Simple video editing: timeline, keyframes, green screen and titles."}
     }
   ]
 };
