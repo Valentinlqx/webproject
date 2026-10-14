@@ -30,6 +30,32 @@ test('chaque projet a son image', async ({ page }) => {
   expect(box.height / box.width).toBeCloseTo(4 / 3, 1);
 });
 
+test('chaque catégorie tient sur une seule rangée qui défile', async ({ page }) => {
+  for (const width of [375, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const row of await page.locator('.grid').all()) {
+      const tops = await row.locator('.tile').evaluateAll(ts => ts.map(t => Math.round(t.getBoundingClientRect().top)));
+      expect(new Set(tops).size, `${width}px`).toBe(1);
+    }
+  }
+});
+
+test('sur ordinateur, les flèches font défiler la rangée et se désactivent au bout', async ({ page }) => {
+  await page.setViewportSize({ width: 900, height: 900 });
+  const design = page.locator('section:has(#design)');
+  const row = design.locator('.grid');
+  const prev = design.getByRole('button', { name: 'Projets précédents' });
+  const next = design.getByRole('button', { name: 'Projets suivants' });
+  await expect(prev).toBeDisabled();
+  await next.click();
+  await expect.poll(() => row.evaluate(r => r.scrollLeft)).toBeGreaterThan(0);
+  await expect(prev).toBeEnabled();
+  await row.evaluate(r => { r.style.scrollBehavior = 'auto'; r.scrollLeft = r.scrollWidth; });
+  await expect(next).toBeDisabled();
+  // Deux projets web tiennent à l'écran : pas de flèches inutiles.
+  await expect(page.locator('section:has(#web) .arrows')).toBeHidden();
+});
+
 test('pas de contact ni de réseaux sociaux', async ({ page }) => {
   await expect(page.locator('a[href^="mailto:"]')).toHaveCount(0);
   const hrefs = await page.locator('a').evaluateAll(as => as.map(a => a.getAttribute('href')));

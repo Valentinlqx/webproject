@@ -10,7 +10,7 @@
   <meta property="og:description" content="Affiches, identités visuelles, vidéo et motion, et de petits outils web." />
   <meta property="og:type" content="website" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>" />
-  <link rel="stylesheet" href="style.css?v=4" />
+  <link rel="stylesheet" href="style.css?v=5" />
 </head>
 <body>
   <main class="page">
@@ -26,8 +26,10 @@
          dit ce qu'on voit, par exemple alt="Affiche de festival : grand titre rouge sur fond noir". -->
 
     <section aria-labelledby="web">
-      <h2 id="web" data-i18n="web">Projets web</h2>
-      <ul class="grid" role="list">
+      <div class="row-head">
+        <h2 id="web" data-i18n="web">Projets web</h2>
+      </div>
+      <ul class="grid" role="list" tabindex="0" aria-labelledby="web">
         <li>
           <a class="tile" href="projects/AutoVinted/autovinted.html">
             <span class="thumb"><span class="thumb-empty" aria-hidden="true">Image</span></span>
@@ -47,8 +49,10 @@
 
     <!-- TODO : projets provisoires. Pour en faire un lien, changer <div class="tile"> en <a class="tile" href="..."> -->
     <section aria-labelledby="design">
-      <h2 id="design" data-i18n="design">Projets design</h2>
-      <ul class="grid" role="list">
+      <div class="row-head">
+        <h2 id="design" data-i18n="design">Projets design</h2>
+      </div>
+      <ul class="grid" role="list" tabindex="0" aria-labelledby="design">
         <li>
           <div class="tile">
             <span class="thumb"><span class="thumb-empty" aria-hidden="true">Image</span></span>
@@ -89,6 +93,6 @@
 
   </main>
   <script src="lang.js?v=3"></script>
-  <script src="home.js?v=5"></script>
+  <script src="home.js?v=6"></script>
 </body>
 </html>
