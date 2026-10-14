@@ -2961,7 +2961,7 @@ const RESOURCES_DATA = {
       "emoji": "📐",
       "cats": ["web","outils-typo"],
       "license": "outil",
-      "licenseName": "Outil gratuit",
+      "licenseName": "Freeware",
       "account": false,
       "desc": {"fr":"Calcule des tailles de texte et d’espaces qui s’adaptent à l’écran.","en":"Works out text and spacing sizes that scale with the screen."}
     },
@@ -2971,7 +2971,7 @@ const RESOURCES_DATA = {
       "emoji": "🔣",
       "cats": ["icones","web"],
       "license": "opensource",
-      "licenseName": "MIT (icônes : licence de chaque jeu)",
+      "licenseName": "MIT, icon set licenses",
       "account": false,
       "desc": {"fr":"Crée sa propre police d'icônes en piochant dans plusieurs jeux libres.","en":"Build your own icon font by picking from several open icon sets."}
     },
@@ -2994,6 +2994,946 @@ const RESOURCES_DATA = {
       "licenseName": "GPL-3.0",
       "account": false,
       "desc": {"fr":"Montage vidéo simple : timeline, images clés, fond vert et titres.","en":"Simple video editing: timeline, keyframes, green screen and titles."}
+    },
+    {
+      "name": "Pixnio",
+      "url": "https://pixnio.com/",
+      "emoji": "📷",
+      "cats": ["photos"],
+      "license": "pro",
+      "licenseName": "CC0, Pixnio License",
+      "account": false,
+      "desc": {"fr":"Photos haute résolution en CC0 ou sous licence Pixnio, utilisables commercialement sans crédit.","en":"High-resolution photos under CC0 or the Pixnio license, usable commercially with no credit needed."}
+    },
+    {
+      "name": "PxHere",
+      "url": "https://pxhere.com/",
+      "emoji": "🖼️",
+      "cats": ["photos"],
+      "license": "cc0",
+      "licenseName": "CC0",
+      "account": false,
+      "desc": {"fr":"Plus d'un million de photos sous CC0, avec filtres par orientation, couleur et taille.","en":"Over a million photos under CC0, searchable by orientation, colour and size."}
+    },
+    {
+      "name": "Focastock",
+      "url": "https://focastock.com/",
+      "emoji": "📸",
+      "cats": ["photos","footage"],
+      "license": "cc0",
+      "licenseName": "CC0",
+      "account": false,
+      "desc": {"fr":"Photos et vidéos gratuites sous CC0 pour projets personnels et commerciaux, crédit facultatif.","en":"Free photos and videos under CC0 for personal and commercial projects, credit optional."}
+    },
+    {
+      "name": "Free Nature Stock",
+      "url": "https://freenaturestock.com/",
+      "emoji": "🌲",
+      "cats": ["photos","footage"],
+      "license": "cc0",
+      "licenseName": "CC0",
+      "account": false,
+      "desc": {"fr":"Photos et vidéos de nature prises par de vrais photographes, sous CC0, sans images IA.","en":"Nature photos and videos shot by real photographers, under CC0, with no AI-generated images."}
+    },
+    {
+      "name": "MyStock",
+      "url": "https://mystock.themeisle.com/",
+      "emoji": "🏞️",
+      "cats": ["photos"],
+      "license": "cc0",
+      "licenseName": "CC0",
+      "account": false,
+      "desc": {"fr":"Environ 1 300 photos sous CC0 rangées par thème : nature, architecture, personnes.","en":"About 1,300 photos under CC0, sorted by theme: nature, architecture, people."}
+    },
+    {
+      "name": "Creativity103",
+      "url": "https://creativity103.com/",
+      "emoji": "🌀",
+      "cats": ["textures","photos"],
+      "license": "credit",
+      "licenseName": "CC BY 3.0",
+      "account": false,
+      "desc": {"fr":"Photos abstraites, fonds et textures sous CC BY 3.0, crédit du site demandé.","en":"Abstract photos, backgrounds and textures under CC BY 3.0, with credit to the site required."}
+    },
+    {
+      "name": "PhyloPic",
+      "url": "https://www.phylopic.org/",
+      "emoji": "🦕",
+      "cats": ["illustrations","icones"],
+      "license": "mixte",
+      "licenseName": "CC0, CC BY, CC BY-SA",
+      "account": false,
+      "desc": {"fr":"Silhouettes d'animaux et de plantes ; chaque image a sa licence Creative Commons (CC0 ou CC BY).","en":"Silhouettes of animals and plants; each image carries its own Creative Commons license (CC0 or CC BY)."}
+    },
+    {
+      "name": "Pikwizard",
+      "url": "https://pikwizard.com/",
+      "emoji": "🧙",
+      "cats": ["photos"],
+      "license": "pro",
+      "licenseName": "Pikwizard Free License",
+      "account": false,
+      "desc": {"fr":"Photos gratuites pour un usage commercial sans crédit ; les images Premium sont payantes.","en":"Free photos for commercial use with no credit needed; images marked Premium are paid."}
+    },
+    {
+      "name": "Free Vector",
+      "url": "https://www.freevector.com/",
+      "emoji": "✒️",
+      "cats": ["illustrations"],
+      "license": "mixte",
+      "licenseName": "CC BY, CC BY-NC, CC BY-SA",
+      "account": false,
+      "desc": {"fr":"Fichiers vectoriels gratuits ; la licence varie selon le fichier, souvent CC BY 4.0.","en":"Free vector files; the license depends on the file, most often CC BY 4.0."}
+    },
+    {
+      "name": "VectorPortal",
+      "url": "https://www.vectorportal.com/",
+      "emoji": "📐",
+      "cats": ["illustrations"],
+      "license": "credit",
+      "licenseName": "CC BY 4.0",
+      "account": false,
+      "desc": {"fr":"Milliers de vecteurs, cliparts et fonds en SVG sous CC BY 4.0, crédit demandé.","en":"Thousands of vectors, clip art and backgrounds in SVG under CC BY 4.0, credit required."}
+    },
+    {
+      "name": "Mockups Design",
+      "url": "https://mockups-design.com/",
+      "emoji": "📦",
+      "cats": ["mockups"],
+      "license": "pro",
+      "licenseName": "Mockups Design License",
+      "account": false,
+      "desc": {"fr":"Mockups PSD gratuits (emballages, logos, affiches) pour un usage commercial, sans crédit.","en":"Free PSD mockups (packaging, logos, posters) for commercial use, no credit needed."}
+    },
+    {
+      "name": "Free Vintage Illustrations",
+      "url": "https://freevintageillustrations.com/",
+      "emoji": "📜",
+      "cats": ["illustrations"],
+      "license": "cc0",
+      "licenseName": "Public domain",
+      "account": false,
+      "desc": {"fr":"Plus de 5 000 illustrations anciennes du domaine public, issues de livres et cartes postales.","en":"Over 5,000 public domain vintage illustrations taken from old books, postcards and ads."}
+    },
+    {
+      "name": "Free Illustrations",
+      "url": "https://freeillustrations.xyz/",
+      "emoji": "🎨",
+      "cats": ["illustrations"],
+      "license": "mixte",
+      "licenseName": "Various",
+      "account": false,
+      "desc": {"fr":"Annuaire de packs d'illustrations gratuits, filtrables par format ; licence propre à chaque pack.","en":"Directory of free illustration packs, filterable by file type; each pack has its own license."}
+    },
+    {
+      "name": "Lost Geometry",
+      "url": "https://lostgeometry.craftwork.design/",
+      "emoji": "🔷",
+      "cats": ["3d","illustrations"],
+      "license": "pro",
+      "licenseName": "Craftwork License",
+      "account": true,
+      "desc": {"fr":"91 objets 3D abstraits en PNG, gratuits pour un usage commercial ; fichiers Blender en option.","en":"91 abstract 3D objects as PNG, free for commercial use; Blender source files are extra."}
+    },
+    {
+      "name": "Pastel Illustrations",
+      "url": "https://usepastel.com/marker-illustrations",
+      "emoji": "🖍️",
+      "cats": ["illustrations"],
+      "license": "pro",
+      "licenseName": "Pastel License",
+      "account": false,
+      "desc": {"fr":"Illustrations dessinées au marqueur en PNG, libres pour un usage commercial, sans crédit.","en":"Marker-drawn illustrations as PNG, free for commercial use with no credit needed."}
+    },
+    {
+      "name": "CuteStockFootage",
+      "url": "https://cutestockfootage.com/free/video",
+      "emoji": "🎬",
+      "cats": ["footage","motion"],
+      "license": "credit",
+      "licenseName": "CC BY 4.0",
+      "account": false,
+      "desc": {"fr":"Clips HD gratuits : transitions, light leaks, particules, fonds verts, sous CC BY 4.0.","en":"Free HD clips: transitions, light leaks, particles and green screen, under CC BY 4.0."}
+    },
+    {
+      "name": "3D Textures",
+      "url": "https://3dtextures.me/",
+      "emoji": "🧱",
+      "cats": ["textures","3d"],
+      "license": "cc0",
+      "licenseName": "CC0",
+      "account": false,
+      "desc": {"fr":"Textures PBR seamless (couleur, normal, rugosité, hauteur, AO) en CC0, sans crédit. 4K de certaines sur Patreon.","en":"Seamless PBR textures (color, normal, roughness, height, AO) under CC0, no credit. Some 4K sets are on Patreon."}
+    },
+    {
+      "name": "Texture Labs",
+      "url": "https://texturelabs.org/",
+      "emoji": "📜",
+      "cats": ["textures"],
+      "license": "pro",
+      "licenseName": "Texturelabs License",
+      "account": false,
+      "desc": {"fr":"Textures photo haute résolution (papier, encre, atmosphère, détails), utilisables en commercial. Revente interdite.","en":"High-resolution photo textures (paper, ink, atmosphere, details), fine for commercial work. No reselling."}
+    },
+    {
+      "name": "Free PBR",
+      "url": "https://freepbr.com/",
+      "emoji": "🪨",
+      "cats": ["textures","3d"],
+      "license": "perso",
+      "licenseName": "Non-commercial",
+      "account": false,
+      "desc": {"fr":"Plus de 600 matériaux PBR gratuits pour un usage non commercial. L'usage commercial passe par un pack payant.","en":"Over 600 PBR material sets, free for non-commercial use. Commercial rights come with a paid bundle."}
+    },
+    {
+      "name": "AMD MaterialX Library",
+      "url": "https://matlib.gpuopen.com/",
+      "emoji": "💎",
+      "cats": ["textures","3d"],
+      "license": "pro",
+      "licenseName": "Apache 2.0",
+      "account": false,
+      "desc": {"fr":"Bibliothèque d'AMD : des centaines de matériaux MaterialX avec leurs textures, téléchargeables sans inscription.","en":"AMD's library of hundreds of MaterialX materials with their textures, downloadable without registering."}
+    },
+    {
+      "name": "TextureLab",
+      "url": "https://njbrown.itch.io/texturelab",
+      "emoji": "🔬",
+      "cats": ["textures","logiciels"],
+      "license": "opensource",
+      "licenseName": "LGPL-3.0",
+      "account": false,
+      "desc": {"fr":"Générateur de textures procédurales à nœuds, accéléré par GPU, pour Windows, macOS et Linux. Encore en développement.","en":"GPU-accelerated, node-based procedural texture generator for Windows, macOS and Linux. Still in development."}
+    },
+    {
+      "name": "Tabbied",
+      "url": "https://tabbied.com/",
+      "emoji": "🔷",
+      "cats": ["en-ligne","illustrations","couleurs"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Motifs génératifs à recolorer et télécharger en PNG ou SVG. Les motifs créés sont à toi, même en commercial.","en":"Generative patterns to recolor and download as PNG or SVG. Patterns you make are yours, commercial use included."}
+    },
+    {
+      "name": "Trianglify.io",
+      "url": "https://trianglify.io/",
+      "emoji": "🔺",
+      "cats": ["en-ligne","illustrations"],
+      "license": "opensource",
+      "licenseName": "GPL-3.0",
+      "account": false,
+      "desc": {"fr":"Générateur de fonds low poly en triangles : couleurs, taille et répartition réglables, export SVG ou PNG.","en":"Low poly triangle background generator: adjust colors, cell size and variance, then export as SVG or PNG."}
+    },
+    {
+      "name": "Doodad Pattern Generator",
+      "url": "https://doodad.dev/pattern-generator/",
+      "emoji": "🌀",
+      "cats": ["en-ligne","illustrations"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Motifs répétables à régler (couleurs, filtres, transformations), export SVG, CSS ou PNG, utilisables en commercial.","en":"Seamless patterns with adjustable colors, filters and transforms, exported as SVG, CSS or PNG, usable commercially."}
+    },
+    {
+      "name": "Printables",
+      "url": "https://www.printables.com/",
+      "emoji": "🖨️",
+      "cats": ["3d"],
+      "license": "mixte",
+      "licenseName": "Creative Commons (per model)",
+      "account": false,
+      "desc": {"fr":"Plateforme de Prusa : modèles 3D à imprimer, licence choisie par chaque auteur, souvent CC BY-NC.","en":"Prusa's platform of printable 3D models; each author picks the license, often CC BY-NC."}
+    },
+    {
+      "name": "Thingiverse",
+      "url": "https://www.thingiverse.com/",
+      "emoji": "🧩",
+      "cats": ["3d"],
+      "license": "mixte",
+      "licenseName": "Creative Commons (per model)",
+      "account": false,
+      "desc": {"fr":"Grande base de modèles 3D à imprimer. Chaque modèle a sa licence Creative Commons, affichée sur sa page.","en":"Large library of printable 3D models. Each model has its own Creative Commons license, shown on its page."}
+    },
+    {
+      "name": "Sketchfab",
+      "url": "https://sketchfab.com/",
+      "emoji": "🗿",
+      "cats": ["3d"],
+      "license": "mixte",
+      "licenseName": "CC BY, CC0, Standard (per model)",
+      "account": true,
+      "desc": {"fr":"Des centaines de milliers de modèles 3D téléchargeables, surtout en CC BY, quelques-uns en CC0. Filtre Downloadable.","en":"Hundreds of thousands of downloadable 3D models, mostly CC BY, some CC0. Use the Downloadable filter."}
+    },
+    {
+      "name": "Handz",
+      "url": "https://www.handz.design/",
+      "emoji": "✋",
+      "cats": ["3d","illustrations"],
+      "license": "cc0",
+      "licenseName": "CC0",
+      "account": false,
+      "desc": {"fr":"Version gratuite de Handz : deux mains 3D riggées, 25 poses et des rendus PNG, avec fichiers Blender, en CC0.","en":"Free version of Handz: two rigged 3D hands, 25 poses and PNG renders, with Blender files, under CC0."}
+    },
+    {
+      "name": "Wings 3D",
+      "url": "https://www.wings3d.com/",
+      "emoji": "🪽",
+      "cats": ["3d","logiciels"],
+      "license": "opensource",
+      "licenseName": "BSD",
+      "account": false,
+      "desc": {"fr":"Modeleur 3D polygonal par subdivision, simple et léger, pour Windows, macOS et Linux.","en":"Lightweight subdivision polygon modeler for Windows, macOS and Linux."}
+    },
+    {
+      "name": "Dust3D",
+      "url": "https://dust3d.org/",
+      "emoji": "🦕",
+      "cats": ["3d","logiciels","jeux"],
+      "license": "opensource",
+      "licenseName": "MIT",
+      "account": false,
+      "desc": {"fr":"Modélisation 3D rapide de personnages low poly, avec dépliage UV et rigging automatiques. Export FBX et glTF.","en":"Quick 3D modeling of low poly characters with automatic UV unwrapping and rigging. Exports FBX and glTF."}
+    },
+    {
+      "name": "Bforartists",
+      "url": "https://www.bforartists.de/",
+      "emoji": "🎨",
+      "cats": ["3d","logiciels"],
+      "license": "opensource",
+      "licenseName": "GPL",
+      "account": false,
+      "desc": {"fr":"Fork de Blender avec une interface revue pour être plus lisible. Gratuit, usage commercial autorisé.","en":"Blender fork with a reworked, easier to read interface. Free, commercial use allowed."}
+    },
+    {
+      "name": "YouTube Audio Library",
+      "url": "https://www.youtube.com/audiolibrary",
+      "emoji": "🎵",
+      "cats": ["musique","effets"],
+      "license": "mixte",
+      "licenseName": "YouTube Audio Library, CC BY",
+      "account": true,
+      "desc": {"fr":"Musiques et bruitages gratuits dans YouTube Studio, certains sans crédit, d'autres en CC BY à créditer.","en":"Free music and sound effects in YouTube Studio, some with no credit needed, others CC BY requiring credit."}
+    },
+    {
+      "name": "Bensound",
+      "url": "https://www.bensound.com/",
+      "emoji": "🎶",
+      "cats": ["musique"],
+      "license": "credit",
+      "licenseName": "Bensound Free License",
+      "account": false,
+      "desc": {"fr":"Morceaux de musique de fond gratuits pour vidéos et sites, avec le crédit à Bensound fourni au téléchargement.","en":"Free background music tracks for videos and websites, with the Bensound credit text given at download."}
+    },
+    {
+      "name": "Chosic",
+      "url": "https://www.chosic.com/free-music/all/",
+      "emoji": "🎼",
+      "cats": ["musique"],
+      "license": "mixte",
+      "licenseName": "CC BY, various",
+      "account": false,
+      "desc": {"fr":"Musiques gratuites classées par genre et ambiance, licence indiquée sur chaque morceau, souvent CC BY.","en":"Free music sorted by genre and mood, with the license shown on each track, often CC BY."}
+    },
+    {
+      "name": "OpenTracks",
+      "url": "https://opentracks.com/en/",
+      "emoji": "🎧",
+      "cats": ["musique","effets"],
+      "license": "mixte",
+      "licenseName": "OpenTracks License",
+      "account": false,
+      "desc": {"fr":"Ex-DOVA-SYNDROME : musiques de fond japonaises gratuites, usage commercial permis selon la licence du morceau.","en":"Formerly DOVA-SYNDROME: free Japanese background music, commercial use allowed per each track's license."}
+    },
+    {
+      "name": "Josh Woodward",
+      "url": "https://www.joshwoodward.com/",
+      "emoji": "🎸",
+      "cats": ["musique"],
+      "license": "credit",
+      "licenseName": "CC BY 4.0",
+      "account": false,
+      "desc": {"fr":"Plus de 200 chansons d'un auteur-compositeur, avec et sans voix, en CC BY 4.0, téléchargement libre.","en":"Over 200 songs by one songwriter, with vocals and instrumental, under CC BY 4.0, free to download."}
+    },
+    {
+      "name": "Free Sounds Library",
+      "url": "https://www.freesoundslibrary.com/",
+      "emoji": "🔊",
+      "cats": ["effets"],
+      "license": "credit",
+      "licenseName": "CC BY 4.0",
+      "account": false,
+      "desc": {"fr":"Bruitages gratuits en MP3 classés par catégorie, sous CC BY 4.0, usage commercial permis avec crédit.","en":"Free MP3 sound effects sorted by category, under CC BY 4.0, commercial use allowed with credit."}
+    },
+    {
+      "name": "BandLab Sounds",
+      "url": "https://www.bandlab.com/sounds/free-samples",
+      "emoji": "🥁",
+      "cats": ["musique","effets"],
+      "license": "pro",
+      "licenseName": "BandLab Sounds License",
+      "account": true,
+      "desc": {"fr":"Milliers de samples et boucles WAV libres de droits, utilisables dans tes morceaux, revente seule interdite.","en":"Thousands of royalty-free WAV samples and loops to use in your music; reselling them alone is not allowed."}
+    },
+    {
+      "name": "Citizen DJ",
+      "url": "https://citizen-dj.labs.loc.gov/",
+      "emoji": "📻",
+      "cats": ["musique","effets"],
+      "license": "cc0",
+      "licenseName": "Public domain",
+      "account": false,
+      "desc": {"fr":"Samples tirés des archives sonores et films de la Library of Congress, dans le domaine public.","en":"Samples taken from the Library of Congress sound and film archives, in the public domain."}
+    },
+    {
+      "name": "Adobe Audition SFX",
+      "url": "https://www.adobe.com/products/audition/offers/AdobeAuditionDLCSFX.html",
+      "emoji": "💥",
+      "cats": ["effets"],
+      "license": "pro",
+      "licenseName": "Adobe EULA",
+      "account": false,
+      "desc": {"fr":"Des milliers de bruitages WAV non compressés d'Adobe en archives ZIP par thème : ambiances, foley, impacts.","en":"Thousands of uncompressed WAV sound effects from Adobe in ZIP archives by theme: ambience, foley, impacts."}
+    },
+    {
+      "name": "Samplebrain",
+      "url": "https://gitlab.com/then-try-this/samplebrain",
+      "emoji": "🧠",
+      "cats": ["logiciels","musique"],
+      "license": "opensource",
+      "licenseName": "GPL-2.0",
+      "account": false,
+      "desc": {"fr":"Logiciel d'Aphex Twin qui découpe des samples en blocs et recompose un son cible avec, sur Windows, Mac, Linux.","en":"Aphex Twin's app that cuts samples into blocks and rebuilds a target sound from them, on Windows, Mac, Linux."}
+    },
+    {
+      "name": "CraftPix",
+      "url": "https://craftpix.net/freebies/",
+      "emoji": "👾",
+      "cats": ["jeux"],
+      "license": "pro",
+      "licenseName": "CraftPix License",
+      "account": false,
+      "desc": {"fr":"Packs 2D gratuits pour jeux : sprites, tilesets, décors, icônes, usage commercial permis, revente interdite.","en":"Free 2D game packs: sprites, tilesets, backgrounds and icons, commercial use allowed, no reselling."}
+    },
+    {
+      "name": "GameDev Market",
+      "url": "https://www.gamedevmarket.net/",
+      "emoji": "🎮",
+      "cats": ["jeux"],
+      "license": "pro",
+      "licenseName": "GDM Pro Licence",
+      "account": true,
+      "desc": {"fr":"Des centaines d'assets de jeu gratuits (2D, 3D, audio) sous la Pro Licence, sans crédit obligatoire.","en":"Hundreds of free game assets (2D, 3D, audio) under the Pro Licence, with no credit required."}
+    },
+    {
+      "name": "HUDS+GUIS",
+      "url": "https://www.hudsandguis.com/",
+      "emoji": "🖥️",
+      "cats": ["inspi"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Galerie d'interfaces de films, jeux et concepts futuristes, à consulter pour l'inspiration, pas à réutiliser.","en":"Gallery of interfaces from films, games and sci-fi concepts, to browse for inspiration, not to reuse."}
+    },
+    {
+      "name": "SPARTAN Procedural",
+      "url": "https://pnjeffries.itch.io/spartan-procjam-edition",
+      "emoji": "🧱",
+      "cats": ["logiciels","jeux"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Logiciel Windows de pixel art pour tuiles et sprites animés, avec un générateur procédural de tuiles.","en":"Windows pixel art app for tiles and animated sprites, with a procedural tile generator."}
+    },
+    {
+      "name": "Bleeper",
+      "url": "https://pixwlk.itch.io/bleeper",
+      "emoji": "🔔",
+      "cats": ["en-ligne","effets","jeux"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Outil web pour créer des bruitages façon NES en dessinant volume et hauteur, export en MP3 ou WAV.","en":"Browser tool to make NES-style sound effects by drawing volume and pitch curves, export to MP3 or WAV."}
+    },
+    {
+      "name": "pixeldudesmaker",
+      "url": "https://0x72.itch.io/pixeldudesmaker",
+      "emoji": "🧙",
+      "cats": ["jeux","en-ligne"],
+      "license": "cc0",
+      "licenseName": "CC0",
+      "account": false,
+      "desc": {"fr":"Générateur web de petits personnages en pixel art animés, export en planche de sprites sous CC0.","en":"Web generator of small animated pixel art characters, exported as CC0 sprite sheets."}
+    },
+    {
+      "name": "PixiEditor",
+      "url": "https://pixieditor.net/",
+      "emoji": "🖌️",
+      "cats": ["logiciels"],
+      "license": "opensource",
+      "licenseName": "LGPL-3.0",
+      "account": false,
+      "desc": {"fr":"Éditeur 2D libre pour pixel art, dessin et animation, sur Windows, Mac et Linux ; tes images t'appartiennent.","en":"Open source 2D editor for pixel art, drawing and animation, on Windows, Mac and Linux; your art is yours."}
+    },
+    {
+      "name": "Nasu",
+      "url": "https://hundredrabbits.itch.io/nasu",
+      "emoji": "🐇",
+      "cats": ["logiciels","jeux"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Éditeur de sprites et polices 8 bits de Hundred Rabbits, une ROM pour l'émulateur Uxn, au prix libre.","en":"8-bit sprite and font editor by Hundred Rabbits, a ROM for the Uxn emulator, pay what you want."}
+    },
+    {
+      "name": "GraphicsGale",
+      "url": "https://graphicsgale.com/us/",
+      "emoji": "🎞️",
+      "cats": ["logiciels","jeux"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Logiciel Windows d'animation en pixel art, gratuit depuis 2017 : calques, pelure d'oignon, export GIF.","en":"Windows pixel art animation app, free since 2017: layers, onion skinning, GIF and sprite sheet export."}
+    },
+    {
+      "name": "rx",
+      "url": "https://rx.cloudhead.io/",
+      "emoji": "🖍️",
+      "cats": ["logiciels"],
+      "license": "opensource",
+      "licenseName": "GPL-3.0",
+      "account": false,
+      "desc": {"fr":"Éditeur de pixel art minimaliste piloté au clavier, inspiré de Vim, avec animation et export GIF.","en":"Minimalist, keyboard-driven pixel art editor inspired by Vim, with animation and GIF export."}
+    },
+    {
+      "name": "PyDPainter",
+      "url": "https://pydpainter.org/",
+      "emoji": "💾",
+      "cats": ["logiciels"],
+      "license": "opensource",
+      "licenseName": "GPL-3.0",
+      "account": false,
+      "desc": {"fr":"Logiciel de pixel art en Python qui reprend Deluxe Paint de l'Amiga : brosses, palettes, animation.","en":"Python pixel art program modelled on the Amiga's Deluxe Paint: brushes, palettes and animation."}
+    },
+    {
+      "name": "OKLCH Color Picker",
+      "url": "https://oklch.com/",
+      "emoji": "🎨",
+      "cats": ["couleurs","en-ligne"],
+      "license": "opensource",
+      "licenseName": "MIT",
+      "account": false,
+      "desc": {"fr":"Sélecteur et convertisseur de couleurs OKLCH et LCH, avec aperçu du gamut et code CSS à copier.","en":"Color picker and converter for the OKLCH and LCH spaces, with a gamut preview and CSS values to copy."}
+    },
+    {
+      "name": "Sorted CSS Colors",
+      "url": "https://enes.in/sorted-colors/",
+      "emoji": "🌈",
+      "cats": ["couleurs","web"],
+      "license": "opensource",
+      "licenseName": "MIT",
+      "account": false,
+      "desc": {"fr":"Les couleurs nommées du CSS triées par teinte et luminosité, avec leurs codes hex, RGB et HSL.","en":"The named CSS colors sorted by hue and lightness, with their hex, RGB and HSL codes. Works offline."}
+    },
+    {
+      "name": "ColorHexa",
+      "url": "https://www.colorhexa.com/",
+      "emoji": "🔢",
+      "cats": ["couleurs","en-ligne"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Fiche complète pour chaque couleur : conversions de formats, nuances, harmonies et simulation daltonienne.","en":"A full page for any color: format conversions, shades, color schemes and a color blindness preview."}
+    },
+    {
+      "name": "Color & Contrast",
+      "url": "https://colorandcontrast.com/",
+      "emoji": "📖",
+      "cats": ["couleurs","tutos"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Livre web gratuit sur la couleur et le contraste, de la science de la vision à la pratique, avec démos.","en":"Free web book on color and contrast, from vision science to practice, with interactive demos."}
+    },
+    {
+      "name": "Colorable",
+      "url": "https://colorable.jxnblk.com/",
+      "emoji": "🌗",
+      "cats": ["couleurs","web"],
+      "license": "opensource",
+      "licenseName": "MIT",
+      "account": false,
+      "desc": {"fr":"Teste le contraste entre une couleur de texte et une couleur de fond, avec le score WCAG obtenu.","en":"Tests the contrast between a text color and a background color and shows the WCAG rating."}
+    },
+    {
+      "name": "Color Oracle",
+      "url": "https://colororacle.org/",
+      "emoji": "👁️",
+      "cats": ["couleurs","logiciels"],
+      "license": "opensource",
+      "licenseName": "MIT",
+      "account": false,
+      "desc": {"fr":"Filtre plein écran qui simule le daltonisme sur Windows, Mac et Linux, quel que soit le logiciel ouvert.","en":"Full-screen filter that simulates color blindness on Windows, Mac and Linux, over any application."}
+    },
+    {
+      "name": "Tint & Shade Generator",
+      "url": "https://maketintsandshades.com/",
+      "emoji": "🎚️",
+      "cats": ["couleurs","en-ligne"],
+      "license": "opensource",
+      "licenseName": "MIT",
+      "account": false,
+      "desc": {"fr":"Génère les teintes et ombres d'une couleur hex par paliers de 10 %, à copier en un clic.","en":"Generates the tints and shades of a hex color in 10% steps, ready to copy in one click."}
+    },
+    {
+      "name": "WebAIM Contrast Checker",
+      "url": "https://webaim.org/resources/contrastchecker/",
+      "emoji": "♿",
+      "cats": ["couleurs","web"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Vérifie le ratio de contraste entre deux couleurs et indique s'il passe les niveaux WCAG AA et AAA.","en":"Checks the contrast ratio between two colors and shows whether it passes WCAG AA and AAA levels."}
+    },
+    {
+      "name": "FontDrop",
+      "url": "https://fontdrop.info/",
+      "emoji": "🔍",
+      "cats": ["outils-typo","en-ligne"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Glisse un fichier de police pour voir ses glyphes, ses métadonnées et sa licence, sans envoi au serveur.","en":"Drop a font file to see its glyphs, metadata and license, without uploading it to a server."}
+    },
+    {
+      "name": "Transfonter",
+      "url": "https://transfonter.org/",
+      "emoji": "🔄",
+      "cats": ["outils-typo","web"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Convertit des polices TTF ou OTF en WOFF et WOFF2 et génère le CSS @font-face, avec sous-ensembles.","en":"Converts TTF or OTF fonts to WOFF and WOFF2 and writes the @font-face CSS, with subsetting options."}
+    },
+    {
+      "name": "FontBase",
+      "url": "https://fontba.se/",
+      "emoji": "🗂️",
+      "cats": ["outils-typo","logiciels"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Gestionnaire de polices pour Windows, Mac et Linux : activation, collections, aperçus. Version Pro en option.","en":"Font manager for Windows, Mac and Linux: activation, collections and previews. Optional paid tier."}
+    },
+    {
+      "name": "Hyperglot",
+      "url": "https://hyperglot.rosettatype.com/",
+      "emoji": "🌐",
+      "cats": ["outils-typo","en-ligne"],
+      "license": "opensource",
+      "licenseName": "Apache-2.0",
+      "account": false,
+      "desc": {"fr":"Indique quelles langues une police prend en charge, sur plus de 700 langues et leurs systèmes d'écriture.","en":"Shows which languages a font supports, across more than 700 languages and their writing systems."}
+    },
+    {
+      "name": "So You Need A Typeface",
+      "url": "https://ianli.github.io/so-you-need-a-typeface/",
+      "emoji": "🧭",
+      "cats": ["outils-typo","tutos"],
+      "license": "opensource",
+      "licenseName": "MIT",
+      "account": false,
+      "desc": {"fr":"Version interactive de l'organigramme de Julian Hansen : réponds aux questions pour trouver une police.","en":"Interactive version of Julian Hansen's flowchart: answer questions to land on a typeface."}
+    },
+    {
+      "name": "Type Terms",
+      "url": "https://avark.agency/typeterms/",
+      "emoji": "🔤",
+      "cats": ["outils-typo","tutos"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Lexique animé de l'anatomie des lettres : fût, empattement, barre, œil, pied, chacun illustré.","en":"Animated glossary of letter anatomy: stem, serif, bar, eye, foot and more, each one illustrated."}
+    },
+    {
+      "name": "archives.design",
+      "url": "https://archives.design/",
+      "emoji": "📚",
+      "cats": ["inspi","tutos"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Livres, revues et spécimens de graphisme de l'Internet Archive, classés par thème, à lire en ligne.","en":"Graphic design books, magazines and type specimens from the Internet Archive, sorted by topic."}
+    },
+    {
+      "name": "People's Graphic Design Archive",
+      "url": "https://peoplesgdarchive.org/",
+      "emoji": "🗃️",
+      "cats": ["inspi"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Archive participative de l'histoire du graphisme : projets, documents de travail, entretiens et textes.","en":"Crowd-sourced archive of graphic design history: projects, process material, oral histories and essays."}
+    },
+    {
+      "name": "AIGA Design Archives",
+      "url": "https://designarchives.aiga.org/",
+      "emoji": "🏛️",
+      "cats": ["inspi"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Plus de 20 000 projets primés aux concours AIGA depuis 1924, à filtrer par couleur, année ou format.","en":"Over 20,000 winning entries from AIGA competitions since 1924, searchable by color, year or format."}
+    },
+    {
+      "name": "One Page Love",
+      "url": "https://onepagelove.com/",
+      "emoji": "💌",
+      "cats": ["inspi","web"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Galerie de sites d'une seule page classés par catégorie, avec une partie de modèles gratuits.","en":"Gallery of single-page websites sorted by category, with a section of free templates."}
+    },
+    {
+      "name": "Packaging of the World",
+      "url": "https://packagingoftheworld.com/",
+      "emoji": "📦",
+      "cats": ["inspi"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Archive d'emballages depuis 2008, à parcourir par pays et par catégorie, avec photos et agence.","en":"Packaging design archive since 2008, browsable by country and category, with photos and agency credits."}
+    },
+    {
+      "name": "CARI",
+      "url": "https://cari.institute/",
+      "emoji": "🛍️",
+      "cats": ["inspi"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Catalogue des esthétiques de consommation depuis les années 1970 (Y2K, McBling...), avec images et contexte.","en":"Catalog of consumer aesthetics from the 1970s on (Y2K, McBling...), with images and historical context."}
+    },
+    {
+      "name": "everywhere.tools",
+      "url": "https://everywhere.tools/",
+      "emoji": "🧰",
+      "cats": ["logiciels","en-ligne","polices"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Répertoire d'outils de design open source : générateurs, polices, créateurs de sites, art génératif.","en":"Directory of open-source design tools: generators, typefaces, website builders and generative art."}
+    },
+    {
+      "name": "The Boolean Game",
+      "url": "https://boolean.method.ac/",
+      "emoji": "⭕",
+      "cats": ["tutos"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Jeu en ligne pour maîtriser les opérations booléennes sur les formes : union, soustraction, intersection.","en":"Browser game to practice boolean shape operations: union, subtract, intersect and difference."}
+    },
+    {
+      "name": "Method Draw",
+      "url": "https://editor.method.ac/",
+      "emoji": "🖋️",
+      "cats": ["en-ligne"],
+      "license": "opensource",
+      "licenseName": "MIT",
+      "account": false,
+      "desc": {"fr":"Éditeur SVG simple dans le navigateur : formes, tracés, texte et calques basiques, export en SVG ou PNG.","en":"Simple SVG editor in the browser: shapes, paths and text, with export to SVG or PNG files."}
+    },
+    {
+      "name": "SVG Artista",
+      "url": "https://svgartista.net/",
+      "emoji": "🎬",
+      "cats": ["en-ligne","web"],
+      "license": "outil",
+      "licenseName": "Freeware, MIT output",
+      "account": false,
+      "desc": {"fr":"Anime le tracé et le remplissage d'un SVG en CSS pur et fournit le code à copier, sans bibliothèque JS.","en":"Animates the stroke and fill of an SVG with plain CSS and gives you the code to copy, no JS library needed."}
+    },
+    {
+      "name": "Blobs",
+      "url": "https://lokesh-coder.github.io/blobs.app/",
+      "emoji": "🫧",
+      "cats": ["en-ligne","web"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Génère des formes organiques aléatoires réglables (complexité, contraste, couleur) à exporter en SVG.","en":"Generates random organic blob shapes with adjustable complexity, contrast and colour, exported as SVG."}
+    },
+    {
+      "name": "Broider",
+      "url": "https://maxbittker.github.io/broider/",
+      "emoji": "🖼️",
+      "cats": ["en-ligne","web"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Dessine une bordure en pixel art sur une grille 9 cases et récupère l'image et le CSS border-image prêts.","en":"Draw a pixel-art border on a 9-slice grid and get the image plus ready-to-paste border-image CSS."}
+    },
+    {
+      "name": "SVGWave",
+      "url": "https://svgwave.in/",
+      "emoji": "🌊",
+      "cats": ["en-ligne","web"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Crée des vagues SVG en dégradé : nombre de couches, crêtes, couleurs, export SVG ou PNG.","en":"Makes gradient SVG waves: set layers, crests and colours, then export as SVG or PNG."}
+    },
+    {
+      "name": "SVG Path Editor",
+      "url": "https://yqnn.github.io/svg-path-editor/",
+      "emoji": "✏️",
+      "cats": ["en-ligne","web"],
+      "license": "opensource",
+      "licenseName": "Apache-2.0",
+      "account": false,
+      "desc": {"fr":"Éditeur de tracés SVG : modifie chaque commande du chemin à la main ou à la souris, avec aperçu direct.","en":"SVG path editor: change each path command by hand or with the mouse, with a live preview."}
+    },
+    {
+      "name": "Vector Express",
+      "url": "https://vector.express/",
+      "emoji": "🔄",
+      "cats": ["en-ligne"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Convertit des fichiers vectoriels (AI, EPS, PDF, DXF, CDR, SVG...) en ligne ou via une API gratuite.","en":"Converts vector files (AI, EPS, PDF, DXF, CDR, SVG and more) online or through a free API."}
+    },
+    {
+      "name": "SVG Tutorial",
+      "url": "https://svg-tutorial.com/",
+      "emoji": "📘",
+      "cats": ["tutos","web"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"25 leçons courtes pour dessiner en SVG à la main, des formes de base à l'animation et l'interactivité.","en":"25 short lessons on hand-writing SVG, from basic shapes up to animation and interactivity."}
+    },
+    {
+      "name": "morphicons",
+      "url": "https://www.morphicons.com/",
+      "emoji": "✨",
+      "cats": ["icones","web"],
+      "license": "opensource",
+      "licenseName": "MIT",
+      "account": false,
+      "desc": {"fr":"Icônes React qui se transforment l'une en l'autre avec une animation, basées sur Lucide, Tabler et Heroicons.","en":"React icons that morph into one another with an animation, based on Lucide, Tabler and Heroicons."}
+    },
+    {
+      "name": "RealFaviconGenerator",
+      "url": "https://realfavicongenerator.net/",
+      "emoji": "⭐",
+      "cats": ["en-ligne","web"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Génère toutes les favicons d'un site (navigateurs, iOS, Android) à partir d'une image, avec le code HTML.","en":"Generates every favicon a site needs (browsers, iOS, Android) from one image, plus the HTML code."}
+    },
+    {
+      "name": "Multiavatar",
+      "url": "https://multiavatar.com/",
+      "emoji": "🤖",
+      "cats": ["illustrations","en-ligne"],
+      "license": "pro",
+      "licenseName": "Multiavatar License",
+      "account": false,
+      "desc": {"fr":"Génère un avatar SVG unique à partir d'un texte. Usage commercial permis, crédit non requis.","en":"Generates a unique SVG avatar from any text. Commercial use allowed, no credit required."}
+    },
+    {
+      "name": "Modern Font Stacks",
+      "url": "https://modernfontstacks.com/",
+      "emoji": "🔤",
+      "cats": ["outils-typo","web"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Piles de polices système classées par style, prêtes à copier en CSS, sans aucun fichier de police à charger.","en":"System font stacks sorted by style, ready to copy as CSS, with no font files to load."}
+    },
+    {
+      "name": "Fontpair",
+      "url": "https://www.fontpair.co/",
+      "emoji": "🔠",
+      "cats": ["outils-typo","inspi"],
+      "license": "outil",
+      "licenseName": "Freeware",
+      "account": false,
+      "desc": {"fr":"Associations de polices Google Fonts (titre + texte) choisies à la main, avec aperçu de chaque paire.","en":"Hand-picked Google Fonts pairings (heading + body text), each one shown in a preview."}
+    },
+    {
+      "name": "CSS3 Patterns Gallery",
+      "url": "https://projects.verou.me/css3patterns/",
+      "emoji": "🧩",
+      "cats": ["textures","web"],
+      "license": "pro",
+      "licenseName": "MIT",
+      "account": false,
+      "desc": {"fr":"Galerie de motifs de fond faits uniquement en dégradés CSS, code à copier pour chaque motif.","en":"Gallery of background patterns made only with CSS gradients, with the code to copy for each."}
+    },
+    {
+      "name": "SoundBible",
+      "url": "https://soundbible.com/",
+      "emoji": "🔊",
+      "cats": ["effets"],
+      "license": "mixte",
+      "licenseName": "Public domain, CC BY 3.0, royalty-free",
+      "account": false,
+      "desc": {"fr":"Bruitages en MP3 et WAV ; la licence de chaque son (domaine public, CC BY...) est indiquée sur sa page.","en":"Sound effects in MP3 and WAV; each sound's license (public domain, CC BY...) is shown on its page."}
+    },
+    {
+      "name": "Good Free Photos",
+      "url": "https://www.goodfreephotos.com/",
+      "emoji": "📷",
+      "cats": ["photos"],
+      "license": "mixte",
+      "licenseName": "Public domain, CC0 (most)",
+      "account": false,
+      "desc": {"fr":"Photos classées par lieu et par thème, en majorité dans le domaine public ; vérifie la licence de chaque image.","en":"Photos sorted by place and theme, mostly public domain; check each image's license."}
+    },
+    {
+      "name": "GrafX2",
+      "url": "https://gitlab.com/GrafX2/grafX2",
+      "emoji": "👾",
+      "cats": ["logiciels","jeux"],
+      "license": "opensource",
+      "licenseName": "GPL-2.0",
+      "account": false,
+      "desc": {"fr":"Logiciel de pixel art en 256 couleurs inspiré de Deluxe Paint, pour Windows, macOS et Linux.","en":"256-colour pixel-art painting program inspired by Deluxe Paint, for Windows, macOS and Linux."}
+    },
+    {
+      "name": "MilkyTracker",
+      "url": "https://milkytracker.org/",
+      "emoji": "🎹",
+      "cats": ["musique","logiciels"],
+      "license": "opensource",
+      "licenseName": "GPL-3.0",
+      "account": false,
+      "desc": {"fr":"Tracker musical façon Fasttracker II pour composer des modules .MOD et .XM, sous Windows, macOS et Linux.","en":"Fasttracker II-style music tracker for composing .MOD and .XM modules on Windows, macOS and Linux."}
+    },
+    {
+      "name": "MuseScore",
+      "url": "https://musescore.org/",
+      "emoji": "🎼",
+      "cats": ["musique","logiciels"],
+      "license": "opensource",
+      "licenseName": "GPL-3.0",
+      "account": false,
+      "desc": {"fr":"Logiciel de notation musicale : écris des partitions, écoute-les et exporte en PDF, MIDI, MusicXML ou audio.","en":"Music notation software: write scores, play them back and export to PDF, MIDI, MusicXML or audio."}
+    },
+    {
+      "name": "Bosca Ceoil Blue",
+      "url": "https://yurisizov.itch.io/boscaceoil-blue",
+      "emoji": "🎵",
+      "cats": ["musique","logiciels","jeux"],
+      "license": "opensource",
+      "licenseName": "Open source",
+      "account": false,
+      "desc": {"fr":"Petit séquenceur pour composer de la musique de jeu, sur Windows, macOS, Linux et navigateur. Prix libre.","en":"Small sequencer for composing game music, on Windows, macOS, Linux and the web. Pay what you want."}
     }
   ]
 };
