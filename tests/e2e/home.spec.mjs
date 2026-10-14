@@ -16,7 +16,7 @@ test('les projets web sont les deux outils, et ils existent', async ({ page, req
   const links = page.locator('section:has(#web) a.tile');
   await expect(links).toHaveCount(2);
   await expect(links.nth(0)).toContainText('AutoVinted');
-  await expect(links.nth(1)).toContainText('Ressources Gratuites');
+  await expect(links.nth(1)).toContainText('Gratis');
   for (const href of await links.evaluateAll(as => as.map(a => a.href))) {
     expect((await request.get(href)).status(), href).toBe(200);
   }
@@ -74,7 +74,7 @@ test("le bouton de langue passe en anglais et vaut pour tout le site", async ({ 
   await expect(page.locator('h2#web')).toHaveText('Web projects');
   await expect(page.locator('#lang')).toHaveText('Français');
   await page.goto('/projects/RessourcesGratuites/ressourcesgratuites.html');
-  await expect(page.locator('h1')).toHaveText('Free Resources');
+  await expect(page.locator('h1')).toHaveText('Gratis');
 });
 
 test('les noms de projets sont des titres, et le mot « Image » est caché aux lecteurs d\'écran', async ({ page }) => {

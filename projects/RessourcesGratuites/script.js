@@ -14,8 +14,8 @@ let state = RG.parseHash(location.hash, ctx);
 
 const i18n = {
   fr: {
-    title: 'Ressources Gratuites — Design & Création',
-    h1: 'Ressources Gratuites',
+    title: 'Gratis — Ressources pour créer',
+    h1: 'Gratis',
     heroSub: 'Des ressources vraiment gratuites pour designers et créateurs, avec la licence de chacune',
     back: 'Retour à l\'accueil',
     skip: 'Aller aux résultats',
@@ -42,8 +42,8 @@ const i18n = {
     credits: 'Icônes : <a href="https://openmoji.org" target="_blank" rel="noopener noreferrer">OpenMoji</a>, sous licence <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>. Polices : Basteleur (Keussel, Velvetyne) et Coconat (Sara Lavazza, Collletttivo), sous licence <a href="fonts/OFL.txt">SIL OFL</a>.',
   },
   en: {
-    title: 'Free Resources — Design & Creation',
-    h1: 'Free Resources',
+    title: 'Gratis — Resources to create with',
+    h1: 'Gratis',
     heroSub: 'Truly free resources for designers and creators, each with its license',
     back: 'Back to home',
     skip: 'Skip to results',

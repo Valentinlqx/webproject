@@ -140,21 +140,21 @@ test('les cartes ouvrent le site dans un nouvel onglet', async ({ page }) => {
 
 test("le bouton de langue traduit aussi les descriptions, et s'en souvient", async ({ page }) => {
   await page.goto(PAGES.rg);
-  await expect(page.locator('h1')).toHaveText('Ressources Gratuites');
+  await expect(page.locator('h1')).toHaveText('Gratis');
   const descFr = await page.locator('.card-desc').first().textContent();
   await page.click('#lang-toggle');
-  await expect(page.locator('h1')).toHaveText('Free Resources');
+  await expect(page.locator('h1')).toHaveText('Gratis');
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   expect(await page.locator('.card-desc').first().textContent()).not.toBe(descFr);
   await page.reload();
-  await expect(page.locator('h1')).toHaveText('Free Resources');
+  await expect(page.locator('h1')).toHaveText('Gratis');
 });
 
 test.describe('navigateur anglais', () => {
   test.use({ locale: 'en-US' });
   test('sans choix enregistré, la page suit la langue du navigateur', async ({ page }) => {
     await page.goto(PAGES.rg);
-    await expect(page.locator('h1')).toHaveText('Free Resources');
+    await expect(page.locator('h1')).toHaveText('Gratis');
   });
 });
 
@@ -177,7 +177,7 @@ test('la page marche même si le navigateur refuse localStorage', async ({ page 
   await page.goto(PAGES.rg);
   expect(await page.locator('.card:not([hidden])').count()).toBeGreaterThan(100);
   await page.click('#lang-toggle');
-  await expect(page.locator('h1')).toHaveText('Free Resources');
+  await expect(page.locator('h1')).toHaveText('Gratis');
   expect(errors).toEqual([]);
 });
 
