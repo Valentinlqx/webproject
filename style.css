@@ -207,6 +207,10 @@ a.tile .tile-name::after {
   content: " →" / "";
 }
 
+a.tile[target="_blank"] .tile-name::after {
+  content: " ↗" / "";
+}
+
 a.tile:hover .tile-name,
 a.tile:focus-visible .tile-name {
   color: var(--accent);
