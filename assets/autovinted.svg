@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" width="600" height="800">
+  <rect width="600" height="800" fill="#09b1ba"/>
+  <circle cx="520" cy="90" r="190" fill="#0fc4cd"/>
+  <circle cx="60" cy="760" r="230" fill="#079ba3"/>
+  <g transform="rotate(-8 190 470)">
+    <rect x="70" y="250" width="250" height="320" rx="18" fill="#fff"/>
+    <rect x="90" y="270" width="210" height="190" rx="10" fill="#cfeef0"/>
+    <path d="M90 440l62-80 46 52 32-36 70 64v20a10 10 0 0 1-10 10H100a10 10 0 0 1-10-10z" fill="#7fd3d8"/>
+    <circle cx="246" cy="318" r="20" fill="#fff"/>
+    <rect x="90" y="480" width="150" height="14" rx="7" fill="#d9dfe1"/>
+    <rect x="90" y="508" width="100" height="14" rx="7" fill="#e8ecee"/>
+  </g>
+  <g transform="rotate(5 410 430)">
+    <rect x="290" y="230" width="260" height="360" rx="18" fill="#fff"/>
+    <rect x="316" y="262" width="150" height="20" rx="10" fill="#1d2b2e"/>
+    <rect x="316" y="300" width="208" height="12" rx="6" fill="#d9dfe1"/>
+    <rect x="316" y="324" width="190" height="12" rx="6" fill="#d9dfe1"/>
+    <rect x="316" y="348" width="208" height="12" rx="6" fill="#d9dfe1"/>
+    <rect x="316" y="372" width="120" height="12" rx="6" fill="#d9dfe1"/>
+    <rect x="316" y="414" width="64" height="26" rx="13" fill="#e6f7f8"/>
+    <rect x="390" y="414" width="80" height="26" rx="13" fill="#e6f7f8"/>
+    <text x="316" y="512" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="44" fill="#09b1ba">12,00 €</text>
+    <rect x="316" y="534" width="208" height="38" rx="8" fill="#09b1ba"/>
+  </g>
+  <g fill="#fff">
+    <path d="M498 170l10 30 30 10-30 10-10 30-10-30-30-10 30-10z"/>
+    <path d="M118 150l6 18 18 6-18 6-6 18-6-18-18-6 18-6z"/>
+    <path d="M300 118l4 12 12 4-12 4-4 12-4-12-12-4 12-4z"/>
+  </g>
+</svg>
