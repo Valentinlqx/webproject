@@ -1,7 +1,7 @@
 // Accueil en français ou en anglais. Sans JavaScript, la page reste en français.
 const texts = {
   fr: {
-    title: 'Vlqx — Graphiste indépendant',
+    title: 'Vlqx',
     web: 'Projets web',
     design: 'Projets design',
     commercial: 'Projets commerciaux',
@@ -14,7 +14,7 @@ const texts = {
     next: 'Projets suivants',
   },
   en: {
-    title: 'Vlqx — Freelance graphic designer',
+    title: 'Vlqx',
     web: 'Web projects',
     design: 'Design projects',
     commercial: 'Commercial projects',
