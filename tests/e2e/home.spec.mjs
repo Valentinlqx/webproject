@@ -41,19 +41,31 @@ test('chaque catégorie tient sur une seule rangée qui défile', async ({ page 
 });
 
 test('sur ordinateur, les flèches font défiler la rangée et se désactivent au bout', async ({ page }) => {
-  await page.setViewportSize({ width: 900, height: 900 });
-  const design = page.locator('section:has(#design)');
-  const row = design.locator('.grid');
-  const prev = design.getByRole('button', { name: 'Projets précédents' });
-  const next = design.getByRole('button', { name: 'Projets suivants' });
+  // À 320 px, les deux projets web ne tiennent plus : la rangée défile.
+  await page.setViewportSize({ width: 320, height: 900 });
+  const web = page.locator('section:has(#web)');
+  const row = web.locator('.grid');
+  const prev = web.getByRole('button', { name: 'Projets précédents' });
+  const next = web.getByRole('button', { name: 'Projets suivants' });
   await expect(prev).toBeDisabled();
   await next.click();
   await expect.poll(() => row.evaluate(r => r.scrollLeft)).toBeGreaterThan(0);
   await expect(prev).toBeEnabled();
   await row.evaluate(r => { r.style.scrollBehavior = 'auto'; r.scrollLeft = r.scrollWidth; });
   await expect(next).toBeDisabled();
-  // Deux projets web tiennent à l'écran : pas de flèches inutiles.
-  await expect(page.locator('section:has(#web) .arrows')).toBeHidden();
+  // Quand tout tient à l'écran, pas de flèches inutiles.
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await expect(page.locator('.arrows')).toHaveCount(2);
+  for (const arrows of await page.locator('.arrows').all()) await expect(arrows).toBeHidden();
+});
+
+test("un seul projet design pour l'instant : Pop Doudou, qui ouvre sa page", async ({ page }) => {
+  const tiles = page.locator('section:has(#design) .tile');
+  await expect(tiles).toHaveCount(1);
+  await expect(tiles).toContainText('Pop Doudou');
+  await tiles.click();
+  await expect(page).toHaveURL(/projects\/PopDoudou\/popdoudou\.html$/);
+  await expect(page.locator('h1')).toHaveText('Pop Doudou');
 });
 
 test('pas de contact ni de réseaux sociaux', async ({ page }) => {
@@ -105,6 +117,6 @@ test("le bouton de langue passe en anglais et vaut pour tout le site", async ({ 
 
 test('les noms de projets sont des titres, et le mot « Image » est caché aux lecteurs d\'écran', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('h3.tile-name')).toHaveCount(7);
+  await expect(page.locator('h3.tile-name')).toHaveCount(3);
   await expect(page.locator('a.tile').first()).toHaveAccessibleName(/^AutoVinted/);
 });

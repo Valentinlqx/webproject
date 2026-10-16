@@ -2,6 +2,7 @@ export const PAGES = {
   home: '/',
   autovinted: '/projects/AutoVinted/autovinted.html',
   rg: '/projects/RessourcesGratuites/ressourcesgratuites.html',
+  popdoudou: '/projects/PopDoudou/popdoudou.html',
 };
 
 export const WIDTHS = [320, 375, 768, 1440];
