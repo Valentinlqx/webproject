@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" width="600" height="800">
+  <rect width="600" height="800" fill="#1d1b2e"/>
+  <g fill="#fa5c5c">
+    <rect x="252" y="300" width="96" height="24"/>
+    <rect x="228" y="324" width="144" height="72"/>
+    <rect x="252" y="396" width="24" height="24"/>
+    <rect x="324" y="396" width="24" height="24"/>
+  </g>
+  <g fill="#1d1b2e">
+    <rect x="252" y="342" width="24" height="24"/>
+    <rect x="324" y="342" width="24" height="24"/>
+  </g>
+  <text x="300" y="510" font-family="'Courier New',monospace" font-size="56" font-weight="700" fill="#f4f1ea" text-anchor="middle" letter-spacing="4">NIPNOP</text>
+  <text x="300" y="560" font-family="'Courier New',monospace" font-size="18" fill="#9c97b8" text-anchor="middle" letter-spacing="6">ITCH.IO</text>
+</svg>

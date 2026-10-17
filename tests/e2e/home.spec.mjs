@@ -9,7 +9,7 @@ test.beforeEach(async ({ page }) => {
 test('le nom en haut, puis les projets', async ({ page }) => {
   await expect(page.locator('h1')).toHaveText('Vlqx');
   await expect(page.locator('.intro')).toHaveCount(0);
-  await expect(page.locator('section h2')).toHaveText(['Projets web', 'Projets design', 'Projets commerciaux']);
+  await expect(page.locator('section h2')).toHaveText(['Projets web', 'Jeux vidéo', 'Projets design', 'Projets commerciaux']);
 });
 
 test('les projets web sont les deux outils, et ils existent', async ({ page, request }) => {
@@ -55,7 +55,7 @@ test('sur ordinateur, les flèches font défiler la rangée et se désactivent a
   await expect(next).toBeDisabled();
   // Quand tout tient à l'écran, pas de flèches inutiles.
   await page.setViewportSize({ width: 1280, height: 900 });
-  await expect(page.locator('.arrows')).toHaveCount(3);
+  await expect(page.locator('.arrows')).toHaveCount(4);
   for (const arrows of await page.locator('.arrows').all()) await expect(arrows).toBeHidden();
 });
 
@@ -72,6 +72,15 @@ test("le projet commercial mène à la boutique Etsy, dans un nouvel onglet", as
   const tile = page.locator('section:has(#commercial) a.tile');
   await expect(tile).toHaveCount(1);
   await expect(tile).toHaveAttribute('href', 'https://www.etsy.com/shop/StudioVelinCuration');
+  await expect(tile).toHaveAttribute('target', '_blank');
+  await expect(tile).toHaveAttribute('rel', /noopener/);
+});
+
+test("le jeu vidéo Nipnop mène à sa page itch.io, dans un nouvel onglet", async ({ page }) => {
+  const tile = page.locator('section:has(#games) a.tile');
+  await expect(tile).toHaveCount(1);
+  await expect(tile).toContainText('Nipnop');
+  await expect(tile).toHaveAttribute('href', 'https://vlqx.itch.io/nipnop');
   await expect(tile).toHaveAttribute('target', '_blank');
   await expect(tile).toHaveAttribute('rel', /noopener/);
 });
@@ -125,6 +134,6 @@ test("le bouton de langue passe en anglais et vaut pour tout le site", async ({ 
 
 test('les noms de projets sont des titres, et le mot « Image » est caché aux lecteurs d\'écran', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('h3.tile-name')).toHaveCount(4);
+  await expect(page.locator('h3.tile-name')).toHaveCount(5);
   await expect(page.locator('a.tile').first()).toHaveAccessibleName(/^AutoVinted/);
 });
