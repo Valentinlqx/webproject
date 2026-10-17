@@ -84,7 +84,7 @@ h2 {
    frame peeks out at the edge so it's clear there is more. */
 .row-head {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
   min-height: 44px;
@@ -207,6 +207,27 @@ a.tile .tile-name::after {
   content: " →" / "";
 }
 
+/* A row title can lead to the whole collection elsewhere (itch.io, Behance). */
+.row-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  text-decoration: none;
+}
+
+.row-link::after {
+  content: "\00a0↗" / "";
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 a.tile[target="_blank"] .tile-name::after {
   content: " ↗" / "";
 }
@@ -247,6 +268,8 @@ h1 {
 @media (hover: hover) and (pointer: fine) {
   .lang:hover,
   .arrow:not(:disabled):hover { border-color: var(--ink); }
+
+  .row-link:hover { color: var(--accent); }
 
   a.tile:hover .thumb img {
     transform: scale(1.03);

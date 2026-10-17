@@ -9,7 +9,7 @@ test.beforeEach(async ({ page }) => {
 test('le nom en haut, puis les projets', async ({ page }) => {
   await expect(page.locator('h1')).toHaveText('Vlqx');
   await expect(page.locator('.intro')).toHaveCount(0);
-  await expect(page.locator('section h2')).toHaveText(['Projets web', 'Jeux vidéo', 'Projets design', 'Projets commerciaux']);
+  await expect(page.locator('section h2')).toHaveText(['Projets web', /^Jeux vidéo/, 'Projets design', 'Projets commerciaux']);
 });
 
 test('les projets web sont les deux outils, et ils existent', async ({ page, request }) => {
@@ -80,9 +80,16 @@ test("le jeu vidéo Nipnop mène à sa page itch.io, dans un nouvel onglet", asy
   const tile = page.locator('section:has(#games) a.tile');
   await expect(tile).toHaveCount(1);
   await expect(tile).toContainText('Nipnop');
-  await expect(tile).toHaveAttribute('href', 'https://vlqx.itch.io/nipnop');
+  await expect(tile).toHaveAttribute('href', 'https://vlqx.itch.io/nip-nop');
   await expect(tile).toHaveAttribute('target', '_blank');
   await expect(tile).toHaveAttribute('rel', /noopener/);
+});
+
+test("le titre Jeux vidéo mène à la page itch.io, dans un nouvel onglet", async ({ page }) => {
+  const link = page.locator('h2#games a');
+  await expect(link).toHaveAttribute('href', 'https://vlqx.itch.io');
+  await expect(link).toHaveAttribute('target', '_blank');
+  await expect(link).toHaveAccessibleName('Jeux vidéo (nouvel onglet)');
 });
 
 test('pas de contact ni de réseaux sociaux', async ({ page }) => {
