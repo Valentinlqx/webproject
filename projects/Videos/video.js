@@ -6,6 +6,7 @@ const texts = {
     kicker: 'Vidéo',
     play: 'Lancer la vidéo',
     note: 'La vidéo est hébergée sur YouTube : elle ne se charge qu’au clic.',
+    altPoster: 'Affiche du film : une part de pizza flotte entre deux mains tendues, sur fond noir. Récompensé aux Trois Quarts de Cinéma : prix du jury, du scénario, du montage et du son.',
     home: 'Retour aux projets',
   },
   en: {
@@ -14,6 +15,7 @@ const texts = {
     kicker: 'Video',
     play: 'Play the video',
     note: 'The video is hosted on YouTube: it only loads when you click.',
+    altPoster: 'Film poster: a slice of pizza floats between two reaching hands on a black background. Awarded at the Trois Quarts de Cinéma ceremony: jury, screenplay, editing and sound prizes.',
     home: 'Back to projects',
   },
 };
@@ -24,6 +26,7 @@ function apply(lang) {
   const t = texts[lang];
   document.documentElement.lang = lang;
   document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t[el.dataset.i18n]; });
+  document.querySelectorAll('[data-i18n-alt]').forEach(el => { el.alt = t[el.dataset.i18nAlt]; });
   document.querySelectorAll('[data-i18n-label]').forEach(el => { el.setAttribute('aria-label', t[el.dataset.i18nLabel]); });
   button.textContent = t.switchTo;
   button.lang = lang === 'fr' ? 'en' : 'fr';

@@ -92,11 +92,12 @@ test("le titre Jeux vidéo mène à la page itch.io, dans un nouvel onglet", asy
   await expect(link).toHaveAccessibleName('Jeux vidéo (nouvel onglet)');
 });
 
-test('les projets vidéo viennent en premier : Une part de mystère ouvre sa page, La révolution arrive', async ({ page }) => {
+test('les projets vidéo viennent en premier : chaque vidéo ouvre sa page', async ({ page }) => {
   await expect(page.locator('section h2').first()).toHaveText('Projets vidéo');
   const tiles = page.locator('section:has(#video) .tile');
   await expect(tiles).toHaveCount(2);
   await expect(tiles.nth(1)).toContainText('La révolution');
+  await expect(tiles.nth(1)).toHaveAttribute('href', 'projects/Videos/la-revolution.html');
   await tiles.first().click();
   await expect(page).toHaveURL(/projects\/Videos\/une-part-de-mystere\.html$/);
 });

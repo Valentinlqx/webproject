@@ -134,6 +134,17 @@ h1 {
   color: var(--muted);
 }
 
+.poster {
+  max-width: 34rem;
+  margin: clamp(2rem, 6vw, 4rem) auto 0;
+}
+
+.poster img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .end {
   display: flex;
   justify-content: center;
