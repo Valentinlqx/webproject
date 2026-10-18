@@ -3,6 +3,7 @@ export const PAGES = {
   autovinted: '/projects/AutoVinted/autovinted.html',
   rg: '/projects/RessourcesGratuites/ressourcesgratuites.html',
   popdoudou: '/projects/PopDoudou/popdoudou.html',
+  mystere: '/projects/Videos/une-part-de-mystere.html',
 };
 
 export const WIDTHS = [320, 375, 768, 1440];

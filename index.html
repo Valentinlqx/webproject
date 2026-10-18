@@ -23,6 +23,28 @@
          Projets web : alt="" (le nom du projet suffit). Projets design : l'image est l'œuvre, alors alt
          dit ce qu'on voit, par exemple alt="Affiche de festival : grand titre rouge sur fond noir". -->
 
+    <section aria-labelledby="video">
+      <div class="row-head">
+        <h2 id="video" data-i18n="video">Projets vidéo</h2>
+      </div>
+      <ul class="grid" role="list" tabindex="0" aria-labelledby="video">
+        <li>
+          <a class="tile" href="projects/Videos/une-part-de-mystere.html">
+            <span class="thumb"><img src="assets/mystere.svg" alt="" width="600" height="800" loading="lazy" decoding="async" /></span>
+            <h3 class="tile-name">Une part de mystère</h3>
+            <span class="tile-desc" data-i18n="upmDesc">Une vidéo, à regarder sur sa page.</span>
+          </a>
+        </li>
+        <li>
+          <div class="tile">
+            <span class="thumb"><img src="assets/revolution.svg" alt="" width="600" height="800" loading="lazy" decoding="async" /></span>
+            <h3 class="tile-name">La révolution</h3>
+            <span class="tile-desc" data-i18n="soon">Bientôt en ligne.</span>
+          </div>
+        </li>
+      </ul>
+    </section>
+
     <section aria-labelledby="web">
       <div class="row-head">
         <h2 id="web" data-i18n="web">Projets web</h2>
@@ -62,7 +84,7 @@
 
     <section aria-labelledby="design">
       <div class="row-head">
-        <h2 id="design" data-i18n="design">Projets design</h2>
+        <h2 id="design"><a class="row-link" href="https://www.behance.net/valentinlqxx" target="_blank" rel="noopener"><span data-i18n="design">Projets design</span><span class="visually-hidden" data-i18n="newTab"> (nouvel onglet)</span></a></h2>
       </div>
       <ul class="grid" role="list" tabindex="0" aria-labelledby="design">
         <li>
@@ -93,6 +115,6 @@
 
   </main>
   <script src="lang.js?v=3"></script>
-  <script src="home.js?v=11"></script>
+  <script src="home.js?v=12"></script>
 </body>
 </html>

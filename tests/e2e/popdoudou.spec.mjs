@@ -36,7 +36,7 @@ test("la langue choisie vaut aussi ici, et le bouton la change", async ({ page }
   await expect(page.locator('.tagline')).toHaveText('Soft inside, pop outside.');
   await expect(page.locator('.pages img').first()).toHaveAttribute('alt', /^The brief/);
   await page.goto('/');
-  await expect(page.locator('h2#design')).toHaveText('Design projects');
+  await expect(page.locator('h2#design')).toHaveText(/^Design projects/);
 });
 
 for (const width of WIDTHS) {

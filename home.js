@@ -2,6 +2,7 @@
 const texts = {
   fr: {
     title: 'Vlqx',
+    video: 'Projets vidéo',
     web: 'Projets web',
     games: 'Jeux vidéo',
     design: 'Projets design',
@@ -12,12 +13,15 @@ const texts = {
     svDesc: 'Boutique Etsy (s’ouvre dans un nouvel onglet).',
     nnDesc: 'Jeu sur itch.io (s’ouvre dans un nouvel onglet).',
     newTab: ' (nouvel onglet)',
+    upmDesc: 'Une vidéo, à regarder sur sa page.',
+    soon: 'Bientôt en ligne.',
     switchTo: 'English',
     prev: 'Projets précédents',
     next: 'Projets suivants',
   },
   en: {
     title: 'Vlqx',
+    video: 'Video projects',
     web: 'Web projects',
     games: 'Video games',
     design: 'Design projects',
@@ -28,6 +32,8 @@ const texts = {
     svDesc: 'Etsy shop (opens in a new tab).',
     nnDesc: 'Game on itch.io (opens in a new tab).',
     newTab: ' (new tab)',
+    upmDesc: 'A video, to watch on its page.',
+    soon: 'Coming soon.',
     switchTo: 'Français',
     prev: 'Previous projects',
     next: 'Next projects',

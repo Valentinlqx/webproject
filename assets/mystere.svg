@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" width="600" height="800">
+  <defs>
+    <radialGradient id="g" cx="0.35" cy="0.4" r="0.8">
+      <stop offset="0" stop-color="#2b2440"/>
+      <stop offset="0.55" stop-color="#141218"/>
+      <stop offset="1" stop-color="#08080a"/>
+    </radialGradient>
+  </defs>
+  <rect width="600" height="800" fill="url(#g)"/>
+  <circle cx="300" cy="330" r="64" fill="#f2efe8"/>
+  <path d="M282 300v60l50-30z" fill="#0c0c0e"/>
+  <g font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" fill="#f2efe8" text-anchor="middle">
+    <text x="300" y="500" font-size="44" font-weight="700">Une part</text>
+    <text x="300" y="552" font-size="44" font-weight="700">de mystère</text>
+  </g>
+</svg>
