@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" width="600" height="800">
-  <rect width="600" height="800" fill="#c8201a"/>
-  <circle cx="300" cy="330" r="64" fill="none" stroke="#f2efe8" stroke-width="6"/>
-  <path d="M282 300v60l50-30z" fill="#f2efe8"/>
-  <g font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" fill="#f2efe8" text-anchor="middle">
-    <text x="300" y="510" font-size="48" font-weight="700" letter-spacing="2">LA RÉVOLUTION</text>
-  </g>
-</svg>

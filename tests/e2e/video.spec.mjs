@@ -34,6 +34,16 @@ test("l'affiche d'Une part de mystère se charge, avec sa description", async ({
   expect((await img.getAttribute('alt')).length).toBeGreaterThan(20);
 });
 
+test("l'affiche de La révolution se charge, et sa description suit la langue", async ({ page }) => {
+  await page.goto(PAGES.revolution);
+  const img = page.locator('.poster img');
+  await img.scrollIntoViewIfNeeded();
+  await expect.poll(() => img.evaluate(i => i.complete && i.naturalWidth)).toBe(1200);
+  await expect(img).toHaveAttribute('alt', /télécommande/);
+  await page.click('#lang');
+  await expect(img).toHaveAttribute('alt', /remote control/);
+});
+
 test('sans JavaScript, le lien ouvre la vidéo sur YouTube', async ({ page }) => {
   await expect(page.locator('a.player')).toHaveAttribute('href', 'https://www.youtube.com/watch?v=G2sTGavlOmU');
 });
