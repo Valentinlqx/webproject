@@ -248,6 +248,27 @@ h1 {
   .thumb { border: 1px solid CanvasText; }
 }
 
+.social ul {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1.25rem;
+  margin-top: 0.5rem;
+}
+
+.social a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 0.875rem;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.social a::after {
+  content: "\00a0↗" / "";
+}
+
 .lang {
   float: right;
   min-height: 44px;
@@ -269,7 +290,8 @@ h1 {
   .lang:hover,
   .arrow:not(:disabled):hover { border-color: var(--ink); }
 
-  .row-link:hover { color: var(--accent); }
+  .row-link:hover,
+  .social a:hover { color: var(--accent); }
 
   a.tile:hover .thumb img {
     transform: scale(1.03);

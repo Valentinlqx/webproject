@@ -110,7 +110,19 @@ test('le titre Projets design mène à Behance, dans un nouvel onglet', async ({
   await expect(link).toHaveAccessibleName('Projets design (nouvel onglet)');
 });
 
-test('pas de contact ni de réseaux sociaux', async ({ page }) => {
+test('les réseaux sont sous le nom, et chacun ouvre un nouvel onglet', async ({ page }) => {
+  const links = page.locator('nav.social a');
+  await expect(links.first()).toHaveAttribute('href', 'https://www.behance.net/valentinlqxx');
+  for (const a of await links.all()) {
+    await expect(a).toHaveAttribute('target', '_blank');
+    await expect(a).toHaveAttribute('rel', /noopener/);
+  }
+  const h1 = await page.locator('h1').boundingBox();
+  const nav = await page.locator('nav.social').boundingBox();
+  expect(nav.y).toBeGreaterThanOrEqual(h1.y + h1.height);
+});
+
+test('pas de contact par mail, ni de réseaux autres que ceux choisis', async ({ page }) => {
   await expect(page.locator('a[href^="mailto:"]')).toHaveCount(0);
   const hrefs = await page.locator('a').evaluateAll(as => as.map(a => a.getAttribute('href')));
   const social = /instagram|linkedin|twitter|x\.com|facebook|tiktok|github|dribbble/i;
