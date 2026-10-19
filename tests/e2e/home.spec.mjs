@@ -59,11 +59,12 @@ test('sur ordinateur, les flèches font défiler la rangée et se désactivent a
   for (const arrows of await page.locator('.arrows').all()) await expect(arrows).toBeHidden();
 });
 
-test("un seul projet design pour l'instant : Pop Doudou, qui ouvre sa page", async ({ page }) => {
+test("projets design : Pop Doudou ouvre sa page, Croqueta et Let's cook arrivent", async ({ page }) => {
   const tiles = page.locator('section:has(#design) .tile');
-  await expect(tiles).toHaveCount(1);
-  await expect(tiles).toContainText('Pop Doudou');
-  await tiles.click();
+  await expect(tiles).toHaveCount(3);
+  await expect(tiles.nth(1)).toContainText('Croqueta');
+  await expect(tiles.nth(2)).toContainText("Let's cook");
+  await tiles.first().click();
   await expect(page).toHaveURL(/projects\/PopDoudou\/popdoudou\.html$/);
   await expect(page.locator('h1')).toHaveText('Pop Doudou');
 });
@@ -158,6 +159,6 @@ test("le bouton de langue passe en anglais et vaut pour tout le site", async ({ 
 
 test('les noms de projets sont des titres, et le mot « Image » est caché aux lecteurs d\'écran', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('h3.tile-name')).toHaveCount(7);
+  await expect(page.locator('h3.tile-name')).toHaveCount(9);
   await expect(page.locator('a.tile').first()).toHaveAccessibleName(/^Une part de mystère/);
 });
