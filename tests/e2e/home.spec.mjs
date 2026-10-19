@@ -112,11 +112,12 @@ test('le titre Projets design mène à Behance, dans un nouvel onglet', async ({
 
 test('les réseaux sont sous le nom, et chacun ouvre un nouvel onglet', async ({ page }) => {
   const links = page.locator('nav.social a');
-  await expect(links).toHaveText([/^Behance/, /^Cosmos/, /^Flickr/]);
+  await expect(links).toHaveText([/^Behance/, /^Cosmos/, /^Flickr/, /^Medium/]);
   expect(await links.evaluateAll(as => as.map(a => a.href))).toEqual([
     'https://www.behance.net/valentinlqxx',
     'https://www.cosmos.so/vlqxx',
     'https://www.flickr.com/photos/vlqxx',
+    'https://medium.com/@xqlv',
   ]);
   for (const a of await links.all()) {
     await expect(a).toHaveAttribute('target', '_blank');
