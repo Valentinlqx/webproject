@@ -1,45 +1,97 @@
 <!DOCTYPE html>
-<html lang="fr">
+<!-- Page faite à partir de projects/modele/modele.html (blocs et mode d'emploi là-bas). -->
+<html lang="fr" data-title-en="Une part de mystère — Short film">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="color-scheme" content="dark" />
-  <title>Une part de mystère — Vlqx</title>
-  <meta name="description" content="Une part de mystère, une vidéo de Vlqx." />
-  <meta property="og:title" content="Une part de mystère — Vlqx" />
+  <title>Une part de mystère — Court-métrage</title>
+  <meta name="description" content="Une part de mystère, un court-métrage tourné pour les Trois Quarts de Cinéma, le concours de l’association étudiante Trois Quarts de Pouce à Valenciennes." />
+  <meta property="og:title" content="Une part de mystère — Court-métrage" />
+  <meta property="og:description" content="Un court-métrage tourné en un mois pour le concours étudiant Trois Quarts de Cinéma, à Valenciennes." />
   <meta property="og:type" content="video.other" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>" />
-  <link rel="stylesheet" href="style.css?v=1" />
+  <link rel="stylesheet" href="../modele/projet.css?v=1" />
+  <style>
+    /* Salle obscure : noir chaud, texte crème, ambre de projecteur. */
+    :root {
+      --bg: #0e0d0b;
+      --ink: #ede6d6;
+      --muted: #a39b8b;
+      --line: #3a362f;
+      --accent: #e0a84a;
+      --surface: #1b1915;
+      --title-font: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    }
+    .hero {
+      background:
+        radial-gradient(ellipse 70% 90% at 78% 0%, rgb(224 168 74 / 0.28), transparent 65%),
+        linear-gradient(to bottom, #000 0, var(--bg) 100%);
+    }
+    h1 { font-style: italic; font-weight: 400; margin-bottom: 1.4rem; }
+    .kicker, dt { color: var(--accent); }
+  </style>
 </head>
 <body>
   <header class="bar">
-    <a href="../../index.html" class="back" data-i18n-label="back" aria-label="Retour à l'accueil">
+    <a href="../../index.html" class="back" aria-label="Retour à l’accueil" data-label-en="Back to home">
       <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M8 1 3 6l5 5" /></svg>
     </a>
     <button class="lang" id="lang" type="button" lang="en">English</button>
   </header>
 
   <main>
-    <p class="kicker" data-i18n="kicker">Vidéo</p>
-    <h1>Une part de mystère</h1>
+    <section class="hero">
+      <div class="hero-text">
+        <p class="kicker"><span data-lang="fr">Court-métrage · Trois Quarts de Cinéma</span><span data-lang="en" lang="en">Short film · Trois Quarts de Cinéma</span></p>
+        <h1>Une part de mystère</h1>
+        <p class="tagline"><span data-lang="fr">Un mois, une équipe, un film.</span><span data-lang="en" lang="en">One month, one crew, one film.</span></p>
+      </div>
+    </section>
 
-    <!-- La vidéo YouTube ne se charge qu'au clic : avant, aucune requête ne part vers Google.
-         Sans JavaScript, le lien ouvre la vidéo sur YouTube. -->
-    <a class="player" href="https://www.youtube.com/watch?v=G2sTGavlOmU" data-video="G2sTGavlOmU" data-title="Une part de mystère">
-      <span class="play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg></span>
-      <span class="play-label" data-i18n="play">Lancer la vidéo</span>
-    </a>
-    <p class="note" data-i18n="note">La vidéo est hébergée sur YouTube : elle ne se charge qu’au clic.</p>
-    <figure class="poster">
-      <img src="images/une-part-de-mystere-affiche.webp" width="1200" height="1698" loading="lazy" decoding="async" data-alt-fr="Affiche du film : une part de pizza flotte entre deux mains tendues, sur fond noir. Récompensé aux Trois Quarts de Cinéma : prix du jury, du scénario, du montage et du son." data-alt-en="Film poster: a slice of pizza floats between two reaching hands on a black background. Awarded at the Trois Quarts de Cinéma ceremony: jury, screenplay, editing and sound prizes." alt="Affiche du film : une part de pizza flotte entre deux mains tendues, sur fond noir. Récompensé aux Trois Quarts de Cinéma : prix du jury, du scénario, du montage et du son." />
-    </figure>
+    <section class="intro">
+      <div>
+        <p class="lede" data-lang="fr">Un court-métrage tourné pour les Trois Quarts de Cinéma, le concours organisé par Trois Quarts de Pouce, l’association étudiante de cinéma de Valenciennes. Le principe : un mois pour écrire, tourner et monter un film.</p>
+        <p class="lede" data-lang="en" lang="en">A short film made for Trois Quarts de Cinéma, the contest run by Trois Quarts de Pouce, the student film club in Valenciennes. The rule: one month to write, shoot and edit a film.</p>
+      </div>
+      <!-- TODO : ajouter l'année et le rôle de Valentin quand on les a. -->
+      <dl class="facts">
+        <div><dt><span data-lang="fr">Type</span><span data-lang="en" lang="en">Type</span></dt><dd><span data-lang="fr">Court-métrage</span><span data-lang="en" lang="en">Short film</span></dd></div>
+        <div><dt><span data-lang="fr">Cadre</span><span data-lang="en" lang="en">Context</span></dt><dd><span data-lang="fr">Concours étudiant, en un mois</span><span data-lang="en" lang="en">Student contest, one month</span></dd></div>
+        <div><dt><span data-lang="fr">Lieu</span><span data-lang="en" lang="en">Place</span></dt><dd>Valenciennes</dd></div>
+        <div><dt><span data-lang="fr">Prix</span><span data-lang="en" lang="en">Awards</span></dt><dd><span data-lang="fr">Jury, scénario, montage, son</span><span data-lang="en" lang="en">Jury, screenplay, editing, sound</span></dd></div>
+      </dl>
+    </section>
+
+    <div class="story">
+      <figure class="media wide">
+        <a class="player" href="https://www.youtube.com/watch?v=G2sTGavlOmU" data-video="G2sTGavlOmU" data-title="Une part de mystère">
+          <span class="play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg></span>
+          <span class="play-label"><span data-lang="fr">Lancer la vidéo</span><span data-lang="en" lang="en">Play the video</span></span>
+        </a>
+        <figcaption><span data-lang="fr">La vidéo est hébergée sur YouTube : elle ne se charge qu’au clic.</span><span data-lang="en" lang="en">The video is hosted on YouTube: it only loads when you click.</span></figcaption>
+      </figure>
+
+      <section class="text">
+        <h2><span data-lang="fr">Le concours</span><span data-lang="en" lang="en">The contest</span></h2>
+        <p data-lang="fr">Chaque année, Trois Quarts de Pouce lance un concours de court-métrage ouvert aux étudiants. Les équipes ont environ un mois pour aller de l’idée au film terminé : écriture, tournage, montage, son. Les films sont ensuite projetés et récompensés lors de la soirée des Trois Quarts de Cinéma.</p>
+        <p data-lang="en" lang="en">Every year, Trois Quarts de Pouce runs a short film contest open to students. Teams get about a month to go from an idea to a finished film: writing, shooting, editing, sound. The films are then screened and awarded at the Trois Quarts de Cinéma night.</p>
+        <p data-lang="fr">Une part de mystère y a reçu quatre prix : celui du jury, du scénario, du montage et du son.</p>
+        <p data-lang="en" lang="en">Une part de mystère won four awards there: jury, screenplay, editing and sound.</p>
+      </section>
+
+      <figure class="media portrait poster">
+        <img src="images/une-part-de-mystere-affiche.webp" width="1200" height="1698" loading="lazy" decoding="async" alt="Affiche du film : une part de pizza flotte entre deux mains tendues, sur fond noir. Récompensé aux Trois Quarts de Cinéma : prix du jury, du scénario, du montage et du son." data-alt-en="Film poster: a slice of pizza floats between two reaching hands on a black background. Awarded at the Trois Quarts de Cinéma ceremony: jury, screenplay, editing and sound prizes." />
+        <figcaption><span data-lang="fr">L’affiche du film.</span><span data-lang="en" lang="en">The film poster.</span></figcaption>
+      </figure>
+    </div>
   </main>
 
   <footer class="end">
-    <a href="../../index.html" data-i18n="home">Retour aux projets</a>
+    <a href="../../index.html"><span data-lang="fr">Retour aux projets</span><span data-lang="en" lang="en">Back to projects</span></a>
   </footer>
 
   <script src="../../lang.js?v=3"></script>
-  <script src="video.js?v=1"></script>
+  <script src="../modele/projet.js?v=1"></script>
 </body>
 </html>

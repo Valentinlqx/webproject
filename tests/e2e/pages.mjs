@@ -5,6 +5,7 @@ export const PAGES = {
   popdoudou: '/projects/PopDoudou/popdoudou.html',
   revolution: '/projects/Videos/la-revolution.html',
   mystere: '/projects/Videos/une-part-de-mystere.html',
+  modele: '/projects/modele/modele.html',
 };
 
 export const WIDTHS = [320, 375, 768, 1440];

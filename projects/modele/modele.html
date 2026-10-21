@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<!-- Modèle de page projet. Pour un nouveau projet : copier ce fichier dans projects/NomDuProjet/,
+     garder les blocs utiles dans <div class="story">, les mettre dans l'ordre voulu, et supprimer les autres.
+     Chaque texte s'écrit deux fois : data-lang="fr" puis data-lang="en" lang="en".
+     Les couleurs et polices du projet se changent dans le <style> ci-dessous. -->
+<html lang="fr" data-title-en="Project template">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light" />
+  <meta name="robots" content="noindex" />
+  <title>Modèle de projet</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>" />
+  <link rel="stylesheet" href="projet.css?v=1" />
+  <style>
+    :root {
+      --accent: #c8201a;
+    }
+  </style>
+</head>
+<body>
+  <header class="bar">
+    <a href="../../index.html" class="back" aria-label="Retour à l’accueil" data-label-en="Back to home">
+      <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M8 1 3 6l5 5" /></svg>
+    </a>
+    <button class="lang" id="lang" type="button" lang="en">English</button>
+  </header>
+
+  <main>
+    <!-- Bandeau de titre. Pour une image de couverture : <img src="images/couverture.webp" alt="" /> avant .hero-text. -->
+    <section class="hero">
+      <div class="hero-text">
+        <p class="kicker"><span data-lang="fr">Catégorie · client</span><span data-lang="en" lang="en">Category · client</span></p>
+        <h1>Nom du projet</h1>
+        <p class="tagline"><span data-lang="fr">Une phrase qui résume le projet.</span><span data-lang="en" lang="en">One line that sums up the project.</span></p>
+      </div>
+    </section>
+
+    <section class="intro">
+      <div>
+        <p class="lede" data-lang="fr">Le paragraphe d’introduction : le contexte, la demande, ce qu’on a fait.</p>
+        <p class="lede" data-lang="en" lang="en">The opening paragraph: the context, the brief, what was made.</p>
+      </div>
+      <dl class="facts">
+        <div><dt><span data-lang="fr">Type</span><span data-lang="en" lang="en">Type</span></dt><dd><span data-lang="fr">Affiche</span><span data-lang="en" lang="en">Poster</span></dd></div>
+        <div><dt><span data-lang="fr">Année</span><span data-lang="en" lang="en">Year</span></dt><dd>2026</dd></div>
+        <div><dt><span data-lang="fr">Rôle</span><span data-lang="en" lang="en">Role</span></dt><dd><span data-lang="fr">Graphisme</span><span data-lang="en" lang="en">Graphic design</span></dd></div>
+      </dl>
+    </section>
+
+    <div class="story">
+      <!-- Texte avec intertitre. -->
+      <section class="text">
+        <h2><span data-lang="fr">Un intertitre</span><span data-lang="en" lang="en">A heading</span></h2>
+        <p data-lang="fr">Un paragraphe de texte. On peut en mettre autant qu’on veut.</p>
+        <p data-lang="en" lang="en">A paragraph of text. Add as many as needed.</p>
+      </section>
+
+      <!-- Image seule. Ajouter class="wide" sur la figure pour qu'elle prenne toute la largeur. -->
+      <figure class="media">
+        <div class="placeholder">images/visuel.webp</div>
+        <!-- <img src="images/visuel.webp" width="1920" height="1080" loading="lazy" decoding="async" alt="Ce qu'on voit sur l'image." data-alt-en="What the image shows." /> -->
+        <figcaption><span data-lang="fr">Légende facultative.</span><span data-lang="en" lang="en">Optional caption.</span></figcaption>
+      </figure>
+
+      <!-- Affiche ou image en hauteur, centrée. -->
+      <figure class="media portrait">
+        <div class="placeholder">images/affiche.webp</div>
+      </figure>
+
+      <!-- Deux images côte à côte (l'une sous l'autre sur téléphone). -->
+      <div class="duo">
+        <div class="placeholder">images/gauche.webp</div>
+        <div class="placeholder">images/droite.webp</div>
+      </div>
+
+      <!-- Vidéo YouTube : remplacer ID par le code de la vidéo (ce qui suit watch?v= dans l'adresse).
+           Elle ne se charge qu'au clic. -->
+      <figure class="media wide">
+        <a class="player" href="https://www.youtube.com/watch?v=ID" data-video="ID" data-title="Titre de la vidéo">
+          <span class="play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg></span>
+          <span class="play-label"><span data-lang="fr">Lancer la vidéo</span><span data-lang="en" lang="en">Play the video</span></span>
+        </a>
+      </figure>
+
+      <!-- Autres vidéos. Vimeo : <iframe src="https://player.vimeo.com/video/ID" title="…" allowfullscreen loading="lazy"></iframe>
+           Fichier du site : <video src="videos/film.mp4" controls preload="metadata" poster="images/affiche.webp"></video> -->
+      <figure class="media video wide">
+        <div class="placeholder"><span data-lang="fr">Vidéo</span><span data-lang="en" lang="en">Video</span></div>
+      </figure>
+
+      <!-- Citation. -->
+      <figure class="quote">
+        <blockquote>
+          <p data-lang="fr">« Une phrase marquante, d’un client ou de l’équipe. »</p>
+          <p data-lang="en" lang="en">“A striking line from a client or the team.”</p>
+        </blockquote>
+      </figure>
+
+      <!-- Crédits. -->
+      <section class="credits">
+        <h2><span data-lang="fr">Crédits</span><span data-lang="en" lang="en">Credits</span></h2>
+        <dl>
+          <div><dt><span data-lang="fr">Réalisation</span><span data-lang="en" lang="en">Director</span></dt><dd>Prénom Nom</dd></div>
+          <div><dt><span data-lang="fr">Image</span><span data-lang="en" lang="en">Cinematography</span></dt><dd>Prénom Nom</dd></div>
+        </dl>
+      </section>
+    </div>
+  </main>
+
+  <footer class="end">
+    <a href="../../index.html"><span data-lang="fr">Retour aux projets</span><span data-lang="en" lang="en">Back to projects</span></a>
+  </footer>
+
+  <script src="../../lang.js?v=3"></script>
+  <script src="projet.js?v=1"></script>
+</body>
+</html>

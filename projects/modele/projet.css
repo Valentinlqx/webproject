@@ -1,0 +1,324 @@
+/* Mise en page commune des pages projet. Chaque projet change ses couleurs et ses polices
+   en redéfinissant ces variables dans un <style> de sa page. */
+:root {
+  --bg: #fafaf8;
+  --ink: #111;
+  --muted: #555;
+  --line: #d9d8d3;
+  --accent: #c8201a;
+  --surface: #ecebe7;
+  --title-font: "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+  --text-font: "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+  --gutter: clamp(1rem, 4vw, 3rem);
+  --radius: clamp(0.25rem, 1vw, 0.6rem);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--text-font);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Chaque texte existe en deux versions ; on n'affiche que celle de la langue choisie. */
+html:not([lang="en"]) [data-lang="en"],
+html[lang="en"] [data-lang="fr"] { display: none !important; }
+
+a, button { color: inherit; font: inherit; }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.bar {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem var(--gutter);
+}
+
+.back,
+.lang {
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  height: 44px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: var(--bg);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.lang { padding: 0 1rem; }
+
+.back svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .back:hover,
+  .lang:hover { background: var(--ink); color: var(--bg); }
+}
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  align-items: end;
+  min-height: clamp(22rem, 50vw + 10rem, 42rem);
+  padding: 6rem var(--gutter) clamp(2.5rem, 6vw, 4.5rem);
+  background: var(--surface);
+}
+
+/* Image de couverture facultative, posée sous le titre. */
+.hero > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-text { position: relative; max-width: 90rem; }
+
+.kicker {
+  font-size: clamp(0.85rem, 2vw, 1rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+h1 {
+  font-family: var(--title-font);
+  font-size: clamp(3rem, 12vw, 9rem);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+  margin: 0.5rem 0 0.8rem;
+}
+
+.tagline { font-size: clamp(1.15rem, 3vw, 1.7rem); }
+
+.intro {
+  display: grid;
+  gap: 2rem;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: clamp(2.5rem, 7vw, 5rem) var(--gutter);
+}
+
+.lede {
+  font-size: clamp(1.1rem, 2.2vw, 1.4rem);
+  max-width: 40em;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(10rem, 100%), 1fr));
+  gap: 1.25rem 2rem;
+  border-top: 1px solid var(--line);
+  padding-top: 1.25rem;
+}
+
+dt {
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+@media (min-width: 60rem) {
+  .intro { grid-template-columns: 3fr 2fr; align-items: start; }
+  .facts { grid-template-columns: 1fr; border-top: 0; border-left: 1px solid var(--line); padding: 0 0 0 1.5rem; }
+}
+
+/* Les blocs s'enchaînent dans .story, dans l'ordre où on les écrit. */
+.story {
+  display: grid;
+  gap: clamp(2.5rem, 7vw, 5rem);
+  padding-bottom: clamp(2.5rem, 7vw, 5rem);
+}
+
+.story > * {
+  width: 100%;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+.story > .wide { max-width: 1600px; }
+
+.text { display: grid; gap: 1rem; }
+.text > * { max-width: 40em; }
+
+.text h2 {
+  font-family: var(--title-font);
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+  line-height: 1.1;
+}
+
+.text p { font-size: 1.1rem; }
+
+.story img,
+.story video,
+.story iframe,
+.placeholder {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.video iframe,
+.video video,
+.video .placeholder { aspect-ratio: 16 / 9; }
+
+/* Lecteur YouTube : une image avec un bouton, remplacée par la vidéo au clic (voir projet.js). */
+.player {
+  position: relative;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 1rem;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius);
+  background: radial-gradient(ellipse at 30% 40%, var(--surface) 0%, var(--bg) 100%);
+  border: 1px solid var(--line);
+  text-decoration: none;
+  overflow: hidden;
+}
+
+.story .player iframe {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  border-radius: 0;
+}
+
+.play {
+  display: grid;
+  place-items: center;
+  width: clamp(3.5rem, 9vw, 5.5rem);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--bg);
+  transition: transform 200ms ease-out;
+}
+
+.play svg {
+  width: 45%;
+  fill: currentColor;
+  margin-left: 8%;
+}
+
+.play-label { font-size: 0.9rem; letter-spacing: 0.04em; }
+
+@media (hover: hover) and (pointer: fine) {
+  a.player:hover .play { transform: scale(1.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .play { transition: none; }
+}
+
+@media (forced-colors: active) {
+  .play { border: 2px solid CanvasText; }
+}
+
+.placeholder {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 3 / 2;
+  padding: 1rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+figcaption {
+  margin-top: 0.6rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+/* Affiche ou image en hauteur : centrée, sans prendre toute la largeur. */
+.portrait img,
+.portrait .placeholder { max-width: 34rem; margin: 0 auto; }
+.portrait .placeholder { aspect-ratio: 2 / 3; }
+.portrait figcaption { text-align: center; }
+
+.duo {
+  display: grid;
+  gap: clamp(0.5rem, 1.5vw, 1rem);
+}
+
+@media (min-width: 40rem) {
+  /* Affiche ou image en hauteur : centrée, sans prendre toute la largeur. */
+.portrait img,
+.portrait .placeholder { max-width: 34rem; margin: 0 auto; }
+.portrait .placeholder { aspect-ratio: 2 / 3; }
+.portrait figcaption { text-align: center; }
+
+.duo { grid-template-columns: 1fr 1fr; }
+}
+
+.quote blockquote {
+  max-width: 30em;
+  font-family: var(--title-font);
+  font-size: clamp(1.5rem, 4vw, 2.4rem);
+  line-height: 1.25;
+  border-left: 3px solid var(--accent);
+  padding-left: clamp(1rem, 3vw, 1.75rem);
+}
+
+.credits h2 {
+  font-family: var(--title-font);
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+  margin-bottom: 1.25rem;
+}
+
+.credits dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
+  gap: 1.25rem 2rem;
+}
+
+.end {
+  display: flex;
+  justify-content: center;
+  padding: clamp(2rem, 6vw, 4rem) var(--gutter) clamp(3rem, 8vw, 5rem);
+}
+
+.end a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 1.75rem;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--bg);
+  text-decoration: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .end a:hover { background: var(--accent); }
+}
