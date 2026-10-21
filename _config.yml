@@ -6,8 +6,6 @@ exclude:
   - node_modules
   - package.json
   - package-lock.json
-  - skills-lock.json
-  - CLAUDE.md
   - playwright.config.mjs
   - test-results
   - playwright-report
