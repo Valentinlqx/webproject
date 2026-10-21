@@ -7,6 +7,8 @@ const texts = {
     play: 'Lancer la vidéo',
     note: 'La vidéo est hébergée sur YouTube : elle ne se charge qu’au clic.',
     home: 'Retour aux projets',
+    upm1: 'Un court-métrage tourné pour les Trois Quarts de Cinéma, le concours de l’association étudiante Trois Quarts de Pouce, à Valenciennes. On avait un mois pour écrire, tourner et monter le film.',
+    upm2: 'Il a reçu le prix du jury, du scénario, du montage et du son.',
   },
   en: {
     back: 'Back to home',
@@ -15,6 +17,8 @@ const texts = {
     play: 'Play the video',
     note: 'The video is hosted on YouTube: it only loads when you click.',
     home: 'Back to projects',
+    upm1: 'A short film made for Trois Quarts de Cinéma, the contest run by the Trois Quarts de Pouce student club in Valenciennes. We had one month to write, shoot and edit it.',
+    upm2: 'It won the jury, screenplay, editing and sound awards.',
   },
 };
 

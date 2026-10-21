@@ -134,6 +134,13 @@ h1 {
   color: var(--muted);
 }
 
+.text {
+  max-width: 40rem;
+  margin-top: clamp(2rem, 6vw, 3rem);
+}
+
+.text p + p { margin-top: 1em; }
+
 .poster {
   max-width: 34rem;
   margin: clamp(2rem, 6vw, 4rem) auto 0;
