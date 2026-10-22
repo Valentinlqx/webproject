@@ -53,18 +53,22 @@ test('sur ordinateur, les flèches font défiler la rangée et se désactivent a
   await expect(prev).toBeEnabled();
   await row.evaluate(r => { r.style.scrollBehavior = 'auto'; r.scrollLeft = r.scrollWidth; });
   await expect(next).toBeDisabled();
-  // Quand tout tient à l'écran, pas de flèches inutiles.
+  // Quand tout tient à l'écran, pas de flèches inutiles : seule la longue rangée design en garde.
   await page.setViewportSize({ width: 1280, height: 900 });
   await expect(page.locator('.arrows')).toHaveCount(5);
-  for (const arrows of await page.locator('.arrows').all()) await expect(arrows).toBeHidden();
+  await expect(page.locator('section:has(#web) .arrows')).toBeHidden();
+  await expect(page.locator('section:has(#video) .arrows')).toBeHidden();
+  await expect(page.locator('section:has(#design) .arrows')).toBeVisible();
 });
 
-test("projets design : Pop Doudou ouvre sa page, Croqueta, Let's cook et Zephyr arrivent", async ({ page }) => {
+test("projets design : Pop Doudou ouvre sa page, Croqueta, Let's cook, Zephyr, Trinity et Mondrepuis arrivent", async ({ page }) => {
   const tiles = page.locator('section:has(#design) .tile');
-  await expect(tiles).toHaveCount(4);
+  await expect(tiles).toHaveCount(6);
   await expect(tiles.nth(1)).toContainText('Croqueta');
   await expect(tiles.nth(2)).toContainText("Let's cook");
   await expect(tiles.nth(3)).toContainText('Zephyr');
+  await expect(tiles.nth(4)).toContainText('Trinity');
+  await expect(tiles.nth(5)).toContainText('Mondrepuis');
   await tiles.first().click();
   await expect(page).toHaveURL(/projects\/PopDoudou\/popdoudou\.html$/);
   await expect(page.locator('h1')).toHaveText('Pop Doudou');
@@ -178,6 +182,6 @@ test("le bouton de langue passe en anglais et vaut pour tout le site", async ({ 
 
 test('les noms de projets sont des titres, et le mot « Image » est caché aux lecteurs d\'écran', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('h3.tile-name')).toHaveCount(10);
+  await expect(page.locator('h3.tile-name')).toHaveCount(12);
   await expect(page.locator('a.tile').first()).toHaveAccessibleName(/^Une part de mystère/);
 });
