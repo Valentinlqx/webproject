@@ -9,7 +9,10 @@ test.beforeEach(async ({ page }) => {
 test('le nom en haut, puis les projets', async ({ page }) => {
   await expect(page.locator('h1')).toHaveText('Vlqx');
   await expect(page.locator('.intro')).toHaveCount(0);
-  await expect(page.locator('section h2')).toHaveText(['Projets vidéo', 'Projets web', /^Jeux vidéo/, /^Projets design/, 'Projets commerciaux']);
+  // Rangées triées par nombre de projets, la plus fournie en haut.
+  await expect(page.locator('section h2')).toHaveText([/^Projets design/, 'Projets vidéo', 'Projets web', /^Jeux vidéo/, 'Projets commerciaux']);
+  const counts = await page.locator('main > section').evaluateAll(ss => ss.map(s => s.querySelectorAll('.tile').length));
+  expect(counts).toEqual([...counts].sort((a, b) => b - a));
 });
 
 test('les projets web sont les deux outils, et ils existent', async ({ page, request }) => {
@@ -98,8 +101,7 @@ test("le titre Jeux vidéo mène à la page itch.io, dans un nouvel onglet", asy
   await expect(link).toHaveAccessibleName('Jeux vidéo (nouvel onglet)');
 });
 
-test('les projets vidéo viennent en premier : chaque vidéo ouvre sa page', async ({ page }) => {
-  await expect(page.locator('section h2').first()).toHaveText('Projets vidéo');
+test('chaque vidéo ouvre sa page', async ({ page }) => {
   const tiles = page.locator('section:has(#video) .tile');
   await expect(tiles).toHaveCount(2);
   await expect(tiles.nth(1)).toContainText('La révolution');
@@ -205,5 +207,5 @@ test("le bouton de langue passe en anglais et vaut pour tout le site", async ({ 
 test('les noms de projets sont des titres, et le mot « Image » est caché aux lecteurs d\'écran', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('h3.tile-name')).toHaveCount(12);
-  await expect(page.locator('a.tile').first()).toHaveAccessibleName(/^Une part de mystère/);
+  await expect(page.locator('a.tile').first()).toHaveAccessibleName(/Pop Doudou/);
 });

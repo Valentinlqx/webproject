@@ -59,6 +59,13 @@ function apply(lang) {
   button.lang = lang === 'fr' ? 'en' : 'fr';
 }
 
+// La catégorie qui a le plus de projets passe en premier ; à égalité, l'ordre de la page reste.
+const main = document.querySelector('main');
+[...main.querySelectorAll(':scope > section')]
+  .map((section, i) => ({ section, i, n: section.querySelectorAll('.tile').length }))
+  .sort((a, b) => b.n - a.n || a.i - b.i)
+  .forEach(({ section }) => main.append(section));
+
 // Flèches pour faire défiler chaque rangée à la souris. Sans JavaScript, la rangée défile quand même.
 const arrowIcon = d => `<svg viewBox="0 0 12 12" aria-hidden="true"><path d="${d}" /></svg>`;
 
