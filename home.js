@@ -85,6 +85,34 @@ document.querySelectorAll('.grid').forEach(row => {
   new ResizeObserver(update).observe(row);
 });
 
+// Le titre change ses lettres au hasard un court instant (au chargement, puis au survol ou au toucher).
+// Moins de 5 secondes à chaque fois : pas besoin de bouton pause. Rien ne bouge si l'appareil le demande.
+const STYLES = 8;
+const letters = [...document.querySelectorAll('.ransom span')];
+const pick = n => Math.floor(Math.random() * n);
+
+function restyle(span, i) {
+  const taken = [letters[i - 1], letters[i + 1]].filter(Boolean).map(l => l.dataset.s);
+  let s;
+  do s = String(pick(STYLES)); while (s === span.dataset.s || taken.includes(s));
+  span.dataset.s = s;
+  span.style.setProperty('--r', `${pick(15) - 7}deg`);
+  span.style.textTransform = pick(2) ? 'uppercase' : 'lowercase';
+}
+
+let shuffling = null;
+function shuffle(duration) {
+  if (shuffling || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  shuffling = setInterval(() => { const i = pick(letters.length); restyle(letters[i], i); }, 160);
+  setTimeout(() => { clearInterval(shuffling); shuffling = null; }, duration);
+}
+
+letters.forEach(restyle);
+shuffle(2500);
+const title = document.querySelector('.ransom');
+title.addEventListener('pointerenter', () => shuffle(1200));
+title.addEventListener('click', () => shuffle(1200));
+
 let lang = SiteLang.get();
 apply(lang);
 button.addEventListener('click', () => {

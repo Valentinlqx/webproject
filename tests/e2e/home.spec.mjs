@@ -133,6 +133,28 @@ test('les réseaux sont sous le nom, et chacun ouvre un nouvel onglet', async ({
   expect(nav.y).toBeGreaterThanOrEqual(h1.y + h1.height);
 });
 
+test('le titre Vlqx en lettres découpées change au hasard, puis s\'arrête', async ({ page }) => {
+  const title = page.locator('h1.ransom');
+  await expect(title).toHaveText('Vlqx');
+  await expect(title.locator('span')).toHaveCount(4);
+  const styles = () => title.locator('span').evaluateAll(ls => ls.map(l => l.dataset.s).join());
+  const first = await styles();
+  await expect.poll(styles, { timeout: 2000 }).not.toBe(first);
+  await page.waitForTimeout(2800);
+  const settled = await styles();
+  await page.waitForTimeout(600);
+  expect(await styles()).toBe(settled);
+});
+
+test("si l'appareil demande moins de mouvement, le titre ne bouge pas", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  const styles = () => page.locator('h1.ransom span').evaluateAll(ls => ls.map(l => l.dataset.s).join());
+  const first = await styles();
+  await page.waitForTimeout(800);
+  expect(await styles()).toBe(first);
+});
+
 test('pas de contact par mail, ni de réseaux autres que ceux choisis', async ({ page }) => {
   await expect(page.locator('a[href^="mailto:"]')).toHaveCount(0);
   const hrefs = await page.locator('a').evaluateAll(as => as.map(a => a.getAttribute('href')));

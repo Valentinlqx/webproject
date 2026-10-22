@@ -243,6 +243,42 @@ h1 {
   overflow-wrap: anywhere;
 }
 
+/* Chaque lettre semble découpée dans un journal différent : son papier, sa police,
+   sa casse et un léger angle. Les couleurs gardent au moins 4,5:1 de contraste. */
+.ransom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.06em;
+  font-size: clamp(2.75rem, 9vw, 4.25rem);
+  letter-spacing: 0;
+  cursor: default;
+}
+
+.ransom span {
+  display: inline-block;
+  padding: 0.06em 0.14em 0.1em;
+  box-shadow: 0.04em 0.05em 0 rgb(0 0 0 / 0.25);
+  transform: rotate(var(--r, 0deg)) translateY(var(--y, 0));
+  transition: transform 120ms ease-out;
+}
+
+.ransom [data-s="0"] { background: #111; color: #fff; font-family: Impact, "Arial Narrow", sans-serif; font-weight: 400; --r: -4deg; }
+.ransom [data-s="1"] { background: #c8201a; color: #fff; font-family: Georgia, "Times New Roman", serif; font-style: italic; --r: 3deg; }
+.ransom [data-s="2"] { background: #f4d03f; color: #111; font-family: "Courier New", Courier, monospace; --r: -2deg; --y: 0.05em; }
+.ransom [data-s="3"] { background: #ebe4d0; color: #111; font-family: "Times New Roman", Times, serif; --r: 5deg; }
+.ransom [data-s="4"] { background: #1f3a93; color: #fff; font-family: "Arial Black", "Helvetica Neue", sans-serif; font-weight: 900; --r: -6deg; --y: -0.04em; }
+.ransom [data-s="5"] { background: #f7b8c8; color: #111; font-family: "Trebuchet MS", Verdana, sans-serif; --r: 2deg; }
+.ransom [data-s="6"] { background: #2e6b3a; color: #fff; font-family: Verdana, Geneva, sans-serif; --r: -3deg; --y: 0.04em; }
+.ransom [data-s="7"] { background: #fff; color: #111; font-family: Didot, "Bodoni MT", Georgia, serif; outline: 1px solid #111; --r: 4deg; }
+
+@media (forced-colors: active) {
+  .ransom span { border: 1px solid CanvasText; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ransom span { transition: none; }
+}
+
 /* In forced colours the grey frame disappears: draw its edge. */
 @media (forced-colors: active) {
   .thumb { border: 1px solid CanvasText; }
