@@ -45,7 +45,15 @@ test("l'affiche de La révolution se charge, et sa description suit la langue", 
 });
 
 test('sans JavaScript, le lien ouvre la vidéo sur YouTube', async ({ page }) => {
-  await expect(page.locator('a.player')).toHaveAttribute('href', 'https://www.youtube.com/watch?v=G2sTGavlOmU');
+  await expect(page.locator('a.player').first()).toHaveAttribute('href', 'https://www.youtube.com/watch?v=G2sTGavlOmU');
+});
+
+test("Une part de mystère montre aussi la cérémonie de clôture, chargée au clic", async ({ page }) => {
+  await expect(page.getByRole('heading', { level: 2 })).toHaveText('La cérémonie de clôture');
+  await page.route(/youtube-nocookie\.com/, route => route.fulfill({ contentType: 'text/html', body: '<p>lecteur</p>' }));
+  await page.getByRole('link', { name: 'Voir la cérémonie' }).click();
+  await expect(page.locator('.more iframe')).toHaveAttribute('src', /\/embed\/r44Hcu3Norw\?/);
+  await expect(page.getByRole('link', { name: 'Lancer la vidéo' })).toBeVisible();
 });
 
 test("on revient à l'accueil par le haut et par le bas", async ({ page }) => {
@@ -59,7 +67,9 @@ test("on revient à l'accueil par le haut et par le bas", async ({ page }) => {
 test('le bouton de langue passe la page en anglais', async ({ page }) => {
   await page.click('#lang');
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
-  await expect(page.locator('a.player')).toContainText('Play the video');
+  await expect(page.locator('a.player').first()).toContainText('Play the video');
+  await expect(page.getByRole('heading', { level: 2 })).toHaveText('The closing ceremony');
+  await expect(page.getByRole('link', { name: 'Watch the ceremony' })).toBeVisible();
 });
 
 for (const [name, url] of [['mystere', PAGES.mystere], ['revolution', PAGES.revolution]]) for (const width of WIDTHS) {
