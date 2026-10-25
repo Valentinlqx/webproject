@@ -61,17 +61,17 @@ test('sur ordinateur, les flèches font défiler la rangée et se désactivent a
   await expect(page.locator('.arrows')).toHaveCount(5);
   await expect(page.locator('section:has(#web) .arrows')).toBeHidden();
   await expect(page.locator('section:has(#video) .arrows')).toBeHidden();
+  await page.setViewportSize({ width: 768, height: 900 });
   await expect(page.locator('section:has(#design) .arrows')).toBeVisible();
 });
 
-test("projets design : Pop Doudou, Croqueta, Let's cook, Zephyr, Trinity et Mondrepuis arrivent", async ({ page }) => {
+test("projets design : Pop Doudou, Croqueta, Let's cook, Zephyr et Trinity arrivent", async ({ page }) => {
   const tiles = page.locator('section:has(#design) .tile');
-  await expect(tiles).toHaveCount(6);
+  await expect(tiles).toHaveCount(5);
   await expect(tiles.nth(1)).toContainText('Croqueta');
   await expect(tiles.nth(2)).toContainText("Let's cook");
   await expect(tiles.nth(3)).toContainText('Zephyr');
   await expect(tiles.nth(4)).toContainText('Trinity');
-  await expect(tiles.nth(5)).toContainText('Mondrepuis');
   await expect(tiles.first()).toContainText('Pop Doudou');
 });
 
@@ -204,6 +204,6 @@ test("le bouton de langue passe en anglais et vaut pour tout le site", async ({ 
 
 test('les noms de projets sont des titres, et le mot « Image » est caché aux lecteurs d\'écran', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('h3.tile-name')).toHaveCount(12);
+  await expect(page.locator('h3.tile-name')).toHaveCount(11);
   await expect(page.locator('a.tile').first()).toHaveAccessibleName(/\S/);
 });
