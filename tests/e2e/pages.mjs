@@ -2,7 +2,6 @@ export const PAGES = {
   home: '/',
   autovinted: '/projects/AutoVinted/autovinted.html',
   rg: '/projects/RessourcesGratuites/ressourcesgratuites.html',
-  popdoudou: '/projects/PopDoudou/popdoudou.html',
   revolution: '/projects/Videos/la-revolution.html',
   mystere: '/projects/Videos/une-part-de-mystere.html',
 };
